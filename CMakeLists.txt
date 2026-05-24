@@ -13,7 +13,11 @@ add_executable(Platformer
     src/main.cpp
     src/Application.h
     src/Application.cpp
-)
+	src/Context.h
+	src/core/State.h
+	src/core/StateMachine.h
+	src/core/StateMachine.cpp
+ "src/states/TestState.h" "src/states/TestState.cpp")
 
 target_link_libraries(Platformer PRIVATE
     SFML::Graphics
@@ -22,3 +26,5 @@ target_link_libraries(Platformer PRIVATE
     SFML::Audio
     nlohmann_json::nlohmann_json
 )
+
+target_include_directories(Platformer PRIVATE src)

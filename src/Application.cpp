@@ -1,19 +1,30 @@
 #include "Application.h"
 
+#include "states/TestState.h"
+
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
+#include <memory>
+
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
+	, context(window, stateMachine)
 {
 	CreateWindow();
+	RegisterInitialState();
 }
 
 void Application::CreateWindow()
 {
 	window.create(desktopMode, "2D Platformer", sf::Style::None, sf::State::Windowed);
 	window.setFramerateLimit(60);
+}
+
+void Application::RegisterInitialState()
+{
+	stateMachine.Push(std::make_unique<TestState>(context));
 }
 
 void Application::Run()
@@ -54,14 +65,19 @@ void Application::ProcessEvents()
 			if (key->code == sf::Keyboard::Key::Escape)
 				window.close();
 		}
+
+		stateMachine.HandleEvent(*event);
 	}
 }
 
 void Application::Update(float deltaTime)
-{}
+{
+	stateMachine.Update(deltaTime);
+}
 
 void Application::Render(float interpolationFactor)
 {
 	window.clear();
+	stateMachine.Render(interpolationFactor);
 	window.display();
 }

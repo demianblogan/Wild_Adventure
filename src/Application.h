@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Context.h"
+#include "core/StateMachine.h"
+
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/VideoMode.hpp>
 
@@ -12,6 +15,7 @@ public:
 
 private:
 	void CreateWindow();
+	void RegisterInitialState();
 	void ProcessEvents();
 	void Update(float deltaTime);
 	void Render(float interpolationFactor);
@@ -21,4 +25,6 @@ private:
 
 	sf::VideoMode desktopMode;
 	sf::RenderWindow window;
+	StateMachine stateMachine;
+	Context context;
 };
