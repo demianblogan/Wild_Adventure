@@ -10,7 +10,7 @@
 
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
-	, context(window, stateMachine)
+	, context(window, stateMachine, resources)
 {
 	CreateWindow();
 	RegisterInitialState();

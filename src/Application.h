@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Context.h"
+#include "core/Resources.h"
 #include "core/StateMachine.h"
 
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -26,5 +27,6 @@ private:
 	sf::VideoMode desktopMode;
 	sf::RenderWindow window;
 	StateMachine stateMachine;
+	Resources resources;
 	Context context;
 };

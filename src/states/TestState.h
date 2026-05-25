@@ -2,8 +2,6 @@
 
 #include "core/State.h"
 
-#include <SFML/Graphics/Color.hpp>
-
 class TestState : public State
 {
 public:

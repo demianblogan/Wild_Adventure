@@ -17,7 +17,7 @@ add_executable(Platformer
 	src/core/State.h
 	src/core/StateMachine.h
 	src/core/StateMachine.cpp
- "src/states/TestState.h" "src/states/TestState.cpp")
+ "src/states/TestState.h" "src/states/TestState.cpp" "src/core/ResourceManager.h" "src/core/Resources.h")
 
 target_link_libraries(Platformer PRIVATE
     SFML::Graphics

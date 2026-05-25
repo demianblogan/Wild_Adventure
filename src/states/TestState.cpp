@@ -2,6 +2,7 @@
 
 #include "Context.h"
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
 TestState::TestState(Context& context)
