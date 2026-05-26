@@ -1,11 +1,13 @@
 #pragma once
 
+#include "AnimationData.h"
+
+#include <string>
+
 struct Animation
 {
-	int frameCount = 1;
-	float frameDuration = 0.1f;
-	bool isLooping = true;
-
+	AnimationData data;
+	std::string playingState;
 	int currentFrame = 0;
 	float elapsedTime = 0.0f;
 };

@@ -37,7 +37,7 @@ void RenderSystem::Render(float interpolationFactor)
 			if (registry.Has<Animation>(entity))
 			{
 				const Animation& animation = registry.Get<Animation>(entity);
-				const int frameWidth = static_cast<int>(texture.getSize().x) / animation.frameCount;
+				const int frameWidth = static_cast<int>(texture.getSize().x) / animation.data.frameCount;
 				const int frameHeight = static_cast<int>(texture.getSize().y);
 
 				const sf::IntRect frameRect(

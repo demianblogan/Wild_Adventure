@@ -3,10 +3,10 @@
 #include "Context.h"
 #include "core/Resources.h"
 #include "components/Animation.h"
-#include "components/PreviousTransform.h"
+#include "components/AnimationSet.h"
+#include "components/AnimationState.h"
 #include "components/Sprite.h"
 #include "components/Transform.h"
-#include "components/Velocity.h"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -14,16 +14,22 @@
 TestState::TestState(Context& context)
 	: State(context)
 {
-	context.resources.textures.Load("run", "assets/textures/main_characters/mask_dude/Run (32x32).png");  // <-- твой путь
+	// загрузить оба атласа врага (твои пути)
+	context.resources.textures.Load("chicken_idle", "assets/textures/enemies/chicken/Idle (32x34).png");
+	context.resources.textures.Load("chicken_run", "assets/textures/enemies/chicken/Run (32x34).png");
 
-	Entity hero = registry.CreateEntity();
-	registry.Add<Transform>(hero, { 100.0f, 300.0f });
-	registry.Add<PreviousTransform>(hero, { 100.0f, 300.0f });
-	registry.Add<Velocity>(hero, { 80.0f, 0.0f });
-	registry.Add<Sprite>(hero, { "run" });
-	registry.Add<Animation>(hero, { 12, 0.05f, true });
+	enemy = registry.CreateEntity();
+	registry.Add<Transform>(enemy, { 300.0f, 250.0f });
+	registry.Add<Sprite>(enemy, { "chicken_idle" });
 
-	movementSystem.emplace(registry);
+	AnimationSet set;
+	set.animations["idle"] = { "chicken_idle", 13, 0.15f, true };
+	set.animations["run"] = { "chicken_run",  14,  0.1f,  true };
+	registry.Add<AnimationSet>(enemy, set);
+
+	registry.Add<AnimationState>(enemy, { "idle" });
+	registry.Add<Animation>(enemy, {});
+
 	animationSystem.emplace(registry);
 	renderSystem.emplace(registry, context.resources, context.window);
 }
@@ -33,7 +39,15 @@ void TestState::HandleEvent(const sf::Event& event)
 
 void TestState::Update(float deltaTime)
 {
-	movementSystem->Update(deltaTime);
+	stateTimer += deltaTime;
+
+	if (stateTimer >= 2.0f)
+	{
+		stateTimer = 0.0f;
+		isRunning = !isRunning;
+		registry.Get<AnimationState>(enemy).current = isRunning ? "run" : "idle";
+	}
+
 	animationSystem->Update(deltaTime);
 }
 
