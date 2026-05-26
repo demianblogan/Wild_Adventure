@@ -1,5 +1,6 @@
 #include "RenderSystem.h"
 
+#include "components/Animation.h"
 #include "components/PreviousTransform.h"
 #include "components/Sprite.h"
 #include "components/Transform.h"
@@ -30,7 +31,22 @@ void RenderSystem::Render(float interpolationFactor)
 				renderY = previous.y + (transform.y - previous.y) * interpolationFactor;
 			}
 
-			sf::Sprite drawable(resources.textures.Get(sprite.textureName));
+			const sf::Texture& texture = resources.textures.Get(sprite.textureName);
+			sf::Sprite drawable(texture);
+
+			if (registry.Has<Animation>(entity))
+			{
+				const Animation& animation = registry.Get<Animation>(entity);
+				const int frameWidth = static_cast<int>(texture.getSize().x) / animation.frameCount;
+				const int frameHeight = static_cast<int>(texture.getSize().y);
+
+				const sf::IntRect frameRect(
+					{ animation.currentFrame * frameWidth, 0 },
+					{ frameWidth, frameHeight });
+
+				drawable.setTextureRect(frameRect);
+			}
+
 			drawable.setPosition({ renderX, renderY });
 			window.draw(drawable);
 		});
