@@ -65,6 +65,11 @@ public:
 		return components[componentIndexes[entity]];
 	}
 
+	const std::vector<Entity>& Entities() const
+	{
+		return ownerEntities;
+	}
+
 private:
 	void EnsureIndexSize(Entity entity)
 	{

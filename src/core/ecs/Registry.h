@@ -41,6 +41,18 @@ public:
 		return GetPool<T>().Get(entity);
 	}
 
+	template <typename FirstComponent, typename... RestComponents, typename Function>
+	void ForEach(Function function)
+	{
+		auto& firstPool = GetPool<FirstComponent>();
+
+		for (Entity entity : firstPool.Entities())
+		{
+			if ((Has<RestComponents>(entity) && ...))
+				function(entity, Get<FirstComponent>(entity), Get<RestComponents>(entity)...);
+		}
+	}
+
 private:
 	template <typename T>
 	ComponentPool<T>& GetPool()

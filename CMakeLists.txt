@@ -17,7 +17,7 @@ add_executable(Platformer
 	src/core/State.h
 	src/core/StateMachine.h
 	src/core/StateMachine.cpp
- "src/states/TestState.h" "src/states/TestState.cpp" "src/core/ResourceManager.h" "src/core/Resources.h" "src/core/ecs/Entity.h" "src/core/ecs/IComponentPool.h" "src/core/ecs/ComponentPool.h" "src/core/ecs/ComponentTypeId.h" "src/core/ecs/Registry.h" "src/components/Transform.h")
+ "src/states/TestState.h" "src/states/TestState.cpp" "src/core/ResourceManager.h" "src/core/Resources.h" "src/core/ecs/Entity.h" "src/core/ecs/IComponentPool.h" "src/core/ecs/ComponentPool.h" "src/core/ecs/ComponentTypeId.h" "src/core/ecs/Registry.h" "src/components/Transform.h" "src/components/Sprite.h" "src/systems/RenderSystem.h" "src/systems/RenderSystem.cpp")
 
 target_link_libraries(Platformer PRIVATE
     SFML::Graphics
