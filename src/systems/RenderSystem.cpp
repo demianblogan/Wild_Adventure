@@ -1,6 +1,7 @@
 #include "RenderSystem.h"
 
 #include "components/Animation.h"
+#include "components/Facing.h"
 #include "components/PreviousTransform.h"
 #include "components/Sprite.h"
 #include "components/Transform.h"
@@ -34,17 +35,28 @@ void RenderSystem::Render(float interpolationFactor)
 			const sf::Texture& texture = resources.textures.Get(sprite.textureName);
 			sf::Sprite drawable(texture);
 
+			int frameWidth = static_cast<int>(texture.getSize().x);
+			const int frameHeight = static_cast<int>(texture.getSize().y);
+
 			if (registry.Has<Animation>(entity))
 			{
 				const Animation& animation = registry.Get<Animation>(entity);
-				const int frameWidth = static_cast<int>(texture.getSize().x) / animation.data.frameCount;
-				const int frameHeight = static_cast<int>(texture.getSize().y);
+				frameWidth = static_cast<int>(texture.getSize().x) / animation.data.frameCount;
 
 				const sf::IntRect frameRect(
 					{ animation.currentFrame * frameWidth, 0 },
 					{ frameWidth, frameHeight });
 
 				drawable.setTextureRect(frameRect);
+			}
+
+			drawable.setOrigin({ frameWidth / 2.0f, frameHeight / 2.0f });
+
+			if (registry.Has<Facing>(entity))
+			{
+				const Facing& facing = registry.Get<Facing>(entity);
+				if (facing.isLookingRight != facing.isTextureRight)
+					drawable.setScale({ -1.0f, 1.0f });
 			}
 
 			drawable.setPosition({ renderX, renderY });
