@@ -19,7 +19,7 @@ Application::Application()
 void Application::CreateWindow()
 {
 	window.create(desktopMode, "2D Platformer", sf::Style::None, sf::State::Windowed);
-	window.setFramerateLimit(60);
+	window.setVerticalSyncEnabled(true);
 }
 
 void Application::RegisterInitialState()

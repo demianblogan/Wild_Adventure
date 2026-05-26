@@ -1,6 +1,6 @@
 #include "RenderSystem.h"
 
-#include "Context.h"
+#include "components/PreviousTransform.h"
 #include "components/Sprite.h"
 #include "components/Transform.h"
 #include "core/Resources.h"
@@ -18,11 +18,20 @@ RenderSystem::RenderSystem(Registry& registry, Resources& resources, sf::RenderW
 void RenderSystem::Render(float interpolationFactor)
 {
 	registry.ForEach<Transform, Sprite>(
-		[this](Entity entity, Transform& transform, Sprite& sprite)
+		[this, interpolationFactor](Entity entity, Transform& transform, Sprite& sprite)
 		{
+			float renderX = transform.x;
+			float renderY = transform.y;
+
+			if (registry.Has<PreviousTransform>(entity))
+			{
+				const PreviousTransform& previous = registry.Get<PreviousTransform>(entity);
+				renderX = previous.x + (transform.x - previous.x) * interpolationFactor;
+				renderY = previous.y + (transform.y - previous.y) * interpolationFactor;
+			}
+
 			sf::Sprite drawable(resources.textures.Get(sprite.textureName));
-			drawable.setPosition({ transform.x, transform.y });
+			drawable.setPosition({ renderX, renderY });
 			window.draw(drawable);
-		}
-	);
+		});
 }
