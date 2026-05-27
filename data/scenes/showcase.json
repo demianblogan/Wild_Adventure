@@ -1,0 +1,25 @@
+{
+	"entities": [
+		{
+			"prefab": "data/chicken.json",
+			"Transform": {
+				"x": 150,
+				"y": 50
+			}
+		},
+		{
+			"prefab": "data/chicken.json",
+			"Transform": {
+				"x": 150,
+				"y": 100
+			}
+		},
+		{
+			"prefab": "data/chicken.json",
+			"Transform": {
+				"x": 150,
+				"y": 250
+			}
+		}
+	]
+}

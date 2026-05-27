@@ -2,12 +2,13 @@
 
 #include "components/Sprite.h"
 #include "components/Transform.h"
+#include "components/PreviousTransform.h"
 #include "components/Velocity.h"
 #include "components/AnimationSet.h"
 #include "components/AnimationState.h"
 #include "components/Facing.h"
+#include "components/Animation.h"
 #include "core/ecs/Registry.h"
-
 
 #include <fstream>
 #include <stdexcept>
@@ -76,6 +77,22 @@ void DataLoader::RegisterLoaders()
 		};
 }
 
+void DataLoader::AddImpliedComponents(Registry& registry, const std::vector<Entity>& entities)
+{
+	for (const Entity entity : entities)
+	{
+		if (registry.Has<Velocity>(entity) && registry.Has<Transform>(entity)
+			&& !registry.Has<PreviousTransform>(entity))
+		{
+			const Transform& transform = registry.Get<Transform>(entity);
+			registry.Add<PreviousTransform>(entity, { transform.x, transform.y });
+		}
+
+		if (registry.Has<AnimationSet>(entity) && !registry.Has<Animation>(entity))
+			registry.Add<Animation>(entity, {});
+	}
+}
+
 Entity DataLoader::LoadEntity(Registry& registry, const nlohmann::json& entityJson)
 {
 	const Entity entity = registry.CreateEntity();
@@ -103,4 +120,39 @@ Entity DataLoader::LoadEntityFromFile(Registry& registry, const std::string& pat
 	const nlohmann::json entityJson = nlohmann::json::parse(file);
 
 	return LoadEntity(registry, entityJson);
+}
+
+std::vector<Entity> DataLoader::LoadScene(Registry& registry, const std::string& scenePath)
+{
+	std::ifstream sceneFile(scenePath);
+
+	if (!sceneFile.is_open())
+		throw std::runtime_error("Could not open scene file: " + scenePath);
+
+	const nlohmann::json sceneJson = nlohmann::json::parse(sceneFile);
+
+	std::vector<Entity> createdEntities;
+
+	for (const auto& entityJson : sceneJson.at("entities"))
+	{
+		nlohmann::json overrides = entityJson;
+
+		const std::string prefabPath = overrides.at("prefab");
+		overrides.erase("prefab");
+
+		std::ifstream prefabFile(prefabPath);
+
+		if (!prefabFile.is_open())
+			throw std::runtime_error("Could not open prefab file: " + prefabPath);
+
+		nlohmann::json merged = nlohmann::json::parse(prefabFile);
+		merged.merge_patch(overrides);
+
+		const Entity entity = LoadEntity(registry, merged);
+		createdEntities.push_back(entity);
+	}
+
+	AddImpliedComponents(registry, createdEntities);
+
+	return createdEntities;
 }
