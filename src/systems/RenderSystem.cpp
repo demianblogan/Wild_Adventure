@@ -8,13 +8,13 @@
 #include "core/Resources.h"
 #include "core/ecs/Registry.h"
 
-#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
-RenderSystem::RenderSystem(Registry& registry, Resources& resources, sf::RenderWindow& window)
+RenderSystem::RenderSystem(Registry& registry, Resources& resources, sf::RenderTarget& renderTarget)
 	: registry(registry)
 	, resources(resources)
-	, window(window)
+	, renderTarget(renderTarget)
 {}
 
 void RenderSystem::Render(float interpolationFactor)
@@ -60,6 +60,6 @@ void RenderSystem::Render(float interpolationFactor)
 			}
 
 			drawable.setPosition({ renderX, renderY });
-			window.draw(drawable);
+			renderTarget.draw(drawable);
 		});
 }

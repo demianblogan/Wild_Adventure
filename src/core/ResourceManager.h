@@ -27,6 +27,9 @@ public:
 		if (!isLoaded)
 			throw std::runtime_error("Failed to load resource: " + filepath.string());
 
+		if constexpr (std::is_same_v<Resource, sf::Texture>)
+			resource.setSmooth(false);
+
 		const auto [iterator, isInserted] = resources.emplace(id, std::move(resource));
 		if (!isInserted)
 			throw std::runtime_error("Resource already loaded: " + id);

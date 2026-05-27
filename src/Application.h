@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Context.h"
+#include "core/VirtualScreen.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 
@@ -26,6 +27,7 @@ private:
 
 	sf::VideoMode desktopMode;
 	sf::RenderWindow window;
+	VirtualScreen virtualScreen;
 	StateMachine stateMachine;
 	Resources resources;
 	Context context;
