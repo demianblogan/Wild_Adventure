@@ -1,6 +1,7 @@
 #include "TestState.h"
 
 #include "Context.h"
+#include "core/VirtualScreen.h"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -17,5 +18,7 @@ void TestState::Update(float deltaTime)
 
 void TestState::Render(float interpolationFactor)
 {
-	context.window.clear(sf::Color(30, 30, 46));
+	sf::RenderTarget& renderTarget = context.virtualScreen.GetRenderTarget();
+
+	renderTarget.clear(sf::Color(30, 30, 46));
 }

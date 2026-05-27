@@ -10,7 +10,7 @@
 
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
-	, context(window, stateMachine, resources)
+	, context(virtualScreen, stateMachine, resources)
 {
 	CreateWindow();
 	RegisterInitialState();
@@ -77,7 +77,11 @@ void Application::Update(float deltaTime)
 
 void Application::Render(float interpolationFactor)
 {
-	window.clear();
+	virtualScreen.Clear();
 	stateMachine.Render(interpolationFactor);
+	virtualScreen.Display();
+
+	window.clear(sf::Color::Black);
+	virtualScreen.RenderToWindow(window);
 	window.display();
 }

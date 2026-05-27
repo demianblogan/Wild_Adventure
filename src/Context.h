@@ -1,16 +1,12 @@
 #pragma once
 
-namespace sf
-{
-	class RenderWindow;
-}
-
+class VirtualScreen;
 class StateMachine;
 class Resources;
 
 struct Context
 {
-	sf::RenderWindow& window;
+	VirtualScreen& virtualScreen;
 	StateMachine& stateMachine;
 	Resources& resources;
 };
