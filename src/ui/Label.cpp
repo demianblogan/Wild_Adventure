@@ -37,7 +37,7 @@ namespace UI
 		sf::Text measuredText(font, text, characterSize);
 		const sf::FloatRect bounds = measuredText.getLocalBounds();
 
-		size = { bounds.size.x, bounds.size.y };
+		size = { std::ceil(bounds.size.x), std::ceil(bounds.size.y) };
 	}
 
 	void Label::DrawSelf(sf::RenderTarget& target, sf::Vector2f absolutePosition) const
@@ -48,7 +48,12 @@ namespace UI
 		drawableText.setFillColor(color);
 
 		const sf::FloatRect bounds = drawableText.getLocalBounds();
-		drawableText.setPosition(absolutePosition - bounds.position);
+		sf::Vector2f finalPosition = absolutePosition - bounds.position;
+
+		finalPosition.x = std::floor(finalPosition.x);
+		finalPosition.y = std::floor(finalPosition.y);
+
+		drawableText.setPosition(finalPosition);
 
 		target.draw(drawableText);
 	}

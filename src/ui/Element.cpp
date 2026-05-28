@@ -4,7 +4,10 @@ namespace UI
 {
 	void Element::Draw(sf::RenderTarget& target, sf::Vector2f parentPosition, sf::Vector2f parentSize) const
 	{
-		const sf::Vector2f absolutePosition = ComputePosition(parentPosition, parentSize);
+		if (!isVisible)
+			return;
+
+		absolutePosition = ComputePosition(parentPosition, parentSize);
 
 		DrawSelf(target, absolutePosition);
 
@@ -28,6 +31,17 @@ namespace UI
 	{
 		children.push_back(std::move(child));
 		return *children.back();
+	}
+
+	std::vector<Element*> Element::GetChildren() const
+	{
+		std::vector<Element*> result;
+		result.reserve(children.size());
+
+		for (const auto& child : children)
+			result.push_back(child.get());
+
+		return result;
 	}
 
 	sf::Vector2f Element::ComputePosition(sf::Vector2f parentPosition, sf::Vector2f parentSize) const

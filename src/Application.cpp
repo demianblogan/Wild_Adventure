@@ -57,6 +57,13 @@ void Application::ProcessEvents()
 {
 	while (const std::optional event = window.pollEvent())
 	{
+		if (const auto* moved = event->getIf<sf::Event::MouseMoved>())
+			virtualScreen.UpdateMousePosition(moved->position, window);
+		else if (const auto* pressed = event->getIf<sf::Event::MouseButtonPressed>())
+			virtualScreen.UpdateMousePosition(pressed->position, window);
+		else if (const auto* released = event->getIf<sf::Event::MouseButtonReleased>())
+			virtualScreen.UpdateMousePosition(released->position, window);
+
 		if (event->is<sf::Event::Closed>())
 			window.close();
 

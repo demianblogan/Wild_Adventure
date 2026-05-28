@@ -1,0 +1,65 @@
+#include "Button.h"
+
+namespace UI
+{
+	namespace
+	{
+		int StateToIndex(InteractionState state)
+		{
+			switch (state)
+			{
+			case InteractionState::Normal:
+				return 0;
+			case InteractionState::Highlighted:
+				return 1;
+			case InteractionState::Pressed:
+				return 2;
+			default:
+				return 0;
+			}
+		}
+	}
+
+	Button::Button()
+	{}
+
+	void Button::SetBackground(InteractionState state, std::unique_ptr<Element> element)
+	{
+		Element& added = AddChild(std::move(element));
+		backgrounds[StateToIndex(state)] = &added;
+		RefreshVisibility();
+	}
+
+	void Button::SetForeground(InteractionState state, std::unique_ptr<Element> element)
+	{
+		Element& added = AddChild(std::move(element));
+		foregrounds[StateToIndex(state)] = &added;
+		RefreshVisibility();
+	}
+
+	void Button::OnStateChanged()
+	{
+		RefreshVisibility();
+	}
+
+	void Button::RefreshVisibility()
+	{
+		Element* activeBg = GetVariant(backgrounds, state);
+		Element* activeFg = GetVariant(foregrounds, state);
+
+		for (Element* bg : backgrounds)
+			if (bg)
+				bg->isVisible = (bg == activeBg);
+
+		for (Element* fg : foregrounds)
+			if (fg)
+				fg->isVisible = (fg == activeFg);
+	}
+
+	Element* Button::GetVariant(const std::array<Element*, 3>& variants, InteractionState state) const
+	{
+		Element* variant = variants[StateToIndex(state)];
+
+		return variant ? variant : variants[StateToIndex(InteractionState::Normal)];
+	}
+}
