@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ui/Animation.h"
+
 #include <SFML/System/Vector2.hpp>
 
 #include <memory>
@@ -30,6 +32,9 @@ namespace UI
 		virtual bool IsInteractive() const { return false; }
 		sf::Vector2f GetAbsolutePosition() const { return absolutePosition; }
 
+		Animation& AddAnimation(std::unique_ptr<Animation> animation);
+		void ClearAnimations();
+
 		sf::Vector2f anchor;
 		sf::Vector2f pivot;
 		sf::Vector2f offset;
@@ -45,5 +50,6 @@ namespace UI
 		mutable sf::Vector2f absolutePosition;
 
 		std::vector<std::unique_ptr<Element>> children;
+		std::vector<std::unique_ptr<Animation>> animations;
 	};
 }

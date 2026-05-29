@@ -1,5 +1,7 @@
 #include "Element.h"
 
+#include <algorithm>
+
 namespace UI
 {
 	void Element::Draw(sf::RenderTarget& target, sf::Vector2f parentPosition, sf::Vector2f parentSize) const
@@ -17,6 +19,14 @@ namespace UI
 
 	void Element::Update(float deltaTime)
 	{
+		for (const auto& animation : animations)
+			animation->Update(deltaTime);
+
+		animations.erase(
+			std::remove_if(animations.begin(), animations.end(),
+				[](const std::unique_ptr<Animation>& a) { return a->IsFinished(); }),
+			animations.end());
+
 		for (const auto& child : children)
 			child->Update(deltaTime);
 	}
@@ -49,6 +59,17 @@ namespace UI
 			result.push_back(child.get());
 
 		return result;
+	}
+
+	Animation& Element::AddAnimation(std::unique_ptr<Animation> animation)
+	{
+		animations.push_back(std::move(animation));
+		return *animations.back();
+	}
+
+	void Element::ClearAnimations()
+	{
+		animations.clear();
 	}
 
 	sf::Vector2f Element::ComputePosition(sf::Vector2f parentPosition, sf::Vector2f parentSize) const

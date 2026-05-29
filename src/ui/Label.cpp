@@ -32,6 +32,12 @@ namespace UI
 		this->color = color;
 	}
 
+	void Label::SetAlpha(float alpha)
+	{
+		const auto byteAlpha = static_cast<std::uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
+		color.a = byteAlpha;
+	}
+
 	void Label::RecalculateSize()
 	{
 		const sf::Font& font = resources.fonts.Get(fontName);
@@ -54,9 +60,6 @@ namespace UI
 
 		finalPosition.x = std::floor(finalPosition.x);
 		finalPosition.y = std::floor(finalPosition.y);
-
-		std::cout << "Label \"" << text << "\" finalPosition = ("
-			<< finalPosition.x << ", " << finalPosition.y << ")\n";
 
 		drawableText.setPosition(finalPosition);
 

@@ -18,6 +18,7 @@ namespace UI
 		void SetText(const std::string& text);
 		void SetCharacterSize(unsigned int characterSize);
 		void SetColor(sf::Color color);
+		void SetAlpha(float alpha);
 
 	protected:
 		void DrawSelf(sf::RenderTarget& target, sf::Vector2f absolutePosition) const override;
