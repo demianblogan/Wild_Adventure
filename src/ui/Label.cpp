@@ -6,6 +6,8 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Text.hpp>
 
+#include <iostream>
+
 namespace UI
 {
 	Label::Label(Resources& resources, const std::string& fontName)
@@ -52,6 +54,9 @@ namespace UI
 
 		finalPosition.x = std::floor(finalPosition.x);
 		finalPosition.y = std::floor(finalPosition.y);
+
+		std::cout << "Label \"" << text << "\" finalPosition = ("
+			<< finalPosition.x << ", " << finalPosition.y << ")\n";
 
 		drawableText.setPosition(finalPosition);
 

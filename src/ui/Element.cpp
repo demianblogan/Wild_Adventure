@@ -33,6 +33,13 @@ namespace UI
 		return *children.back();
 	}
 
+	Element& Element::AddChildBack(std::unique_ptr<Element> child)
+	{
+		children.insert(children.begin(), std::move(child));
+
+		return *children.front();
+	}
+
 	std::vector<Element*> Element::GetChildren() const
 	{
 		std::vector<Element*> result;

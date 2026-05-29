@@ -37,54 +37,52 @@ namespace UI
 
 	void Root::HandleEvent(const sf::Event& event)
 	{
+		if (event.getIf<sf::Event::MouseMoved>())
+		{
+			activeMode = InputMode::Cursor;
+			HandleMouseMove();
+			return;
+		}
+
+		if (event.getIf<sf::Event::MouseButtonPressed>())
+		{
+			activeMode = InputMode::Cursor;
+
+			if (activatedElement)
+			{
+				const sf::Vector2f mouse = virtualScreen.GetMousePosition();
+				const sf::FloatRect activatedBounds(activatedElement->GetAbsolutePosition(), activatedElement->size);
+
+				if (!activatedBounds.contains(mouse))
+					DeactivateCurrent();
+			}
+
+			HandleMousePress();
+			return;
+		}
+
+		if (event.getIf<sf::Event::MouseButtonReleased>())
+		{
+			HandleMouseRelease();
+			return;
+		}
+
 		if (activatedElement)
 		{
 			if (const auto* key = event.getIf<sf::Event::KeyPressed>())
 			{
 				if (key->code == sf::Keyboard::Key::Escape)
 				{
-					HandleEscape();
-					return;
-				}
-			}
-
-			if (event.getIf<sf::Event::MouseButtonPressed>())
-			{
-				const sf::Vector2f mouse = virtualScreen.GetMousePosition();
-				const sf::FloatRect bounds(activatedElement->GetAbsolutePosition(), activatedElement->size);
-
-				if (!bounds.contains(mouse))
-				{
 					DeactivateCurrent();
-				}
-				else
-				{
-					activatedElement->HandleEvent(event);
 					return;
 				}
 			}
-			else
-			{
-				activatedElement->HandleEvent(event);
-				return;
-			}
+
+			activatedElement->HandleEvent(event);
+			return;
 		}
 
-		if (event.getIf<sf::Event::MouseMoved>())
-		{
-			activeMode = InputMode::Cursor;
-			HandleMouseMove();
-		}
-		else if (event.getIf<sf::Event::MouseButtonPressed>())
-		{
-			activeMode = InputMode::Cursor;
-			HandleMousePress();
-		}
-		else if (event.getIf<sf::Event::MouseButtonReleased>())
-		{
-			HandleMouseRelease();
-		}
-		else if (const auto* key = event.getIf<sf::Event::KeyPressed>())
+		if (const auto* key = event.getIf<sf::Event::KeyPressed>())
 		{
 			if (key->code == sf::Keyboard::Key::Down || key->code == sf::Keyboard::Key::Right)
 			{

@@ -23,6 +23,8 @@ namespace UI
 		virtual void HandleEvent(const sf::Event& event);
 
 		Element& AddChild(std::unique_ptr<Element> child);
+		Element& AddChildBack(std::unique_ptr<Element> child);
+
 		std::vector<Element*> GetChildren() const;
 
 		virtual bool IsInteractive() const { return false; }
