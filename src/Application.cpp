@@ -10,7 +10,8 @@
 
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
-	, context(virtualScreen, stateMachine, resources)
+	, audioMixer(resources)
+	, context(virtualScreen, stateMachine, resources, audioMixer)
 {
 	CreateWindow();
 	RegisterInitialState();

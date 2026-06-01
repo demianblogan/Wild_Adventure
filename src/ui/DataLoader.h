@@ -9,6 +9,11 @@
 
 struct Resources;
 
+namespace Audio
+{
+	class Mixer;
+}
+
 namespace UI
 {
 	class Element;
@@ -39,13 +44,17 @@ namespace UI
 		std::function<bool(char32_t)> FindFilter(const std::string& name) const;
 
 		void SetPrefabDirectory(const std::string& directory);
+		void SetButtonSounds(Audio::Mixer& mixer, const std::string& hoverSoundName, const std::string& pressSoundName);
 
 	private:
 		void RegisterDefaultFactories();
+		const nlohmann::json& LoadPrefab(const std::string& name);
 
 		Resources& resources;
 
-		const nlohmann::json& LoadPrefab(const std::string& name);
+		Audio::Mixer* buttonSoundMixer = nullptr;
+		std::string buttonHoverSound;
+		std::string buttonPressSound;
 
 		std::string prefabDirectory = "data/ui/prefabs/";
 		std::unordered_map<std::string, nlohmann::json> prefabCache;

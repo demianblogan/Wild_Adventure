@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Context.h"
+#include "audio/Mixer.h"
 #include "core/VirtualScreen.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
@@ -30,5 +31,6 @@ private:
 	VirtualScreen virtualScreen;
 	StateMachine stateMachine;
 	Resources resources;
+	Audio::Mixer audioMixer;
 	Context context;
 };

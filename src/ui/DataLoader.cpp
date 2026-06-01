@@ -1,5 +1,6 @@
 #include "DataLoader.h"
 
+#include "audio/Mixer.h"
 #include "ui/Button.h"
 #include "ui/Checkbox.h"
 #include "ui/Element.h"
@@ -253,12 +254,30 @@ namespace UI
 					}
 				}
 
+				std::function<void()> action;
 				if (data.contains("action"))
+					action = loader.FindAction(data["action"]);
+
+				if (loader.buttonSoundMixer != nullptr)
 				{
-					const std::string actionName = data["action"];
-					auto action = loader.FindAction(actionName);
-					if (action)
-						button->SetOnPressed(std::move(action));
+					Audio::Mixer* mixer = loader.buttonSoundMixer;
+					const std::string hoverSound = loader.buttonHoverSound;
+					const std::string pressSound = loader.buttonPressSound;
+
+					if (!hoverSound.empty())
+						button->SetOnHighlighted([mixer, hoverSound] { mixer->PlaySound(hoverSound); });
+
+					button->SetOnPressed([mixer, pressSound, action]
+						{
+							if (!pressSound.empty())
+								mixer->PlaySound(pressSound);
+							if (action)
+								action();
+						});
+				}
+				else if (action)
+				{
+					button->SetOnPressed(std::move(action));
 				}
 
 				return button;
@@ -374,5 +393,12 @@ namespace UI
 
 				return textField;
 			};
+	}
+
+	void DataLoader::SetButtonSounds(Audio::Mixer& mixer, const std::string& hoverSoundName, const std::string& pressSoundName)
+	{
+		buttonSoundMixer = &mixer;
+		buttonHoverSound = hoverSoundName;
+		buttonPressSound = pressSoundName;
 	}
 }

@@ -33,6 +33,7 @@ namespace UI
 		bool IsActivated() const { return isActivated; }
 
 		void SetOnPressed(std::function<void()> callback);
+		void SetOnHighlighted(std::function<void()> callback);
 
 		InteractionState GetState() const { return state; }
 
@@ -45,8 +46,11 @@ namespace UI
 		virtual void OnActivated() {}
 		virtual void OnDeactivated() {}
 
+
 		InteractionState state = InteractionState::Normal;
 		bool isActivated = false;
+
 		std::function<void()> onPressed;
+		std::function<void()> onHighlighted;
 	};
 }

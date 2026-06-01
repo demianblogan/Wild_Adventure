@@ -1,5 +1,7 @@
 #include "InteractiveElement.h"
 
+#include "audio/Mixer.h"
+
 namespace UI
 {
 	void InteractiveElement::SetHighlighted(bool highlighted)
@@ -11,8 +13,12 @@ namespace UI
 
 		if (newState != state)
 		{
+			const bool wasNotHighlighted = (state != InteractionState::Highlighted);
 			state = newState;
 			OnStateChanged();
+
+			if (newState == InteractionState::Highlighted && wasNotHighlighted && onHighlighted)
+				onHighlighted();
 		}
 	}
 
@@ -60,5 +66,9 @@ namespace UI
 	void InteractiveElement::SetOnPressed(std::function<void()> callback)
 	{
 		onPressed = std::move(callback);
+	}
+	void InteractiveElement::SetOnHighlighted(std::function<void()> callback)
+	{
+		onHighlighted = std::move(callback);
 	}
 }

@@ -1,0 +1,23 @@
+{
+	"Element": {
+		"size": [ 640, 360 ],
+		"children": [
+			{
+				"Button": {
+					"prefab": "menu_button",
+					"offset": [ 0, -30 ],
+					"action": "play",
+					"foregrounds": { "Normal": { "Label": { "text": "Play" } } }
+				}
+			},
+			{
+				"Button": {
+					"prefab": "menu_button",
+					"offset": [ 0, 30 ],
+					"action": "exit",
+					"foregrounds": { "Normal": { "Label": { "text": "Exit" } } }
+				}
+			}
+		]
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"sounds": {
+		"jump": {
+			"path": "assets/audio/sounds/first_jump.ogg",
+			"volume": 0.8
+		},
+		"ui_hover": {
+			"path": "assets/audio/sounds/ui_hover.ogg",
+			"volume": 0.5
+		},
+		"ui_press": {
+			"path": "assets/audio/sounds/ui_press.ogg",
+			"volume": 0.6
+		}
+	},
+	"music": {
+		"menu_theme": {
+			"path": "assets/audio/music/menu.ogg",
+			"loop": true
+		}
+	}
+}
