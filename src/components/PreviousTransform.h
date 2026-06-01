@@ -1,7 +1,10 @@
 #pragma once
 
-struct PreviousTransform
+namespace ECS
 {
-	float x = 0.0f;
-	float y = 0.0f;
-};
+	struct PreviousTransform
+	{
+		float x = 0.0f;
+		float y = 0.0f;
+	};
+}

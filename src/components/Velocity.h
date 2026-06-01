@@ -1,7 +1,10 @@
 #pragma once
 
-struct Velocity
+namespace ECS
 {
-	float x = 0.0f;
-	float y = 0.0f;
-};
+	struct Velocity
+	{
+		float x = 0.0f;
+		float y = 0.0f;
+	};
+}

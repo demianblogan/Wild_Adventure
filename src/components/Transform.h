@@ -1,7 +1,10 @@
 #pragma once
 
-struct Transform
+namespace ECS
 {
-	float x = 0.0f;
-	float y = 0.0f;
-};
+	struct Transform
+	{
+		float x = 0.0f;
+		float y = 0.0f;
+	};
+}

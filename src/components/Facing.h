@@ -1,7 +1,10 @@
 #pragma once
 
-struct Facing
+namespace ECS
 {
-	bool isLookingRight = true;
-	bool isTextureRight = true;
-};
+	struct Facing
+	{
+		bool isLookingRight = true;
+		bool isTextureRight = true;
+	};
+}

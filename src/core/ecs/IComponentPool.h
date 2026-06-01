@@ -2,11 +2,14 @@
 
 #include "core/ecs/Entity.h"
 
-class IComponentPool
+namespace ECS
 {
-public:
-	virtual ~IComponentPool() = default;
+	class IComponentPool
+	{
+	public:
+		virtual ~IComponentPool() = default;
 
-	virtual void RemoveFrom(Entity entity) = 0;
-	virtual bool Has(Entity entity) const = 0;
-};
+		virtual void RemoveFrom(Entity entity) = 0;
+		virtual bool Has(Entity entity) const = 0;
+	};
+}

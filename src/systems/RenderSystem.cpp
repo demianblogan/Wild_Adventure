@@ -11,55 +11,58 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
-RenderSystem::RenderSystem(Registry& registry, Resources& resources, sf::RenderTarget& renderTarget)
-	: registry(registry)
-	, resources(resources)
-	, renderTarget(renderTarget)
-{}
-
-void RenderSystem::Render(float interpolationFactor)
+namespace ECS
 {
-	registry.ForEach<Transform, Sprite>(
-		[this, interpolationFactor](Entity entity, Transform& transform, Sprite& sprite)
-		{
-			float renderX = transform.x;
-			float renderY = transform.y;
+	RenderSystem::RenderSystem(Registry& registry, Resources& resources, sf::RenderTarget& renderTarget)
+		: registry(registry)
+		, resources(resources)
+		, renderTarget(renderTarget)
+	{}
 
-			if (registry.Has<PreviousTransform>(entity))
+	void RenderSystem::Render(float interpolationFactor)
+	{
+		registry.ForEach<Transform, Sprite>(
+			[this, interpolationFactor](Entity entity, Transform& transform, Sprite& sprite)
 			{
-				const PreviousTransform& previous = registry.Get<PreviousTransform>(entity);
-				renderX = previous.x + (transform.x - previous.x) * interpolationFactor;
-				renderY = previous.y + (transform.y - previous.y) * interpolationFactor;
-			}
+				float renderX = transform.x;
+				float renderY = transform.y;
 
-			const sf::Texture& texture = resources.textures.Get(sprite.textureName);
-			sf::Sprite drawable(texture);
+				if (registry.Has<PreviousTransform>(entity))
+				{
+					const PreviousTransform& previous = registry.Get<PreviousTransform>(entity);
+					renderX = previous.x + (transform.x - previous.x) * interpolationFactor;
+					renderY = previous.y + (transform.y - previous.y) * interpolationFactor;
+				}
 
-			int frameWidth = static_cast<int>(texture.getSize().x);
-			const int frameHeight = static_cast<int>(texture.getSize().y);
+				const sf::Texture& texture = resources.textures.Get(sprite.textureName);
+				sf::Sprite drawable(texture);
 
-			if (registry.Has<Animation>(entity))
-			{
-				const Animation& animation = registry.Get<Animation>(entity);
-				frameWidth = static_cast<int>(texture.getSize().x) / animation.data.frameCount;
+				int frameWidth = static_cast<int>(texture.getSize().x);
+				const int frameHeight = static_cast<int>(texture.getSize().y);
 
-				const sf::IntRect frameRect(
-					{ animation.currentFrame * frameWidth, 0 },
-					{ frameWidth, frameHeight });
+				if (registry.Has<Animation>(entity))
+				{
+					const Animation& animation = registry.Get<Animation>(entity);
+					frameWidth = static_cast<int>(texture.getSize().x) / animation.data.frameCount;
 
-				drawable.setTextureRect(frameRect);
-			}
+					const sf::IntRect frameRect(
+						{ animation.currentFrame * frameWidth, 0 },
+						{ frameWidth, frameHeight });
 
-			drawable.setOrigin({ frameWidth / 2.0f, frameHeight / 2.0f });
+					drawable.setTextureRect(frameRect);
+				}
 
-			if (registry.Has<Facing>(entity))
-			{
-				const Facing& facing = registry.Get<Facing>(entity);
-				if (facing.isLookingRight != facing.isTextureRight)
-					drawable.setScale({ -1.0f, 1.0f });
-			}
+				drawable.setOrigin({ frameWidth / 2.0f, frameHeight / 2.0f });
 
-			drawable.setPosition({ renderX, renderY });
-			renderTarget.draw(drawable);
-		});
+				if (registry.Has<Facing>(entity))
+				{
+					const Facing& facing = registry.Get<Facing>(entity);
+					if (facing.isLookingRight != facing.isTextureRight)
+						drawable.setScale({ -1.0f, 1.0f });
+				}
+
+				drawable.setPosition({ renderX, renderY });
+				renderTarget.draw(drawable);
+			});
+	}
 }

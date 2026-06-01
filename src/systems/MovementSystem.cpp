@@ -6,22 +6,25 @@
 #include "components/Velocity.h"
 #include "core/ecs/Registry.h"
 
-MovementSystem::MovementSystem(Registry& registry)
-	: registry(registry)
-{}
-
-void MovementSystem::Update(float deltaTime)
+namespace ECS
 {
-	registry.ForEach<Transform, PreviousTransform, Velocity>(
-		[this, deltaTime](Entity entity, Transform& transform, PreviousTransform& previous, Velocity& velocity)
-		{
-			previous.x = transform.x;
-			previous.y = transform.y;
+	MovementSystem::MovementSystem(Registry& registry)
+		: registry(registry)
+	{}
 
-			transform.x += velocity.x * deltaTime;
-			transform.y += velocity.y * deltaTime;
+	void MovementSystem::Update(float deltaTime)
+	{
+		registry.ForEach<Transform, PreviousTransform, Velocity>(
+			[this, deltaTime](Entity entity, Transform& transform, PreviousTransform& previous, Velocity& velocity)
+			{
+				previous.x = transform.x;
+				previous.y = transform.y;
 
-			if (registry.Has<Facing>(entity) && velocity.x != 0.0f)
-				registry.Get<Facing>(entity).isLookingRight = velocity.x > 0.0f;
-		});
+				transform.x += velocity.x * deltaTime;
+				transform.y += velocity.y * deltaTime;
+
+				if (registry.Has<Facing>(entity) && velocity.x != 0.0f)
+					registry.Get<Facing>(entity).isLookingRight = velocity.x > 0.0f;
+			});
+	}
 }
