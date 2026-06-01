@@ -15,6 +15,8 @@ namespace UI
 		Pressed
 	};
 
+	constexpr std::size_t INTERACTION_STATE_COUNT = 3;
+
 	class InteractiveElement : public Element
 	{
 	public:

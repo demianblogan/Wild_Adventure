@@ -75,24 +75,22 @@ namespace UI
 
 	void Checkbox::RefreshVisibility()
 	{
-		Element* activeBg = GetBackgroundForState(state);
+		Element* activeBackground = GetBackgroundForState(state);
 
-		for (Element* bg : backgrounds)
-			if (bg)
-				bg->isVisible = (bg == activeBg);
+		for (Element* background : backgrounds)
+			if (background != nullptr)
+				background->isVisible = (background == activeBackground);
 
-		if (checkedView)
+		if (checkedView != nullptr)
 			checkedView->isVisible = isChecked;
-		if (uncheckedView)
+		if (uncheckedView != nullptr)
 			uncheckedView->isVisible = !isChecked;
 	}
 
 	Element* Checkbox::GetBackgroundForState(InteractionState state) const
 	{
-		Element* bg = backgrounds[StateToIndex(state)];
-		if (bg)
-			return bg;
-		else
-			return backgrounds[StateToIndex(InteractionState::Normal)];
+		Element* background = backgrounds[StateToIndex(state)];
+
+		return background != nullptr ? background : backgrounds[StateToIndex(InteractionState::Normal)];
 	}
 }

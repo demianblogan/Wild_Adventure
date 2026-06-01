@@ -56,7 +56,7 @@ namespace UI
 
 		Label* textLabel = nullptr;
 		Image* cursor = nullptr;
-		std::array<Element*, 3> backgrounds = { nullptr, nullptr, nullptr };
+		std::array<Element*, INTERACTION_STATE_COUNT> backgrounds = { nullptr, nullptr, nullptr };
 
 		std::string text;
 		std::size_t cursorPosition = 0;

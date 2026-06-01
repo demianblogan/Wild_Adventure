@@ -40,10 +40,11 @@ namespace UI
 	Element& Element::AddChild(std::unique_ptr<Element> child)
 	{
 		children.push_back(std::move(child));
+
 		return *children.back();
 	}
 
-	Element& Element::AddChildBack(std::unique_ptr<Element> child)
+	Element& Element::AddChildBehind(std::unique_ptr<Element> child)
 	{
 		children.insert(children.begin(), std::move(child));
 
@@ -64,6 +65,7 @@ namespace UI
 	Animation& Element::AddAnimation(std::unique_ptr<Animation> animation)
 	{
 		animations.push_back(std::move(animation));
+
 		return *animations.back();
 	}
 

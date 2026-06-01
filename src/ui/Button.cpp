@@ -20,9 +20,6 @@ namespace UI
 		}
 	}
 
-	Button::Button()
-	{}
-
 	void Button::SetBackground(InteractionState state, std::unique_ptr<Element> element)
 	{
 		Element& added = AddChild(std::move(element));
@@ -44,19 +41,19 @@ namespace UI
 
 	void Button::RefreshVisibility()
 	{
-		Element* activeBg = GetVariant(backgrounds, state);
-		Element* activeFg = GetVariant(foregrounds, state);
+		Element* activeBackground = GetVariant(backgrounds, state);
+		Element* activeForeground = GetVariant(foregrounds, state);
 
-		for (Element* bg : backgrounds)
-			if (bg)
-				bg->isVisible = (bg == activeBg);
+		for (Element* background : backgrounds)
+			if (background != nullptr)
+				background->isVisible = (background == activeBackground);
 
-		for (Element* fg : foregrounds)
-			if (fg)
-				fg->isVisible = (fg == activeFg);
+		for (Element* foreground : foregrounds)
+			if (foreground != nullptr)
+				foreground->isVisible = (foreground == activeForeground);
 	}
 
-	Element* Button::GetVariant(const std::array<Element*, 3>& variants, InteractionState state) const
+	Element* Button::GetVariant(const std::array<Element*, INTERACTION_STATE_COUNT>& variants, InteractionState state) const
 	{
 		Element* variant = variants[StateToIndex(state)];
 

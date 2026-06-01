@@ -6,16 +6,16 @@ namespace UI
 {
 	enum class AnimationCurve
 	{
-		Linear,
-		Sine,
-		EaseOut
+		Linear,    // uniform change (constant speed)
+		Sine,      // smooth start and smooth end (ease-in-out)
+		EaseOut    // fast start, gradual slowdown towards the end
 	};
 
 	enum class AnimationLoop
 	{
-		Once,
-		Loop,
-		PingPong
+		Once,      // play from -> to once, then finish
+		Loop,      // repeat from -> to, jumps back to from on each cycle
+		PingPong   // smooth from -> to -> from -> to -> ...
 	};
 
 	class Animation

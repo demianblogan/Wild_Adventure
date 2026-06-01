@@ -1,0 +1,47 @@
+{
+	"Slider": {
+		"size": [ 240, 20 ],
+		"anchor": [ 0.5, 0.5 ],
+		"pivot": [ 0.5, 0.5 ],
+		"track": {
+			"Image": {
+				"size": [ 240, 6 ],
+				"anchor": [ 0.5, 0.5 ],
+				"pivot": [ 0.5, 0.5 ],
+				"color": [ 80, 50, 110, 255 ]
+			}
+		},
+		"fill": {
+			"Image": {
+				"size": [ 0, 6 ],
+				"color": [ 180, 120, 240, 255 ]
+			}
+		},
+		"handles": {
+			"Normal": {
+				"Image": {
+					"size": [ 16, 20 ],
+					"color": [ 130, 80, 180, 255 ]
+				}
+			},
+			"Highlighted": {
+				"Image": {
+					"size": [ 16, 20 ],
+					"color": [ 180, 120, 240, 255 ]
+				}
+			},
+			"Pressed": {
+				"Image": {
+					"size": [ 16, 20 ],
+					"color": [ 220, 180, 255, 255 ]
+				}
+			}
+		},
+		"activatedHandle": {
+			"Image": {
+				"size": [ 16, 20 ],
+				"color": [ 255, 220, 120, 255 ]
+			}
+		}
+	}
+}

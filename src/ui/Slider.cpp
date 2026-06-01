@@ -12,16 +12,17 @@ namespace UI
 		{
 			switch (state)
 			{
-			case InteractionState::Normal:      return 0;
-			case InteractionState::Highlighted: return 1;
-			case InteractionState::Pressed:     return 2;
+			case InteractionState::Normal:
+				return 0;
+			case InteractionState::Highlighted:
+				return 1;
+			case InteractionState::Pressed:
+				return 2;
+			default:
+				return 0;
 			}
-			return 0;
 		}
 	}
-
-	Slider::Slider()
-	{}
 
 	void Slider::SetTrack(std::unique_ptr<Element> element)
 	{
@@ -142,7 +143,7 @@ namespace UI
 
 		for (Element* handle : handles)
 		{
-			if (handle)
+			if (handle != nullptr)
 			{
 				handle->anchor = { 0.0f, 0.5f };
 				handle->pivot = { 0.5f, 0.5f };
@@ -150,14 +151,14 @@ namespace UI
 			}
 		}
 
-		if (activatedHandle)
+		if (activatedHandle != nullptr)
 		{
 			activatedHandle->anchor = { 0.0f, 0.5f };
 			activatedHandle->pivot = { 0.5f, 0.5f };
 			activatedHandle->offset = { handleX, 0.0f };
 		}
 
-		if (fill)
+		if (fill != nullptr)
 		{
 			fill->anchor = { 0.0f, 0.5f };
 			fill->pivot = { 0.0f, 0.5f };
@@ -172,18 +173,17 @@ namespace UI
 			: GetHandleForState(state);
 
 		for (Element* handle : handles)
-			if (handle)
+			if (handle != nullptr)
 				handle->isVisible = (handle == activeHandle);
 
-		if (activatedHandle)
+		if (activatedHandle != nullptr)
 			activatedHandle->isVisible = (activatedHandle == activeHandle);
 	}
 
 	Element* Slider::GetHandleForState(InteractionState state) const
 	{
 		Element* handle = handles[StateToIndex(state)];
-		if (handle)
-			return handle;
-		return handles[StateToIndex(InteractionState::Normal)];
+
+		return handle != nullptr ? handle : handles[StateToIndex(InteractionState::Normal)];
 	}
 }

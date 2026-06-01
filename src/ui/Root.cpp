@@ -23,16 +23,16 @@ namespace UI
 	{
 		interactives.clear();
 		if (content)
-			CollectFrom(*content);
+			CollectInteractivesFrom(*content);
 	}
 
-	void Root::CollectFrom(Element& element)
+	void Root::CollectInteractivesFrom(Element& element)
 	{
 		if (element.IsInteractive())
 			interactives.push_back(static_cast<InteractiveElement*>(&element));
 
 		for (Element* child : element.GetChildren())
-			CollectFrom(*child);
+			CollectInteractivesFrom(*child);
 	}
 
 	void Root::HandleEvent(const sf::Event& event)
@@ -48,7 +48,7 @@ namespace UI
 		{
 			activeMode = InputMode::Cursor;
 
-			if (activatedElement)
+			if (activatedElement != nullptr)
 			{
 				const sf::Vector2f mouse = virtualScreen.GetMousePosition();
 				const sf::FloatRect activatedBounds(activatedElement->GetAbsolutePosition(), activatedElement->size);
@@ -67,7 +67,7 @@ namespace UI
 			return;
 		}
 
-		if (activatedElement)
+		if (activatedElement != nullptr)
 		{
 			if (const auto* key = event.getIf<sf::Event::KeyPressed>())
 			{
@@ -111,7 +111,7 @@ namespace UI
 	{
 		const sf::Vector2f mouse = virtualScreen.GetMousePosition();
 
-		if (draggedElement)
+		if (draggedElement != nullptr)
 		{
 			draggedElement->OnDragMove(mouse);
 			return;
@@ -147,7 +147,7 @@ namespace UI
 
 	void Root::HandleMouseRelease()
 	{
-		if (draggedElement)
+		if (draggedElement != nullptr)
 		{
 			draggedElement->OnDragEnd();
 			draggedElement->Release();
@@ -201,14 +201,9 @@ namespace UI
 		}
 	}
 
-	void Root::HandleEscape()
-	{
-		DeactivateCurrent();
-	}
-
 	void Root::DeactivateCurrent()
 	{
-		if (activatedElement)
+		if (activatedElement != nullptr)
 		{
 			activatedElement->Deactivate();
 			activatedElement = nullptr;

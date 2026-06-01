@@ -31,7 +31,7 @@ namespace UI
 
 		Element* GetBackgroundForState(InteractionState state) const;
 
-		std::array<Element*, 3> backgrounds = { nullptr, nullptr, nullptr };
+		std::array<Element*, INTERACTION_STATE_COUNT> backgrounds = { nullptr, nullptr, nullptr };
 		Element* checkedView = nullptr;
 		Element* uncheckedView = nullptr;
 

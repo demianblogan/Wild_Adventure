@@ -38,14 +38,13 @@ namespace UI
 
 	private:
 		void CollectInteractives();
-		void CollectFrom(Element& element);
+		void CollectInteractivesFrom(Element& element);
 
 		void HandleMouseMove();
 		void HandleMousePress();
 		void HandleMouseRelease();
 		void HandleNavigation(int direction);
 		void HandleConfirm(bool pressed);
-		void HandleEscape();
 
 		void SetHighlightedIndex(int index);
 		void DeactivateCurrent();

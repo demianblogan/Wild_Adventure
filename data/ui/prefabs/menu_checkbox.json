@@ -1,0 +1,41 @@
+{
+	"Checkbox": {
+		"size": [ 32, 32 ],
+		"anchor": [ 0.5, 0.5 ],
+		"pivot": [ 0.5, 0.5 ],
+		"backgrounds": {
+			"Normal": {
+				"Image": {
+					"size": [ 32, 32 ],
+					"anchor": [ 0.5, 0.5 ],
+					"pivot": [ 0.5, 0.5 ],
+					"color": [ 30, 90, 100, 255 ]
+				}
+			},
+			"Highlighted": {
+				"Image": {
+					"size": [ 32, 32 ],
+					"anchor": [ 0.5, 0.5 ],
+					"pivot": [ 0.5, 0.5 ],
+					"color": [ 60, 150, 170, 255 ]
+				}
+			},
+			"Pressed": {
+				"Image": {
+					"size": [ 32, 32 ],
+					"anchor": [ 0.5, 0.5 ],
+					"pivot": [ 0.5, 0.5 ],
+					"color": [ 100, 220, 240, 255 ]
+				}
+			}
+		},
+		"checkedView": {
+			"Image": {
+				"size": [ 20, 20 ],
+				"anchor": [ 0.5, 0.5 ],
+				"pivot": [ 0.5, 0.5 ],
+				"color": [ 255, 255, 255, 255 ]
+			}
+		}
+	}
+}

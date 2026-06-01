@@ -25,7 +25,7 @@ namespace UI
 
 	void Image::SetAlpha(float alpha)
 	{
-		const auto byteAlpha = static_cast<std::uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
+		std::uint8_t byteAlpha = static_cast<std::uint8_t>(std::clamp(alpha, 0.0f, 1.0f) * 255.0f);
 		color.a = byteAlpha;
 	}
 

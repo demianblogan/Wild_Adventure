@@ -25,7 +25,7 @@ namespace UI
 		virtual void HandleEvent(const sf::Event& event);
 
 		Element& AddChild(std::unique_ptr<Element> child);
-		Element& AddChildBack(std::unique_ptr<Element> child);
+		Element& AddChildBehind(std::unique_ptr<Element> child);
 
 		std::vector<Element*> GetChildren() const;
 
@@ -35,10 +35,10 @@ namespace UI
 		Animation& AddAnimation(std::unique_ptr<Animation> animation);
 		void ClearAnimations();
 
-		sf::Vector2f anchor;
-		sf::Vector2f pivot;
-		sf::Vector2f offset;
-		sf::Vector2f size;
+		sf::Vector2f anchor = { 0.0f, 0.0f }; // anchor point in the parent (0..1 of its size)
+		sf::Vector2f pivot = { 0.0f, 0.0f };  // point within this element aligned with the parent's anchor (0..1 of this element's size)
+		sf::Vector2f offset = { 0.0f, 0.0f }; // additional pixel offset applied after positioning
+		sf::Vector2f size = { 0.0f, 0.0f };   // element size in pixels
 
 		bool isVisible = true;
 

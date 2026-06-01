@@ -48,7 +48,7 @@ namespace UI
 
 	void TextField::SetBackground(InteractionState state, std::unique_ptr<Element> element)
 	{
-		Element& added = AddChildBack(std::move(element));
+		Element& added = AddChildBehind(std::move(element));
 		backgrounds[StateToIndex(state)] = &added;
 		RefreshBackgroundVisibility();
 	}
@@ -84,7 +84,8 @@ namespace UI
 		{
 			blinkTimer -= blinkPeriod;
 			cursorBlinkVisible = !cursorBlinkVisible;
-			if (cursor)
+
+			if (cursor != nullptr)
 				cursor->isVisible = cursorBlinkVisible;
 		}
 	}
@@ -97,15 +98,15 @@ namespace UI
 			{
 				const char32_t character = entered->unicode;
 
-				if (character == 8)
+				if (character == 8) // backspace
 				{
 					DeleteBefore();
 				}
-				else if (character == 127)
+				else if (character == 127) // delete
 				{
 					DeleteAfter();
 				}
-				else if (character >= 32)
+				else if (character >= 32) // printable characters
 				{
 					if (!filter || filter(character))
 						InsertCharacter(character);
@@ -134,14 +135,14 @@ namespace UI
 	{
 		blinkTimer = 0.0f;
 		cursorBlinkVisible = true;
-		if (cursor)
+		if (cursor != nullptr)
 			cursor->isVisible = true;
 		RefreshCursorPosition();
 	}
 
 	void TextField::OnDeactivated()
 	{
-		if (cursor)
+		if (cursor != nullptr)
 			cursor->isVisible = false;
 	}
 
@@ -196,13 +197,13 @@ namespace UI
 
 	void TextField::RefreshTextDisplay()
 	{
-		if (textLabel)
+		if (textLabel != nullptr)
 			textLabel->SetText(text);
 	}
 
 	void TextField::RefreshCursorPosition()
 	{
-		if (!cursor || !textLabel)
+		if (cursor == nullptr || textLabel == nullptr)
 			return;
 
 		const std::string prefix = text.substr(0, cursorPosition);
@@ -223,18 +224,19 @@ namespace UI
 
 	void TextField::RefreshBackgroundVisibility()
 	{
-		Element* activeBg = GetBackgroundForState(state);
+		Element* activeBackground = GetBackgroundForState(state);
 
-		for (Element* bg : backgrounds)
-			if (bg)
-				bg->isVisible = (bg == activeBg);
+		for (Element* background : backgrounds)
+			if (background != nullptr)
+				background->isVisible = (background == activeBackground);
 	}
 
 	Element* TextField::GetBackgroundForState(InteractionState state) const
 	{
-		Element* bg = backgrounds[StateToIndex(state)];
-		if (bg)
-			return bg;
-		return backgrounds[StateToIndex(InteractionState::Normal)];
+		Element* background = backgrounds[StateToIndex(state)];
+		if (background != nullptr)
+			return background;
+		else
+			return backgrounds[StateToIndex(InteractionState::Normal)];
 	}
 }
