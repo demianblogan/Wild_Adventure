@@ -5,18 +5,22 @@ namespace sf
 	class RenderTarget;
 }
 
-class Registry;
 struct Resources;
 
-class RenderSystem
+namespace ECS
 {
-public:
-	RenderSystem(Registry& registry, Resources& resources, sf::RenderTarget& renderTarget);
+	class Registry;
 
-	void Render(float interpolationFactor);
+	class RenderSystem
+	{
+	public:
+		RenderSystem(Registry& registry, Resources& resources, sf::RenderTarget& renderTarget);
 
-private:
-	Registry& registry;
-	Resources& resources;
-	sf::RenderTarget& renderTarget;
-};
+		void Render(float interpolationFactor);
+
+	private:
+		Registry& registry;
+		Resources& resources;
+		sf::RenderTarget& renderTarget;
+	};
+}

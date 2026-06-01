@@ -1,14 +1,17 @@
 #pragma once
 
-class Registry;
-
-class MovementSystem
+namespace ECS
 {
-public:
-	MovementSystem(Registry& registry);
+	class Registry;
 
-	void Update(float deltaTime);
+	class MovementSystem
+	{
+	public:
+		MovementSystem(Registry& registry);
 
-private:
-	Registry& registry;
-};
+		void Update(float deltaTime);
+
+	private:
+		Registry& registry;
+	};
+}

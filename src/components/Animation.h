@@ -4,10 +4,13 @@
 
 #include <string>
 
-struct Animation
+namespace ECS
 {
-	AnimationData data;
-	std::string playingState;
-	int currentFrame = 0;
-	float elapsedTime = 0.0f;
-};
+	struct Animation
+	{
+		AnimationData data;
+		std::string playingState;
+		int currentFrame = 0;
+		float elapsedTime = 0.0f;
+	};
+}

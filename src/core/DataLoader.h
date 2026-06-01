@@ -9,23 +9,26 @@
 #include <unordered_map>
 #include <vector>
 
-class Registry;
+namespace ECS
+{
+	class Registry;
+}
 
 class DataLoader
 {
 public:
 	DataLoader();
 
-	Entity LoadEntity(Registry& registry, const nlohmann::json& entityJson);
-	Entity LoadEntityFromFile(Registry& registry, const std::string& path);
+	ECS::Entity LoadEntity(ECS::Registry& registry, const nlohmann::json& entityJson);
+	ECS::Entity LoadEntityFromFile(ECS::Registry& registry, const std::string& path);
 
-	std::vector<Entity> LoadScene(Registry& registry, const std::string& scenePath);
+	std::vector<ECS::Entity> LoadScene(ECS::Registry& registry, const std::string& scenePath);
 
 private:
-	using ComponentLoader = std::function<void(Registry&, Entity, const nlohmann::json&)>;
+	using ComponentLoader = std::function<void(ECS::Registry&, ECS::Entity, const nlohmann::json&)>;
 
 	void RegisterLoaders();
-	void AddImpliedComponents(Registry& registry, const std::vector<Entity>& entities);
+	void AddImpliedComponents(ECS::Registry& registry, const std::vector<ECS::Entity>& entities);
 
 	std::unordered_map<std::string, ComponentLoader> loaders;
 };

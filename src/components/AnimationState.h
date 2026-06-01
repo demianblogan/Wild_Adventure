@@ -2,7 +2,10 @@
 
 #include <string>
 
-struct AnimationState
+namespace ECS
 {
-	std::string current;
-};
+	struct AnimationState
+	{
+		std::string current;
+	};
+}

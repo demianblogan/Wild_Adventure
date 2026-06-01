@@ -2,7 +2,10 @@
 
 #include <string>
 
-struct Sprite
+namespace ECS
 {
-	std::string textureName;
-};
+	struct Sprite
+	{
+		std::string textureName;
+	};
+}

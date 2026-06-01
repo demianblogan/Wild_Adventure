@@ -5,7 +5,10 @@
 #include <string>
 #include <unordered_map>
 
-struct AnimationSet
+namespace ECS
 {
-	std::unordered_map<std::string, AnimationData> animations;
-};
+	struct AnimationSet
+	{
+		std::unordered_map<std::string, AnimationData> animations;
+	};
+}

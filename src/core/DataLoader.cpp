@@ -20,36 +20,36 @@ DataLoader::DataLoader()
 
 void DataLoader::RegisterLoaders()
 {
-	loaders["Transform"] = [](Registry& registry, Entity entity, const nlohmann::json& data)
+	loaders["Transform"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
-			Transform transform;
+			ECS::Transform transform;
 			transform.x = data.at("x");
 			transform.y = data.at("y");
-			registry.Add<Transform>(entity, transform);
+			registry.Add<ECS::Transform>(entity, transform);
 		};
 
-	loaders["Velocity"] = [](Registry& registry, Entity entity, const nlohmann::json& data)
+	loaders["Velocity"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
-			Velocity velocity;
+			ECS::Velocity velocity;
 			velocity.x = data.at("x");
 			velocity.y = data.at("y");
-			registry.Add<Velocity>(entity, velocity);
+			registry.Add<ECS::Velocity>(entity, velocity);
 		};
 
-	loaders["Sprite"] = [](Registry& registry, Entity entity, const nlohmann::json& data)
+	loaders["Sprite"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
-			Sprite sprite;
+			ECS::Sprite sprite;
 			sprite.textureName = data.at("textureName");
-			registry.Add<Sprite>(entity, sprite);
+			registry.Add<ECS::Sprite>(entity, sprite);
 		};
 
-	loaders["AnimationSet"] = [](Registry& registry, Entity entity, const nlohmann::json& data)
+	loaders["AnimationSet"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
-			AnimationSet set;
+			ECS::AnimationSet set;
 
 			for (const auto& [stateName, animationData] : data.items())
 			{
-				AnimationData animation;
+				ECS::AnimationData animation;
 				animation.textureName = animationData.at("textureName");
 				animation.frameCount = animationData.at("frameCount");
 				animation.frameDuration = animationData.at("frameDuration");
@@ -58,44 +58,44 @@ void DataLoader::RegisterLoaders()
 				set.animations[stateName] = animation;
 			}
 
-			registry.Add<AnimationSet>(entity, set);
+			registry.Add<ECS::AnimationSet>(entity, set);
 		};
 
-	loaders["AnimationState"] = [](Registry& registry, Entity entity, const nlohmann::json& data)
+	loaders["AnimationState"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
-			AnimationState state;
+			ECS::AnimationState state;
 			state.current = data.at("current");
-			registry.Add<AnimationState>(entity, state);
+			registry.Add<ECS::AnimationState>(entity, state);
 		};
 
-	loaders["Facing"] = [](Registry& registry, Entity entity, const nlohmann::json& data)
+	loaders["Facing"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
-			Facing facing;
+			ECS::Facing facing;
 			facing.isLookingRight = data.at("isLookingRight");
 			facing.isTextureRight = data.at("isTextureRight");
-			registry.Add<Facing>(entity, facing);
+			registry.Add<ECS::Facing>(entity, facing);
 		};
 }
 
-void DataLoader::AddImpliedComponents(Registry& registry, const std::vector<Entity>& entities)
+void DataLoader::AddImpliedComponents(ECS::Registry& registry, const std::vector<ECS::Entity>& entities)
 {
-	for (const Entity entity : entities)
+	for (const ECS::Entity entity : entities)
 	{
-		if (registry.Has<Velocity>(entity) && registry.Has<Transform>(entity)
-			&& !registry.Has<PreviousTransform>(entity))
+		if (registry.Has<ECS::Velocity>(entity) && registry.Has<ECS::Transform>(entity)
+			&& !registry.Has<ECS::PreviousTransform>(entity))
 		{
-			const Transform& transform = registry.Get<Transform>(entity);
-			registry.Add<PreviousTransform>(entity, { transform.x, transform.y });
+			const ECS::Transform& transform = registry.Get<ECS::Transform>(entity);
+			registry.Add<ECS::PreviousTransform>(entity, { transform.x, transform.y });
 		}
 
-		if (registry.Has<AnimationSet>(entity) && !registry.Has<Animation>(entity))
-			registry.Add<Animation>(entity, {});
+		if (registry.Has<ECS::AnimationSet>(entity) && !registry.Has<ECS::Animation>(entity))
+			registry.Add<ECS::Animation>(entity, {});
 	}
 }
 
-Entity DataLoader::LoadEntity(Registry& registry, const nlohmann::json& entityJson)
+ECS::Entity DataLoader::LoadEntity(ECS::Registry& registry, const nlohmann::json& entityJson)
 {
-	const Entity entity = registry.CreateEntity();
+	const ECS::Entity entity = registry.CreateEntity();
 
 	for (const auto& [componentName, componentData] : entityJson.items())
 	{
@@ -110,7 +110,7 @@ Entity DataLoader::LoadEntity(Registry& registry, const nlohmann::json& entityJs
 	return entity;
 }
 
-Entity DataLoader::LoadEntityFromFile(Registry& registry, const std::string& path)
+ECS::Entity DataLoader::LoadEntityFromFile(ECS::Registry& registry, const std::string& path)
 {
 	std::ifstream file(path);
 
@@ -122,7 +122,7 @@ Entity DataLoader::LoadEntityFromFile(Registry& registry, const std::string& pat
 	return LoadEntity(registry, entityJson);
 }
 
-std::vector<Entity> DataLoader::LoadScene(Registry& registry, const std::string& scenePath)
+std::vector<ECS::Entity> DataLoader::LoadScene(ECS::Registry& registry, const std::string& scenePath)
 {
 	std::ifstream sceneFile(scenePath);
 
@@ -131,7 +131,7 @@ std::vector<Entity> DataLoader::LoadScene(Registry& registry, const std::string&
 
 	const nlohmann::json sceneJson = nlohmann::json::parse(sceneFile);
 
-	std::vector<Entity> createdEntities;
+	std::vector<ECS::Entity> createdEntities;
 
 	for (const auto& entityJson : sceneJson.at("entities"))
 	{
@@ -148,7 +148,7 @@ std::vector<Entity> DataLoader::LoadScene(Registry& registry, const std::string&
 		nlohmann::json merged = nlohmann::json::parse(prefabFile);
 		merged.merge_patch(overrides);
 
-		const Entity entity = LoadEntity(registry, merged);
+		const ECS::Entity entity = LoadEntity(registry, merged);
 		createdEntities.push_back(entity);
 	}
 

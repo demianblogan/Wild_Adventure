@@ -1,14 +1,17 @@
 #pragma once
 
-class Registry;
-
-class AnimationSystem
+namespace ECS
 {
-public:
-	AnimationSystem(Registry& registry);
+	class Registry;
 
-	void Update(float deltaTime);
+	class AnimationSystem
+	{
+	public:
+		AnimationSystem(Registry& registry);
 
-private:
-	Registry& registry;
-};
+		void Update(float deltaTime);
+
+	private:
+		Registry& registry;
+	};
+}
