@@ -24,8 +24,8 @@ public:
 	void UpdateMousePosition(sf::Vector2i windowPosition, sf::RenderWindow& window);
 	sf::Vector2f GetMousePosition() const { return mousePosition; }
 
-	static constexpr unsigned int WIDTH = 640;
-	static constexpr unsigned int HEIGHT = 360;
+	static constexpr unsigned int WIDTH = 320;
+	static constexpr unsigned int HEIGHT = 180;
 
 private:
 	sf::Vector2f MapWindowToVirtual(sf::Vector2i windowPosition, sf::RenderWindow& window) const;
