@@ -1,0 +1,44 @@
+{
+	"texture": "dust",
+	"gravity": 200,
+	"runBackOffset": 5,
+	"presets":
+	{
+		"run":
+		{
+			"count": 1,
+			"speedX": 10,
+			"speedYMin": -20,
+			"speedYMax": -8,
+			"lifetime": 0.2,
+			"scale": 0.4
+		},
+		"jump":
+		{
+			"count": 6,
+			"speedX": 50,
+			"speedYMin": -80,
+			"speedYMax": -35,
+			"lifetime": 0.3,
+			"scale": 0.5
+		},
+		"land":
+		{
+			"count": 7,
+			"speedX": 80,
+			"speedYMin": -35,
+			"speedYMax": -5,
+			"lifetime": 0.3,
+			"scale": 0.5
+		},
+		"wall_jump":
+		{
+			"count": 6,
+			"speedX": 70,
+			"speedYMin": -55,
+			"speedYMax": -15,
+			"lifetime": 0.3,
+			"scale": 0.5
+		}
+	}
+}
