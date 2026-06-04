@@ -13,7 +13,7 @@ namespace ECS
 		: registry(registry)
 	{}
 
-	void InputSystem::Update()
+	void InputSystem::Update(float deltaTime)
 	{
 		using Key = sf::Keyboard::Key;
 
@@ -25,13 +25,18 @@ namespace ECS
 			|| sf::Keyboard::isKeyPressed(Key::W)
 			|| sf::Keyboard::isKeyPressed(Key::Up);
 
-		const bool jumpEdge = jumpDown && !wasJumpDown; // only on the press, not while held
+		const bool jumpEdge = jumpDown && !wasJumpDown;
 		wasJumpDown = jumpDown;
 
 		registry.ForEach<Player, Velocity, Jump>(
-			[direction, jumpEdge](Entity, Player& player, Velocity& velocity, Jump& jump)
+			[direction, jumpEdge, deltaTime](Entity, Player& player, Velocity& velocity, Jump& jump)
 			{
-				velocity.x = direction * player.moveSpeed;
+				// During the wall-jump lock the push carries the player away from the wall;
+				// input must not overwrite horizontal velocity yet.
+				if (jump.lockTimer > 0.0f)
+					jump.lockTimer -= deltaTime;
+				else
+					velocity.x = direction * player.moveSpeed;
 
 				if (jumpEdge)
 					jump.wantsToJump = true;

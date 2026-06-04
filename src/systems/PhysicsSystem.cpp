@@ -7,6 +7,7 @@
 #include "components/PreviousTransform.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
+#include "components/WallSlide.h"
 #include "core/ecs/Registry.h"
 #include "tilemap/Tilemap.h"
 
@@ -37,10 +38,32 @@ namespace ECS
 					velocity.y = gravity.maxFallSpeed;
 
 				collisionState.isOnGround = false;
+				collisionState.isOnWall = false;
+				collisionState.wallDirection = 0;
 
-				// Move and resolve one axis at a time: this keeps corners and walls clean.
 				transform.x += velocity.x * deltaTime;
 				ResolveHorizontal(transform, collider, velocity);
+
+				// Wall detection by touch: check for a solid tile right next to either side,
+				// independent of input/velocity. Touching a wall is enough to cling.
+				if (IsWallAt(transform, collider, 1))
+				{
+					collisionState.isOnWall = true;
+					collisionState.wallDirection = 1;
+				}
+				else if (IsWallAt(transform, collider, -1))
+				{
+					collisionState.isOnWall = true;
+					collisionState.wallDirection = -1;
+				}
+
+				// Clinging to a wall caps the fall speed (slow slide).
+				if (registry.Has<WallSlide>(entity) && collisionState.isOnWall && velocity.y > 0.0f)
+				{
+					const WallSlide& wallSlide = registry.Get<WallSlide>(entity);
+					if (velocity.y > wallSlide.slideSpeed)
+						velocity.y = wallSlide.slideSpeed;
+				}
 
 				transform.y += velocity.y * deltaTime;
 				ResolveVertical(transform, collider, velocity, collisionState);
@@ -61,8 +84,6 @@ namespace ECS
 		const float top = transform.y - collider.height;
 		const float bottom = transform.y;
 
-		// Rows the body spans. The tiny offset on the bottom keeps the floor tile
-		// we stand on from counting as a side wall.
 		const int firstRow = static_cast<int>(std::floor(top / tileSize));
 		const int lastRow = static_cast<int>(std::floor((bottom - 0.001f) / tileSize));
 
@@ -112,7 +133,7 @@ namespace ECS
 		const int firstColumn = static_cast<int>(std::floor(left / tileSize));
 		const int lastColumn = static_cast<int>(std::floor((right - 0.001f) / tileSize));
 
-		if (velocity.y > 0.0f) // moving down
+		if (velocity.y > 0.0f)
 		{
 			const float bottom = transform.y;
 			const int row = static_cast<int>(std::floor(bottom / tileSize));
@@ -128,7 +149,7 @@ namespace ECS
 				}
 			}
 		}
-		else // moving up
+		else
 		{
 			const float top = transform.y - collider.height;
 			const int row = static_cast<int>(std::floor(top / tileSize));
@@ -143,5 +164,28 @@ namespace ECS
 				}
 			}
 		}
+	}
+
+	bool PhysicsSystem::IsWallAt(const Transform& transform, const Collider& collider, int direction) const
+	{
+		const float tileSize = static_cast<float>(tilemap.tileSize);
+		const float halfWidth = collider.width / 2.0f;
+
+		const float top = transform.y - collider.height;
+		const float bottom = transform.y;
+
+		const int firstRow = static_cast<int>(std::floor(top / tileSize));
+		const int lastRow = static_cast<int>(std::floor((bottom - 0.001f) / tileSize));
+
+		const float edge = (direction > 0) ? (transform.x + halfWidth) : (transform.x - halfWidth);
+		const int column = static_cast<int>(std::floor((edge + direction * 1.0f) / tileSize));
+
+		for (int row = firstRow; row <= lastRow; row++)
+		{
+			if (tilemap.IsSolid(column, row))
+				return true;
+		}
+
+		return false;
 	}
 }

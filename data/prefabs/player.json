@@ -39,6 +39,13 @@
 			"frameCount": 6,
 			"frameDuration": 0.05,
 			"isLooping": true
+		},
+		"WallSlide":
+		{
+			"textureName": "ninja_frog_wall_jump",
+			"frameCount": 5,
+			"frameDuration": 0.1,
+			"isLooping": true
 		}
 	},
 	"AnimationState":
@@ -67,6 +74,12 @@
 	"Jump":
 	{
 		"jumpSpeed": 280,
-		"maxJumps": 2
+		"maxJumps": 2,
+		"wallJumpPushX": 200
+	},
+	"WallSlide":
+	{
+		"slideSpeed": 60
 	}
+
 }

@@ -25,7 +25,9 @@ namespace ECS
 
 				if (!collisionState.isOnGround)
 				{
-					if (velocity.y < 0.0f)
+					if (collisionState.isOnWall && velocity.y >= 0.0f)
+						desired = "WallSlide";
+					else if (velocity.y < 0.0f)
 						desired = (jump.jumpsRemaining == 0) ? "DoubleJump" : "Jump";
 					else
 						desired = "Fall";
