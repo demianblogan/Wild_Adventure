@@ -3,6 +3,7 @@
 #include "ui/Animation.h"
 
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Color.hpp>
 
 #include <memory>
 #include <string>
@@ -27,6 +28,7 @@ namespace UI
 
 		Element& AddChild(std::unique_ptr<Element> child);
 		Element& AddChildBehind(std::unique_ptr<Element> child);
+		void ClearChildren();
 
 		std::vector<Element*> GetChildren() const;
 
@@ -37,6 +39,8 @@ namespace UI
 
 		Animation& AddAnimation(std::unique_ptr<Animation> animation);
 		void ClearAnimations();
+
+		virtual void SetColor(sf::Color color) {}
 
 		std::string name;
 

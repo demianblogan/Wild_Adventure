@@ -1,0 +1,101 @@
+{
+	"Element":
+	{
+		"size":
+		[
+			480,
+			270
+		],
+		"children":
+		[
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						-54
+					],
+					"action": "menu_open_play",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Start Game"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						-18
+					],
+					"action": "menu_open_settings",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Settings"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						18
+					],
+					"action": "menu_open_author",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Author"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						54
+					],
+					"action": "menu_exit",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Exit"
+							}
+						}
+					}
+				}
+			}
+		]
+	}
+}

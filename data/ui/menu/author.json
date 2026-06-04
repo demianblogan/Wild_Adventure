@@ -1,0 +1,73 @@
+{
+	"Element":
+	{
+		"size":
+		[
+			480,
+			270
+		],
+		"children":
+		[
+			{
+				"Label":
+				{
+					"anchor":
+					[
+						0.5,
+						0
+					],
+					"pivot":
+					[
+						0.5,
+						0
+					],
+					"offset":
+					[
+						0,
+						90
+					],
+					"fontName": "main",
+					"characterSize": 16,
+					"color":
+					[
+						255,
+						255,
+						255,
+						255
+					],
+					"outlineColor":
+					[
+						60,
+						38,
+						24,
+						255
+					],
+					"outlineThickness": 1,
+					"text": "Made by Demian. Replace this text."
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						70
+					],
+					"action": "menu_back",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Back"
+							}
+						}
+					}
+				}
+			}
+		]
+	}
+}

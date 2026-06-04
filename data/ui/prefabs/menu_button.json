@@ -1,44 +1,155 @@
 {
-	"Button": {
-		"size": [ 200, 32 ],
-		"anchor": [ 0.5, 0.5 ],
-		"pivot": [ 0.5, 0.5 ],
-		"backgrounds": {
-			"Normal": {
-				"Image": {
-					"size": [ 200, 32 ],
-					"anchor": [ 0.5, 0.5 ],
-					"pivot": [ 0.5, 0.5 ],
-					"color": [ 80, 80, 80, 255 ]
+	"Button":
+	{
+		"size":
+		[
+			200,
+			32
+		],
+		"anchor":
+		[
+			0.5,
+			0.5
+		],
+		"pivot":
+		[
+			0.5,
+			0.5
+		],
+		"backgrounds":
+		{
+			"Normal":
+			{
+				"Image":
+				{
+					"size":
+					[
+						120,
+						32
+					],
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"textureName": "button_normal",
+					"color":
+					[
+						210,
+						210,
+						210,
+						255
+					]
 				}
 			},
-			"Highlighted": {
-				"Image": {
-					"size": [ 200, 32 ],
-					"anchor": [ 0.5, 0.5 ],
-					"pivot": [ 0.5, 0.5 ],
-					"color": [ 140, 140, 140, 255 ]
+			"Highlighted":
+			{
+				"Image":
+				{
+					"size":
+					[
+						140,
+						32
+					],
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"textureName": "button_normal",
+					"color":
+					[
+						255,
+						255,
+						255,
+						255
+					]
 				}
 			},
-			"Pressed": {
-				"Image": {
-					"size": [ 200, 32 ],
-					"anchor": [ 0.5, 0.5 ],
-					"pivot": [ 0.5, 0.5 ],
-					"color": [ 200, 200, 60, 255 ]
+			"Pressed":
+			{
+				"Image":
+				{
+					"size":
+					[
+						140,
+						32
+					],
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"textureName": "button_pressed",
+					"color":
+					[
+						255,
+						255,
+						255,
+						255
+					]
 				}
 			}
 		},
-		"foregrounds": {
-			"Normal": {
-				"Label": {
-					"anchor": [ 0.5, 0.5 ],
-					"pivot": [ 0.5, 0.5 ],
+		"foregrounds":
+		{
+			"Normal":
+			{
+				"Label":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
 					"fontName": "main",
-					"characterSize": 16,
-					"color": [ 255, 255, 255, 255 ]
+					"characterSize": 16
 				}
 			}
+		},
+		"foregroundColors":
+		{
+			"Normal":
+			[
+				245,
+				230,
+				180,
+				255
+			],
+			"Highlighted":
+			[
+				255,
+				255,
+				255,
+				255
+			],
+			"Pressed":
+			[
+				255,
+				255,
+				255,
+				255
+			]
 		}
 	}
 }

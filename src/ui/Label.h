@@ -17,7 +17,7 @@ namespace UI
 
 		void SetText(const std::string& text);
 		void SetCharacterSize(unsigned int characterSize);
-		void SetColor(sf::Color color);
+		void SetColor(sf::Color color) override;
 		void SetAlpha(float alpha);
 		void SetOutlineColor(sf::Color color);
 		void SetOutlineThickness(float thickness);

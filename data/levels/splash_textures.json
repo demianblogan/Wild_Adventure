@@ -12,5 +12,7 @@
 	"bananas": "assets/textures/items/fruits/Bananas.png",
 	"melon": "assets/textures/items/fruits/Melon.png",
 	"spikes": "assets/textures/traps/spikes/Idle.png",
-	"green": "assets/textures/background/green.png"
+	"green": "assets/textures/background/green.png",
+	"button_normal": "assets/textures/ui/button_normal.png",
+	"button_pressed": "assets/textures/ui/button_pressed.png"
 }

@@ -1,0 +1,99 @@
+{
+	"Element":
+	{
+		"size":
+		[
+			480,
+			270
+		],
+		"children":
+		[
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						-54
+					],
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Graphics"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						-18
+					],
+					"action": "menu_open_audio",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Audio"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						18
+					],
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Controls"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						54
+					],
+					"action": "menu_back",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Back"
+							}
+						}
+					}
+				}
+			}
+		]
+	}
+}

@@ -6,17 +6,24 @@
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
 
-class SplashState : public State
+#include <string>
+#include <vector>
+
+class MenuState : public State
 {
 public:
-	SplashState(Context& context);
+	MenuState(Context& context);
 
 	void HandleEvent(const sf::Event& event) override;
 	void Update(float deltaTime) override;
 	void Render(float interpolationFactor) override;
 
 private:
-	void BuildInterface();
+	enum class NavRequest { None, OpenPanel, Back, Exit };
+
+	void RegisterActions();
+	void ShowPanel(const std::string& panelId);
+	void ApplyPendingNavigation();
 
 	MenuBackdrop backdrop;
 
@@ -25,5 +32,8 @@ private:
 
 	Transition transition;
 
-	bool isLeaving = false;
+	std::vector<std::string> panelStack;
+
+	NavRequest pendingRequest = NavRequest::None;
+	std::string pendingPanelId;
 };

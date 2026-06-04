@@ -26,8 +26,13 @@ namespace UI
 
 	void Root::CollectInteractives()
 	{
+		highlightedIndex = -1;
+		draggedElement = nullptr;
+		activatedElement = nullptr;
+
 		interactives.clear();
-		if (content)
+
+		if (content != nullptr)
 			CollectInteractivesFrom(*content);
 	}
 

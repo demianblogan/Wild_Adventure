@@ -55,6 +55,11 @@ public:
 		return resource;
 	}
 
+	bool Has(const std::string& id) const
+	{
+		return resources.find(id) != resources.end();
+	}
+
 private:
 	std::unordered_map<std::string, Resource> resources;
 };

@@ -15,5 +15,8 @@ void Resources::LoadTexturesFromFile(const std::string& path)
 	const nlohmann::json data = nlohmann::json::parse(file);
 
 	for (const auto& [id, texturePath] : data.items())
-		textures.Load(id, texturePath.get<std::string>());
+	{
+		if (!textures.Has(id))
+			textures.Load(id, texturePath.get<std::string>());
+	}
 }

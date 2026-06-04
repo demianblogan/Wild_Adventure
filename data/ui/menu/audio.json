@@ -1,0 +1,65 @@
+{
+	"Element":
+	{
+		"size":
+		[
+			480,
+			270
+		],
+		"children":
+		[
+			{
+				"Label":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						-30
+					],
+					"fontName": "main",
+					"characterSize": 16,
+					"color":
+					[
+						255,
+						255,
+						255,
+						255
+					],
+					"text": "Audio settings coming soon"
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						20
+					],
+					"action": "menu_back",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Back"
+							}
+						}
+					}
+				}
+			}
+		]
+	}
+}

@@ -34,6 +34,12 @@ namespace UI
 		RefreshVisibility();
 	}
 
+	void Button::SetForegroundColor(InteractionState state, sf::Color color)
+	{
+		foregroundColors[StateToIndex(state)] = color;
+		RefreshVisibility();
+	}
+
 	void Button::OnStateChanged()
 	{
 		RefreshVisibility();
@@ -51,6 +57,13 @@ namespace UI
 		for (Element* foreground : foregrounds)
 			if (foreground != nullptr)
 				foreground->isVisible = (foreground == activeForeground);
+
+		if (activeForeground != nullptr)
+		{
+			const std::optional<sf::Color>& stateColor = foregroundColors[StateToIndex(state)];
+			if (stateColor.has_value())
+				activeForeground->SetColor(stateColor.value());
+		}
 	}
 
 	Element* Button::GetVariant(const std::array<Element*, INTERACTION_STATE_COUNT>& variants, InteractionState state) const

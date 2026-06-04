@@ -51,6 +51,11 @@ namespace UI
 		return *children.front();
 	}
 
+	void Element::ClearChildren()
+	{
+		children.clear();
+	}
+
 	std::vector<Element*> Element::GetChildren() const
 	{
 		std::vector<Element*> result;

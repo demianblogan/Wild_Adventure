@@ -16,7 +16,7 @@ namespace UI
 		Image(Resources& resources);
 
 		void SetTexture(const std::string& textureName);
-		void SetColor(sf::Color color);
+		void SetColor(sf::Color color) override;
 		void SetAlpha(float alpha);
 
 	protected:

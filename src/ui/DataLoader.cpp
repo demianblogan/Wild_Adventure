@@ -260,6 +260,15 @@ namespace UI
 					}
 				}
 
+				if (data.contains("foregroundColors"))
+				{
+					for (const auto& [stateName, colorData] : data["foregroundColors"].items())
+					{
+						const InteractionState state = ParseInteractionState(stateName);
+						button->SetForegroundColor(state, ParseColor(colorData));
+					}
+				}
+
 				std::function<void()> action;
 				if (data.contains("action"))
 					action = loader.FindAction(data["action"]);

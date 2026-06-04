@@ -33,6 +33,7 @@ void Application::Run()
 {
 	sf::Clock clock;
 	float remainderTime = 0.0f;
+	bool hasStateRun = false;
 
 	while (window.isOpen())
 	{
@@ -48,6 +49,17 @@ void Application::Run()
 		{
 			Update(FIXED_DELTA_TIME);
 			remainderTime -= FIXED_DELTA_TIME;
+		}
+
+		// Close only after the game has actually started and then emptied the stack
+		// (e.g. the "Exit" button), not during the first frames before the initial
+		// state's deferred Push has been applied.
+		if (!stateMachine.IsEmpty())
+			hasStateRun = true;
+		else if (hasStateRun)
+		{
+			window.close();
+			break;
 		}
 
 		const float interpolationFactor = remainderTime / FIXED_DELTA_TIME;
