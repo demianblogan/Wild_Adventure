@@ -53,7 +53,7 @@ void GameState::Update(float deltaTime)
 {
 	transition.Update(deltaTime);
 
-	inputSystem.Update();
+	inputSystem.Update(deltaTime);
 	jumpSystem.Update();
 	patrolSystem.Update();
 	physicsSystem.Update(deltaTime);

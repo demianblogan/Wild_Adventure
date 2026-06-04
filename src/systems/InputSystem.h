@@ -9,7 +9,7 @@ namespace ECS
 	public:
 		InputSystem(Registry& registry);
 
-		void Update();
+		void Update(float deltaTime);
 
 	private:
 		Registry& registry;

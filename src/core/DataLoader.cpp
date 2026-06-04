@@ -15,6 +15,7 @@
 #include "components/Velocity.h"
 #include "core/ecs/Registry.h"
 #include "components/Jump.h"
+#include "components/WallSlide.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -127,6 +128,23 @@ void DataLoader::RegisterLoaders()
 			jump.maxJumps = data.at("maxJumps");
 			jump.jumpsRemaining = jump.maxJumps;
 			registry.Add<ECS::Jump>(entity, jump);
+		};
+
+	loaders["Jump"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Jump jump;
+			jump.jumpSpeed = data.at("jumpSpeed");
+			jump.maxJumps = data.at("maxJumps");
+			jump.jumpsRemaining = jump.maxJumps;
+			jump.wallJumpPushX = data.value("wallJumpPushX", 0.0f);
+			registry.Add<ECS::Jump>(entity, jump);
+		};
+
+	loaders["WallSlide"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::WallSlide wallSlide;
+			wallSlide.slideSpeed = data.at("slideSpeed");
+			registry.Add<ECS::WallSlide>(entity, wallSlide);
 		};
 }
 

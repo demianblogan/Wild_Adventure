@@ -20,6 +20,7 @@ namespace ECS
 	private:
 		void ResolveHorizontal(Transform& transform, const Collider& collider, Velocity& velocity) const;
 		void ResolveVertical(Transform& transform, const Collider& collider, Velocity& velocity, CollisionState& collisionState) const;
+		bool IsWallAt(const Transform& transform, const Collider& collider, int direction) const;
 
 		Registry& registry;
 		const Tilemap& tilemap;
