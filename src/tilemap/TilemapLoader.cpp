@@ -89,6 +89,19 @@ Tilemap LoadTilemap(const std::string& path, const std::string& textureName, int
 					layer.data.push_back(gid);
 			}
 
+			// The "collision" layer is physics-only: build the solid grid, don't draw it.
+			if (layer.name == "collision")
+			{
+				tilemap.collisionWidth = layer.width;
+				tilemap.collisionHeight = layer.height;
+				tilemap.solidGrid.assign(static_cast<std::size_t>(layer.width) * layer.height, false);
+
+				for (std::size_t i = 0; i < layer.data.size(); i++)
+					tilemap.solidGrid[i] = (layer.data[i] != 0);
+
+				continue;
+			}
+
 			BuildLayerVertices(layer, tilemap.tileSize, tilemap.atlasWidthInTiles, tilemap.firstGid);
 
 			tilemap.layers.push_back(std::move(layer));

@@ -11,6 +11,8 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
+#include <cmath>
+
 namespace ECS
 {
 	RenderSystem::RenderSystem(Registry& registry, Resources& resources, sf::RenderTarget& renderTarget)
@@ -56,7 +58,6 @@ namespace ECS
 					drawable.setTextureRect(frameRect);
 				}
 
-				// Origin at bottom-center: Transform position is the entity's feet.
 				drawable.setOrigin({ frameWidth / 2.0f, static_cast<float>(frameHeight) });
 
 				if (registry.Has<Facing>(entity))
@@ -66,7 +67,9 @@ namespace ECS
 						drawable.setScale({ -1.0f, 1.0f });
 				}
 
-				drawable.setPosition({ renderX, renderY });
+				// Snap to whole virtual pixels so moving sprites stay crisp on upscale.
+				drawable.setPosition({ std::floor(renderX), std::floor(renderY) });
+
 				renderTarget.draw(drawable);
 			});
 	}

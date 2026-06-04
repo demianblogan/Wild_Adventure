@@ -3,6 +3,10 @@
 #include "components/Animation.h"
 #include "components/AnimationSet.h"
 #include "components/AnimationState.h"
+#include "components/Collider.h"
+#include "components/CollisionState.h"
+#include "components/Gravity.h"
+#include "components/Player.h"
 #include "components/Facing.h"
 #include "components/Patrol.h"
 #include "components/PreviousTransform.h"
@@ -10,6 +14,7 @@
 #include "components/Transform.h"
 #include "components/Velocity.h"
 #include "core/ecs/Registry.h"
+#include "components/Jump.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -91,6 +96,38 @@ void DataLoader::RegisterLoaders()
 
 			registry.Add<ECS::Patrol>(entity, patrol);
 		};
+
+	loaders["Collider"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Collider collider;
+			collider.width = data.at("width");
+			collider.height = data.at("height");
+			registry.Add<ECS::Collider>(entity, collider);
+		};
+
+	loaders["Gravity"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Gravity gravity;
+			gravity.acceleration = data.at("acceleration");
+			gravity.maxFallSpeed = data.at("maxFallSpeed");
+			registry.Add<ECS::Gravity>(entity, gravity);
+		};
+
+	loaders["Player"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Player player;
+			player.moveSpeed = data.at("moveSpeed");
+			registry.Add<ECS::Player>(entity, player);
+		};
+
+	loaders["Jump"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Jump jump;
+			jump.jumpSpeed = data.at("jumpSpeed");
+			jump.maxJumps = data.at("maxJumps");
+			jump.jumpsRemaining = jump.maxJumps;
+			registry.Add<ECS::Jump>(entity, jump);
+		};
 }
 
 void DataLoader::AddImpliedComponents(ECS::Registry& registry, const std::vector<ECS::Entity>& entities)
@@ -100,12 +137,18 @@ void DataLoader::AddImpliedComponents(ECS::Registry& registry, const std::vector
 		if (registry.Has<ECS::Patrol>(entity) && !registry.Has<ECS::Velocity>(entity))
 			registry.Add<ECS::Velocity>(entity, {});
 
+		if (registry.Has<ECS::Gravity>(entity) && !registry.Has<ECS::Velocity>(entity))
+			registry.Add<ECS::Velocity>(entity, {});
+
 		if (registry.Has<ECS::Velocity>(entity) && registry.Has<ECS::Transform>(entity)
 			&& !registry.Has<ECS::PreviousTransform>(entity))
 		{
 			const ECS::Transform& transform = registry.Get<ECS::Transform>(entity);
 			registry.Add<ECS::PreviousTransform>(entity, { transform.x, transform.y });
 		}
+
+		if (registry.Has<ECS::Collider>(entity) && !registry.Has<ECS::CollisionState>(entity))
+			registry.Add<ECS::CollisionState>(entity, {});
 
 		if (registry.Has<ECS::AnimationSet>(entity) && !registry.Has<ECS::Animation>(entity))
 			registry.Add<ECS::Animation>(entity, {});

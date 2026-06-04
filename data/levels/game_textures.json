@@ -1,0 +1,8 @@
+{
+	"terrain": "assets/textures/terrain/terrain_(16x16).png",
+	"ninja_frog_idle": "assets/textures/main_characters/ninja_frog/Idle (32x32).png",
+	"ninja_frog_run": "assets/textures/main_characters/ninja_frog/Run (32x32).png",
+	"ninja_frog_fall": "assets/textures/main_characters/ninja_frog/Fall (32x32).png",
+	"ninja_frog_jump": "assets/textures/main_characters/ninja_frog/Jump (32x32).png",
+	"ninja_frog_double_jump": "assets/textures/main_characters/ninja_frog/Double Jump (32x32).png"
+}

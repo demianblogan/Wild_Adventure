@@ -34,6 +34,12 @@ namespace UI
 
 		if (content != nullptr)
 			CollectInteractivesFrom(*content);
+
+		if (!interactives.empty())
+		{
+			highlightedIndex = 0;
+			interactives[0]->SetHighlighted(true, false);
+		}
 	}
 
 	void Root::CollectInteractivesFrom(Element& element)

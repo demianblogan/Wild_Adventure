@@ -1,5 +1,6 @@
 #include "MovementSystem.h"
 
+#include "components/Collider.h"
 #include "components/Facing.h"
 #include "components/PreviousTransform.h"
 #include "components/Transform.h"
@@ -17,6 +18,10 @@ namespace ECS
 		registry.ForEach<Transform, PreviousTransform, Velocity>(
 			[this, deltaTime](Entity entity, Transform& transform, PreviousTransform& previous, Velocity& velocity)
 			{
+				// Entities with a collider are driven by the physics system instead.
+				if (registry.Has<Collider>(entity))
+					return;
+
 				previous.x = transform.x;
 				previous.y = transform.y;
 

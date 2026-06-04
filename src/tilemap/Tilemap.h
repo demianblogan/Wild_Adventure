@@ -23,6 +23,10 @@ struct Tilemap
 
 	std::vector<Layer> layers;
 
+	int collisionWidth = 0;
+	int collisionHeight = 0;
+	std::vector<bool> solidGrid;
+
 	int GetWidth() const
 	{
 		return layers.empty() ? 0 : layers[0].width;
@@ -31,5 +35,15 @@ struct Tilemap
 	int GetHeight() const
 	{
 		return layers.empty() ? 0 : layers[0].height;
+	}
+
+	bool IsSolid(int tileX, int tileY) const
+	{
+		// Outside the level counts as solid for now: the character can't fall out
+		// of the world. We'll revisit this when we add death by falling.
+		if (tileX < 0 || tileY < 0 || tileX >= collisionWidth || tileY >= collisionHeight)
+			return true;
+
+		return solidGrid[static_cast<std::size_t>(tileY) * collisionWidth + tileX];
 	}
 };

@@ -4,7 +4,7 @@
 
 namespace UI
 {
-	void InteractiveElement::SetHighlighted(bool highlighted)
+	void InteractiveElement::SetHighlighted(bool highlighted, bool playSound)
 	{
 		if (state == InteractionState::Pressed)
 			return;
@@ -17,7 +17,7 @@ namespace UI
 			state = newState;
 			OnStateChanged();
 
-			if (newState == InteractionState::Highlighted && wasNotHighlighted && onHighlighted)
+			if (newState == InteractionState::Highlighted && wasNotHighlighted && playSound && onHighlighted)
 				onHighlighted();
 		}
 	}

@@ -1,0 +1,72 @@
+{
+	"Sprite":
+	{
+		"textureName": "ninja_frog_idle"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "ninja_frog_idle",
+			"frameCount": 11,
+			"frameDuration": 0.08,
+			"isLooping": true
+		},
+		"Run":
+		{
+			"textureName": "ninja_frog_run",
+			"frameCount": 12,
+			"frameDuration": 0.06,
+			"isLooping": true
+		},
+		"Fall":
+		{
+			"textureName": "ninja_frog_fall",
+			"frameCount": 1,
+			"frameDuration": 0.10,
+			"isLooping": true
+		},
+		"Jump":
+		{
+			"textureName": "ninja_frog_jump",
+			"frameCount": 1,
+			"frameDuration": 0.10,
+			"isLooping": true
+		},
+		"DoubleJump":
+		{
+			"textureName": "ninja_frog_double_jump",
+			"frameCount": 6,
+			"frameDuration": 0.05,
+			"isLooping": true
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	},
+	"Facing":
+	{
+		"isLookingRight": true,
+		"isTextureRight": true
+	},
+	"Collider":
+	{
+		"width": 16,
+		"height": 26
+	},
+	"Gravity":
+	{
+		"acceleration": 900,
+		"maxFallSpeed": 480
+	},
+	"Player":
+	{
+		"moveSpeed": 90
+	},
+	"Jump":
+	{
+		"jumpSpeed": 280,
+		"maxJumps": 2
+	}
+}

@@ -22,7 +22,7 @@ namespace UI
 	public:
 		bool IsInteractive() const override { return true; }
 
-		void SetHighlighted(bool highlighted);
+		void SetHighlighted(bool highlighted, bool playSound = true);
 		void Press();
 		void Release();
 

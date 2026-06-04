@@ -17,6 +17,7 @@
 						0,
 						-54
 					],
+					"action": "menu_start_game",
 					"foregrounds":
 					{
 						"Normal":

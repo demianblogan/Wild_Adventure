@@ -6,6 +6,7 @@
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
 #include "ui/Element.h"
+#include "states/GameState.h"
 
 #include <SFML/Graphics/Font.hpp>
 
@@ -51,6 +52,7 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_open_author", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "author"; });
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
+	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
 }
 
 void MenuState::ShowPanel(const std::string& panelId)
@@ -81,6 +83,10 @@ void MenuState::ApplyPendingNavigation()
 			panelStack.pop_back();
 			ShowPanel(panelStack.back());
 		}
+		break;
+
+	case NavRequest::StartGame:
+		context.stateMachine.Push(std::make_unique<GameState>(context, "data/levels/test_level.tmj"));
 		break;
 
 	case NavRequest::Exit:
