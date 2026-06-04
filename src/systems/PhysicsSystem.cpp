@@ -68,8 +68,17 @@ namespace ECS
 				transform.y += velocity.y * deltaTime;
 				ResolveVertical(transform, collider, velocity, collisionState);
 
-				if (registry.Has<Facing>(entity) && velocity.x != 0.0f)
-					registry.Get<Facing>(entity).isLookingRight = velocity.x > 0.0f;
+				if (registry.Has<Facing>(entity))
+				{
+					Facing& facing = registry.Get<Facing>(entity);
+
+					// While clinging to a wall, face the wall so the slide animation
+					// is oriented correctly no matter how we approached it.
+					if (collisionState.isOnWall && !collisionState.isOnGround)
+						facing.isLookingRight = (collisionState.wallDirection > 0);
+					else if (velocity.x != 0.0f)
+						facing.isLookingRight = velocity.x > 0.0f;
+				}
 			});
 	}
 
