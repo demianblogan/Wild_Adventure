@@ -8,15 +8,18 @@
 #include "graphics/Transition.h"
 #include "systems/AnimationSystem.h"
 #include "systems/DamageSystem.h"
+#include "systems/DeathSystem.h"
 #include "systems/InputSystem.h"
 #include "systems/JumpSystem.h"
 #include "systems/MovementSystem.h"
 #include "systems/PatrolSystem.h"
 #include "systems/PhysicsSystem.h"
+#include "systems/PickupSystem.h"
 #include "systems/PlayerAnimationSystem.h"
 #include "systems/RenderSystem.h"
-#include "systems/DeathSystem.h"
 #include "tilemap/Tilemap.h"
+#include "ui/DataLoader.h"
+#include "ui/Root.h"
 
 #include <string>
 
@@ -30,11 +33,16 @@ public:
 	void Render(float interpolationFactor) override;
 
 private:
+	void UpdateScoreLabel();
+
 	ECS::Registry registry;
 	DataLoader sceneLoader;
 
 	Camera camera;
 	Tilemap tilemap;
+
+	int score = 0;
+	int previousScore = -1;
 
 	ECS::InputSystem inputSystem;
 	ECS::JumpSystem jumpSystem;
@@ -43,11 +51,16 @@ private:
 	ECS::PatrolSystem patrolSystem;
 	ECS::PhysicsSystem physicsSystem;
 	ECS::MovementSystem movementSystem;
+	ECS::PickupSystem pickupSystem;
 	ECS::AnimationSystem animationSystem;
 	ECS::PlayerAnimationSystem playerAnimationSystem;
 	ECS::RenderSystem renderSystem;
 
 	ParticleSystem particles;
+
+	UI::Root hudInterface;
+	UI::DataLoader hudLoader;
+
 	Transition transition;
 
 	std::string levelPath;

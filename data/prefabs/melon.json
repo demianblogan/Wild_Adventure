@@ -9,12 +9,28 @@
 		{
 			"textureName": "melon",
 			"frameCount": 17,
-			"frameDuration": 0.04,
+			"frameDuration": 0.05,
 			"isLooping": true
+		},
+		"Collected":
+		{
+			"textureName": "collected",
+			"frameCount": 6,
+			"frameDuration": 0.04,
+			"isLooping": false
 		}
 	},
 	"AnimationState":
 	{
 		"current": "Idle"
+	},
+	"Collectible":
+	{
+		"points": 30
+	},
+	"Hitbox":
+	{
+		"width": 16,
+		"height": 16
 	}
 }

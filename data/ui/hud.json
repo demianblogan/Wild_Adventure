@@ -1,0 +1,53 @@
+{
+	"Element":
+	{
+		"name": "root",
+		"size":
+		[
+			480,
+			270
+		],
+		"children":
+		[
+			{
+				"Label":
+				{
+					"name": "score",
+					"anchor":
+					[
+						0,
+						0
+					],
+					"pivot":
+					[
+						0,
+						0
+					],
+					"offset":
+					[
+						8,
+						8
+					],
+					"fontName": "main",
+					"characterSize": 16,
+					"color":
+					[
+						255,
+						255,
+						255,
+						255
+					],
+					"outlineColor":
+					[
+						40,
+						40,
+						40,
+						255
+					],
+					"outlineThickness": 1,
+					"text": "Score: 0"
+				}
+			}
+		]
+	}
+}

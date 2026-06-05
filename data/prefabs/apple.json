@@ -1,13 +1,13 @@
 {
 	"Sprite":
 	{
-		"textureName": "bananas"
+		"textureName": "apple"
 	},
 	"AnimationSet":
 	{
 		"Idle":
 		{
-			"textureName": "bananas",
+			"textureName": "apple",
 			"frameCount": 17,
 			"frameDuration": 0.05,
 			"isLooping": true
@@ -26,7 +26,7 @@
 	},
 	"Collectible":
 	{
-		"points": 15
+		"points": 10
 	},
 	"Hitbox":
 	{

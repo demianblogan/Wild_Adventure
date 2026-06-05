@@ -31,6 +31,15 @@ namespace ECS
 			GetPool<T>().RemoveFrom(entity);
 		}
 
+		void DestroyEntity(Entity entity)
+		{
+			for (std::unique_ptr<IComponentPool>& pool : pools)
+			{
+				if (pool != nullptr && pool->Has(entity))
+					pool->RemoveFrom(entity);
+			}
+		}
+
 		template <typename T>
 		bool Has(Entity entity)
 		{

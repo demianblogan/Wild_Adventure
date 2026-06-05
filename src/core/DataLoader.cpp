@@ -19,6 +19,7 @@
 #include "components/Hazard.h"
 #include "components/Health.h"
 #include "components/Hitbox.h"
+#include "components/Collectible.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -176,6 +177,13 @@ void DataLoader::RegisterLoaders()
 			hitbox.width = data.at("width");
 			hitbox.height = data.at("height");
 			registry.Add<ECS::Hitbox>(entity, hitbox);
+		};
+
+	loaders["Collectible"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Collectible collectible;
+			collectible.points = data.at("points");
+			registry.Add<ECS::Collectible>(entity, collectible);
 		};
 }
 

@@ -13,8 +13,10 @@
 #include "core/ecs/Registry.h"
 #include "tilemap/TilemapLoader.h"
 #include "tilemap/TilemapRenderer.h"
+#include "ui/Label.h"
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
 #include <cmath>
@@ -29,13 +31,24 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	, patrolSystem(registry)
 	, physicsSystem(registry, tilemap)
 	, movementSystem(registry)
+	, pickupSystem(registry, score)
 	, animationSystem(registry)
 	, playerAnimationSystem(registry)
 	, renderSystem(registry, context.resources, context.virtualScreen.GetRenderTarget())
 	, particles(context.resources)
+	, hudInterface(context.virtualScreen)
+	, hudLoader(context.resources)
 	, levelPath(levelPath)
 {
-	context.resources.LoadTexturesFromFile("data/levels/game_textures.json");
+	Resources& resources = context.resources;
+
+	if (!resources.fonts.Has("main"))
+	{
+		resources.fonts.Load("main", "assets/fonts/main.ttf");
+		resources.fonts.Get("main").setSmooth(false);
+	}
+
+	resources.LoadTexturesFromFile("data/levels/game_textures.json");
 	particles.LoadConfig("data/particles.json");
 
 	tilemap = LoadTilemap(levelPath, "terrain", 22);
@@ -47,7 +60,7 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	};
 	camera.SetWorldSize(worldSize);
 
-	fallLimit = worldSize.y + 64.0f; // below this, the fall into the void is fatal
+	fallLimit = worldSize.y + 64.0f;
 
 	sceneLoader.LoadSceneFromMap(registry, levelPath);
 
@@ -57,11 +70,28 @@ GameState::GameState(Context& context, const std::string& levelPath)
 			camera.SnapTo({ transform.x, transform.y });
 		});
 
+	hudInterface.SetContent(hudLoader.LoadFromFile("data/ui/hud.json"));
+	UpdateScoreLabel();
+
 	transition.StartReveal();
 }
 
 void GameState::HandleEvent(const sf::Event& event)
 {}
+
+void GameState::UpdateScoreLabel()
+{
+	if (score == previousScore)
+		return;
+
+	if (UI::Element* element = hudInterface.FindByName("score"))
+	{
+		if (auto* label = dynamic_cast<UI::Label*>(element))
+			label->SetText("Score: " + std::to_string(score));
+	}
+
+	previousScore = score;
+}
 
 void GameState::Update(float deltaTime)
 {
@@ -69,7 +99,6 @@ void GameState::Update(float deltaTime)
 
 	if (isRestarting)
 	{
-		// World is frozen during the cover wipe; reload once fully covered.
 		if (transition.GetMode() == Transition::Mode::Done)
 		{
 			context.stateMachine.Pop();
@@ -85,11 +114,15 @@ void GameState::Update(float deltaTime)
 	patrolSystem.Update();
 	physicsSystem.Update(deltaTime);
 	movementSystem.Update(deltaTime);
+	pickupSystem.Update();
 
 	playerAnimationSystem.Update();
 	animationSystem.Update(deltaTime);
 
 	particles.Update(deltaTime);
+
+	UpdateScoreLabel();
+	hudInterface.Update(deltaTime);
 
 	registry.ForEach<ECS::Player, ECS::Transform, ECS::Velocity, ECS::CollisionState, ECS::Jump, ECS::Health>(
 		[this, deltaTime](ECS::Entity, ECS::Player&, ECS::Transform& transform, ECS::Velocity& velocity,
@@ -159,5 +192,6 @@ void GameState::Render(float interpolationFactor)
 	renderSystem.Render(interpolationFactor);
 
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+	hudInterface.Draw(renderTarget);
 	transition.Draw(renderTarget);
 }

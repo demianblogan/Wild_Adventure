@@ -9,5 +9,14 @@
 	"ninja_frog_wall_jump": "assets/textures/main_characters/ninja_frog/Wall Jump (32x32).png",
 	"ninja_frog_hit": "assets/textures/main_characters/ninja_frog/Hit (32x32).png",
 
-	"dust": "assets/textures/other/dust_particle.png"
+	"dust": "assets/textures/other/dust_particle.png",
+
+	"apple": "assets/textures/items/fruits/Apple.png",
+	"bananas": "assets/textures/items/fruits/Bananas.png",
+	"cherries": "assets/textures/items/fruits/Cherries.png",
+	"kiwi": "assets/textures/items/fruits/Kiwi.png",
+	"melon": "assets/textures/items/fruits/Melon.png",
+	"orange": "assets/textures/items/fruits/Orange.png",
+	"pineapple": "assets/textures/items/fruits/Pineapple.png",
+	"collected": "assets/textures/items/fruits/Collected.png"
 }
