@@ -34,6 +34,7 @@ public:
 
 private:
 	void UpdateScoreLabel();
+	void UpdateHearts(int currentHealth, float deltaTime);
 
 	ECS::Registry registry;
 	DataLoader sceneLoader;
@@ -43,6 +44,12 @@ private:
 
 	int score = 0;
 	int previousScore = -1;
+	int maxHearts = 3;
+	int displayedHealth = 3;
+	int blinkingHeart = -1;
+	float blinkTimer = 0.0f;
+
+	static constexpr float HEART_BLINK_DURATION = 0.5f;
 
 	ECS::InputSystem inputSystem;
 	ECS::JumpSystem jumpSystem;
