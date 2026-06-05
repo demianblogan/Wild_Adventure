@@ -46,7 +46,15 @@
 			"frameCount": 5,
 			"frameDuration": 0.1,
 			"isLooping": true
+		},
+		"Hit":
+		{
+			"textureName": "ninja_frog_hit",
+			"frameCount": 7,
+			"frameDuration": 0.05,
+			"isLooping": false
 		}
+
 	},
 	"AnimationState":
 	{
@@ -82,6 +90,12 @@
 	"WallSlide":
 	{
 		"slideSpeed": 60
+	},
+	"Health":
+	{
+		"maximum": 3,
+		"invulnerabilityDuration": 1.0,
+		"hitStunDuration": 0.35,
+		"knockbackSpeed": 220
 	}
-
 }

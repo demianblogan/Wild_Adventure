@@ -4,6 +4,7 @@
 #include "components/CollisionState.h"
 #include "components/Facing.h"
 #include "components/Gravity.h"
+#include "components/Health.h"
 #include "components/PreviousTransform.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
@@ -33,6 +34,8 @@ namespace ECS
 					previous.y = transform.y;
 				}
 
+				const bool dead = registry.Has<Health>(entity) && registry.Get<Health>(entity).current <= 0;
+
 				velocity.y += gravity.acceleration * deltaTime;
 				if (velocity.y > gravity.maxFallSpeed)
 					velocity.y = gravity.maxFallSpeed;
@@ -42,38 +45,38 @@ namespace ECS
 				collisionState.wallDirection = 0;
 
 				transform.x += velocity.x * deltaTime;
-				ResolveHorizontal(transform, collider, velocity);
+				if (!dead)
+					ResolveHorizontal(transform, collider, velocity);
 
-				// Wall detection by touch: check for a solid tile right next to either side,
-				// independent of input/velocity. Touching a wall is enough to cling.
-				if (IsWallAt(transform, collider, 1))
+				if (!dead)
 				{
-					collisionState.isOnWall = true;
-					collisionState.wallDirection = 1;
-				}
-				else if (IsWallAt(transform, collider, -1))
-				{
-					collisionState.isOnWall = true;
-					collisionState.wallDirection = -1;
-				}
+					if (IsWallAt(transform, collider, 1))
+					{
+						collisionState.isOnWall = true;
+						collisionState.wallDirection = 1;
+					}
+					else if (IsWallAt(transform, collider, -1))
+					{
+						collisionState.isOnWall = true;
+						collisionState.wallDirection = -1;
+					}
 
-				// Clinging to a wall caps the fall speed (slow slide).
-				if (registry.Has<WallSlide>(entity) && collisionState.isOnWall && velocity.y > 0.0f)
-				{
-					const WallSlide& wallSlide = registry.Get<WallSlide>(entity);
-					if (velocity.y > wallSlide.slideSpeed)
-						velocity.y = wallSlide.slideSpeed;
+					if (registry.Has<WallSlide>(entity) && collisionState.isOnWall && velocity.y > 0.0f)
+					{
+						const WallSlide& wallSlide = registry.Get<WallSlide>(entity);
+						if (velocity.y > wallSlide.slideSpeed)
+							velocity.y = wallSlide.slideSpeed;
+					}
 				}
 
 				transform.y += velocity.y * deltaTime;
-				ResolveVertical(transform, collider, velocity, collisionState);
+				if (!dead)
+					ResolveVertical(transform, collider, velocity, collisionState);
 
 				if (registry.Has<Facing>(entity))
 				{
 					Facing& facing = registry.Get<Facing>(entity);
 
-					// While clinging to a wall, face the wall so the slide animation
-					// is oriented correctly no matter how we approached it.
 					if (collisionState.isOnWall && !collisionState.isOnGround)
 						facing.isLookingRight = (collisionState.wallDirection > 0);
 					else if (velocity.x != 0.0f)

@@ -2,11 +2,13 @@
 
 #include "Context.h"
 #include "components/CollisionState.h"
+#include "components/Health.h"
 #include "components/Jump.h"
 #include "components/Player.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
 #include "core/Resources.h"
+#include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
 #include "core/ecs/Registry.h"
 #include "tilemap/TilemapLoader.h"
@@ -16,11 +18,14 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 
 #include <cmath>
+#include <memory>
 
 GameState::GameState(Context& context, const std::string& levelPath)
 	: State(context)
 	, inputSystem(registry)
 	, jumpSystem(registry)
+	, damageSystem(registry)
+	, deathSystem(registry)
 	, patrolSystem(registry)
 	, physicsSystem(registry, tilemap)
 	, movementSystem(registry)
@@ -28,9 +33,11 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	, playerAnimationSystem(registry)
 	, renderSystem(registry, context.resources, context.virtualScreen.GetRenderTarget())
 	, particles(context.resources)
+	, levelPath(levelPath)
 {
 	context.resources.LoadTexturesFromFile("data/levels/game_textures.json");
 	particles.LoadConfig("data/particles.json");
+
 	tilemap = LoadTilemap(levelPath, "terrain", 22);
 
 	const sf::Vector2f worldSize =
@@ -39,6 +46,8 @@ GameState::GameState(Context& context, const std::string& levelPath)
 		static_cast<float>(tilemap.GetHeight() * tilemap.tileSize)
 	};
 	camera.SetWorldSize(worldSize);
+
+	fallLimit = worldSize.y + 64.0f; // below this, the fall into the void is fatal
 
 	sceneLoader.LoadSceneFromMap(registry, levelPath);
 
@@ -58,8 +67,21 @@ void GameState::Update(float deltaTime)
 {
 	transition.Update(deltaTime);
 
+	if (isRestarting)
+	{
+		// World is frozen during the cover wipe; reload once fully covered.
+		if (transition.GetMode() == Transition::Mode::Done)
+		{
+			context.stateMachine.Pop();
+			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath));
+		}
+		return;
+	}
+
 	inputSystem.Update(deltaTime);
 	jumpSystem.Update();
+	damageSystem.Update(deltaTime);
+	deathSystem.Update(deltaTime);
 	patrolSystem.Update();
 	physicsSystem.Update(deltaTime);
 	movementSystem.Update(deltaTime);
@@ -69,16 +91,15 @@ void GameState::Update(float deltaTime)
 
 	particles.Update(deltaTime);
 
-	registry.ForEach<ECS::Player, ECS::Transform, ECS::Velocity, ECS::CollisionState, ECS::Jump>(
+	registry.ForEach<ECS::Player, ECS::Transform, ECS::Velocity, ECS::CollisionState, ECS::Jump, ECS::Health>(
 		[this, deltaTime](ECS::Entity, ECS::Player&, ECS::Transform& transform, ECS::Velocity& velocity,
-			ECS::CollisionState& collisionState, ECS::Jump& jump)
+			ECS::CollisionState& collisionState, ECS::Jump& jump, ECS::Health& health)
 		{
 			const sf::Vector2f feet = { transform.x, transform.y };
 			const bool onGround = collisionState.isOnGround;
 
 			camera.MoveTo(feet);
 
-			// Run dust: a small puff behind the feet at a steady interval while running.
 			if (onGround && std::abs(velocity.x) > 5.0f)
 			{
 				runDustTimer -= deltaTime;
@@ -95,30 +116,32 @@ void GameState::Update(float deltaTime)
 				runDustTimer = 0.0f;
 			}
 
-			// Wall jump: the control lock just switched on this frame.
 			if (previousLockTimer <= 0.0f && jump.lockTimer > 0.0f)
 			{
 				const int pushDirection = (velocity.x > 0.0f) ? 1 : -1;
 				particles.Emit("wall_jump", feet, pushDirection);
 			}
-			// Jump off the ground.
 			else if (wasOnGround && !onGround && velocity.y < 0.0f)
 			{
 				particles.Emit("jump", feet);
 			}
-			// Mid-air (double) jump.
 			else if (!wasOnGround && !onGround && jump.jumpsRemaining < previousJumpsRemaining)
 			{
 				particles.Emit("jump", feet);
 			}
 
-			// Landing.
 			if (!wasOnGround && onGround)
 				particles.Emit("land", feet);
 
 			wasOnGround = onGround;
 			previousJumpsRemaining = jump.jumpsRemaining;
 			previousLockTimer = jump.lockTimer;
+
+			if (transform.y > fallLimit)
+			{
+				transition.StartCover();
+				isRestarting = true;
+			}
 		});
 }
 
@@ -132,7 +155,7 @@ void GameState::Render(float interpolationFactor)
 	context.virtualScreen.SetCameraCenter(worldCenter.x, worldCenter.y);
 
 	DrawTilemap(tilemap, renderTarget, context.resources);
-	particles.Draw(renderTarget);   // behind the entities
+	particles.Draw(renderTarget);
 	renderSystem.Render(interpolationFactor);
 
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);

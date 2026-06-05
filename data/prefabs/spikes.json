@@ -2,5 +2,14 @@
 	"Sprite":
 	{
 		"textureName": "spikes"
+	},
+	"Hazard":
+	{
+		"damage": 1
+	},
+	"Hitbox":
+	{
+		"width": 14,
+		"height": 8
 	}
 }

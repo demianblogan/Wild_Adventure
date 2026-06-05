@@ -7,6 +7,7 @@
 	"ninja_frog_jump": "assets/textures/main_characters/ninja_frog/Jump (32x32).png",
 	"ninja_frog_double_jump": "assets/textures/main_characters/ninja_frog/Double Jump (32x32).png",
 	"ninja_frog_wall_jump": "assets/textures/main_characters/ninja_frog/Wall Jump (32x32).png",
+	"ninja_frog_hit": "assets/textures/main_characters/ninja_frog/Hit (32x32).png",
 
 	"dust": "assets/textures/other/dust_particle.png"
 }

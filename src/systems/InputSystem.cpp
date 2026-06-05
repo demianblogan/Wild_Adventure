@@ -1,5 +1,6 @@
 #include "InputSystem.h"
 
+#include "components/Health.h"
 #include "components/Jump.h"
 #include "components/Player.h"
 #include "components/Velocity.h"
@@ -42,14 +43,19 @@ namespace ECS
 		const bool jumpEdge = jumpDown && !wasJumpDown;
 		wasJumpDown = jumpDown;
 
-		registry.ForEach<Player, Velocity, Jump>(
-			[direction, jumpEdge, deltaTime](Entity, Player& player, Velocity& velocity, Jump& jump)
+		registry.ForEach<Player, Velocity, Jump, Health>(
+			[direction, jumpEdge, deltaTime](Entity, Player& player, Velocity& velocity, Jump& jump, Health& health)
 			{
+				if (health.current <= 0)
+					return;
+
 				if (jump.lockTimer > 0.0f)
-				{
 					jump.lockTimer -= deltaTime;
-				}
-				else
+
+				// Control is locked during a wall-jump push or during hit-stun.
+				const bool locked = (jump.lockTimer > 0.0f) || (health.hitStunTimer > 0.0f);
+
+				if (!locked)
 				{
 					const float target = direction * player.moveSpeed;
 					const float rate = (direction != 0.0f) ? player.acceleration : player.deceleration;

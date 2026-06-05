@@ -16,6 +16,9 @@
 #include "core/ecs/Registry.h"
 #include "components/Jump.h"
 #include "components/WallSlide.h"
+#include "components/Hazard.h"
+#include "components/Health.h"
+#include "components/Hitbox.h"
 
 #include <fstream>
 #include <stdexcept>
@@ -147,6 +150,32 @@ void DataLoader::RegisterLoaders()
 			ECS::WallSlide wallSlide;
 			wallSlide.slideSpeed = data.at("slideSpeed");
 			registry.Add<ECS::WallSlide>(entity, wallSlide);
+		};
+
+	loaders["Health"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Health health;
+			health.maximum = data.at("maximum");
+			health.current = health.maximum;
+			health.invulnerabilityDuration = data.at("invulnerabilityDuration");
+			health.hitStunDuration = data.at("hitStunDuration");
+			health.knockbackSpeed = data.at("knockbackSpeed");
+			registry.Add<ECS::Health>(entity, health);
+		};
+
+	loaders["Hazard"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Hazard hazard;
+			hazard.damage = data.at("damage");
+			registry.Add<ECS::Hazard>(entity, hazard);
+		};
+
+	loaders["Hitbox"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Hitbox hitbox;
+			hitbox.width = data.at("width");
+			hitbox.height = data.at("height");
+			registry.Add<ECS::Hitbox>(entity, hitbox);
 		};
 }
 

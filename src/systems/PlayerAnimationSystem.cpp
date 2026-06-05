@@ -2,6 +2,7 @@
 
 #include "components/AnimationState.h"
 #include "components/CollisionState.h"
+#include "components/Health.h"
 #include "components/Jump.h"
 #include "components/Player.h"
 #include "components/Velocity.h"
@@ -17,10 +18,13 @@ namespace ECS
 
 	void PlayerAnimationSystem::Update()
 	{
-		registry.ForEach<Player, Velocity, CollisionState, AnimationState, Jump>(
+		registry.ForEach<Player, Velocity, CollisionState, AnimationState, Jump, Health>(
 			[](Entity, Player&, Velocity& velocity, CollisionState& collisionState,
-				AnimationState& state, Jump& jump)
+				AnimationState& state, Jump& jump, Health& health)
 			{
+				if (health.hitStunTimer > 0.0f || health.current <= 0)
+					return;
+
 				std::string desired;
 
 				if (!collisionState.isOnGround)

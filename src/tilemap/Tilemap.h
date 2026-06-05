@@ -39,9 +39,12 @@ struct Tilemap
 
 	bool IsSolid(int tileX, int tileY) const
 	{
-		// Outside the level counts as solid for now: the character can't fall out
-		// of the world. We'll revisit this when we add death by falling.
-		if (tileX < 0 || tileY < 0 || tileX >= collisionWidth || tileY >= collisionHeight)
+		// Below the level is open void — the character falls through to die there.
+		if (tileY >= collisionHeight)
+			return false;
+
+		// Sides and ceiling stay solid so the level is otherwise contained.
+		if (tileX < 0 || tileY < 0 || tileX >= collisionWidth)
 			return true;
 
 		return solidGrid[static_cast<std::size_t>(tileY) * collisionWidth + tileX];

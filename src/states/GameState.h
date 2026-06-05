@@ -7,6 +7,7 @@
 #include "graphics/ParticleSystem.h"
 #include "graphics/Transition.h"
 #include "systems/AnimationSystem.h"
+#include "systems/DamageSystem.h"
 #include "systems/InputSystem.h"
 #include "systems/JumpSystem.h"
 #include "systems/MovementSystem.h"
@@ -14,6 +15,7 @@
 #include "systems/PhysicsSystem.h"
 #include "systems/PlayerAnimationSystem.h"
 #include "systems/RenderSystem.h"
+#include "systems/DeathSystem.h"
 #include "tilemap/Tilemap.h"
 
 #include <string>
@@ -36,6 +38,8 @@ private:
 
 	ECS::InputSystem inputSystem;
 	ECS::JumpSystem jumpSystem;
+	ECS::DamageSystem damageSystem;
+	ECS::DeathSystem deathSystem;
 	ECS::PatrolSystem patrolSystem;
 	ECS::PhysicsSystem physicsSystem;
 	ECS::MovementSystem movementSystem;
@@ -45,6 +49,10 @@ private:
 
 	ParticleSystem particles;
 	Transition transition;
+
+	std::string levelPath;
+	float fallLimit = 0.0f;
+	bool isRestarting = false;
 
 	bool wasOnGround = false;
 	int previousJumpsRemaining = 0;
