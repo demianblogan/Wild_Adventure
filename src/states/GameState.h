@@ -15,6 +15,7 @@
 #include "systems/PhysicsSystem.h"
 #include "systems/PlayerAnimationSystem.h"
 #include "systems/RenderSystem.h"
+#include "systems/DeathSystem.h"
 #include "tilemap/Tilemap.h"
 
 #include <string>
@@ -38,6 +39,7 @@ private:
 	ECS::InputSystem inputSystem;
 	ECS::JumpSystem jumpSystem;
 	ECS::DamageSystem damageSystem;
+	ECS::DeathSystem deathSystem;
 	ECS::PatrolSystem patrolSystem;
 	ECS::PhysicsSystem physicsSystem;
 	ECS::MovementSystem movementSystem;

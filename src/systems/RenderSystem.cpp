@@ -6,9 +6,11 @@
 #include "components/PreviousTransform.h"
 #include "components/Sprite.h"
 #include "components/Transform.h"
+#include "components/Rotation.h"
 #include "core/Resources.h"
 #include "core/ecs/Registry.h"
 
+#include <SFML/System/Angle.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
@@ -31,7 +33,7 @@ namespace ECS
 				if (registry.Has<Health>(entity))
 				{
 					const Health& health = registry.Get<Health>(entity);
-					if (health.invulnerabilityTimer > 0.0f && std::fmod(health.invulnerabilityTimer, 0.16f) < 0.08f)
+					if (health.invulnerabilityTimer > 0.0f && health.current > 0 && std::fmod(health.invulnerabilityTimer, 0.16f) < 0.08f)
 						return;
 				}
 
@@ -75,6 +77,9 @@ namespace ECS
 					if (facing.isLookingRight != facing.isTextureRight)
 						drawable.setScale({ -1.0f, 1.0f });
 				}
+
+				if (registry.Has<Rotation>(entity))
+					drawable.setRotation(sf::degrees(registry.Get<Rotation>(entity).angle));
 
 				drawable.setPosition({ std::floor(renderX), std::floor(renderY) });
 

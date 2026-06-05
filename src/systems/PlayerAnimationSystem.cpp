@@ -22,8 +22,7 @@ namespace ECS
 			[](Entity, Player&, Velocity& velocity, CollisionState& collisionState,
 				AnimationState& state, Jump& jump, Health& health)
 			{
-				// During hit-stun the Hit animation plays; don't override it.
-				if (health.hitStunTimer > 0.0f)
+				if (health.hitStunTimer > 0.0f || health.current <= 0)
 					return;
 
 				std::string desired;

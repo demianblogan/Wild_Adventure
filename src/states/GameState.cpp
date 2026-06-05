@@ -25,6 +25,7 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	, inputSystem(registry)
 	, jumpSystem(registry)
 	, damageSystem(registry)
+	, deathSystem(registry)
 	, patrolSystem(registry)
 	, physicsSystem(registry, tilemap)
 	, movementSystem(registry)
@@ -80,6 +81,7 @@ void GameState::Update(float deltaTime)
 	inputSystem.Update(deltaTime);
 	jumpSystem.Update();
 	damageSystem.Update(deltaTime);
+	deathSystem.Update(deltaTime);
 	patrolSystem.Update();
 	physicsSystem.Update(deltaTime);
 	movementSystem.Update(deltaTime);
@@ -135,8 +137,7 @@ void GameState::Update(float deltaTime)
 			previousJumpsRemaining = jump.jumpsRemaining;
 			previousLockTimer = jump.lockTimer;
 
-			// Death (no health) or a fall into the void: cover the screen, then reload.
-			if (health.current <= 0 || transform.y > fallLimit)
+			if (transform.y > fallLimit)
 			{
 				transition.StartCover();
 				isRestarting = true;

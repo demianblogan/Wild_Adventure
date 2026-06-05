@@ -46,6 +46,9 @@ namespace ECS
 		registry.ForEach<Player, Velocity, Jump, Health>(
 			[direction, jumpEdge, deltaTime](Entity, Player& player, Velocity& velocity, Jump& jump, Health& health)
 			{
+				if (health.current <= 0)
+					return;
+
 				if (jump.lockTimer > 0.0f)
 					jump.lockTimer -= deltaTime;
 
