@@ -70,6 +70,14 @@ GameState::GameState(Context& context, const std::string& levelPath)
 			camera.SnapTo({ transform.x, transform.y });
 		});
 
+	registry.ForEach<ECS::Player, ECS::Transform, ECS::Health>(
+		[this](ECS::Entity, ECS::Player&, ECS::Transform& transform, ECS::Health& health)
+		{
+			camera.SnapTo({ transform.x, transform.y });
+			maxHearts = health.maximum;
+			displayedHealth = health.maximum;
+		});
+
 	hudInterface.SetContent(hudLoader.LoadFromFile("data/ui/hud.json"));
 	UpdateScoreLabel();
 
@@ -91,6 +99,41 @@ void GameState::UpdateScoreLabel()
 	}
 
 	previousScore = score;
+}
+
+void GameState::UpdateHearts(int currentHealth, float deltaTime)
+{
+	// A point was just lost: start blinking the rightmost shown heart.
+	if (currentHealth < displayedHealth && blinkingHeart < 0)
+	{
+		blinkingHeart = currentHealth; // heart index that will disappear
+		blinkTimer = HEART_BLINK_DURATION;
+		displayedHealth = currentHealth;
+	}
+
+	bool blinkOn = true;
+	if (blinkingHeart >= 0)
+	{
+		blinkTimer -= deltaTime;
+		blinkOn = std::fmod(blinkTimer, 0.12f) < 0.06f; // fast on/off
+
+		if (blinkTimer <= 0.0f)
+			blinkingHeart = -1; // fully gone now
+	}
+
+	for (int i = 0; i < maxHearts; i++)
+	{
+		UI::Element* heart = hudInterface.FindByName("heart" + std::to_string(i));
+		if (heart == nullptr)
+			continue;
+
+		if (i < displayedHealth)
+			heart->isVisible = true;       // settled, alive
+		else if (i == blinkingHeart)
+			heart->isVisible = blinkOn;    // blinking out
+		else
+			heart->isVisible = false;      // gone
+	}
 }
 
 void GameState::Update(float deltaTime)
@@ -128,6 +171,8 @@ void GameState::Update(float deltaTime)
 		[this, deltaTime](ECS::Entity, ECS::Player&, ECS::Transform& transform, ECS::Velocity& velocity,
 			ECS::CollisionState& collisionState, ECS::Jump& jump, ECS::Health& health)
 		{
+			UpdateHearts(health.current, deltaTime);
+
 			const sf::Vector2f feet = { transform.x, transform.y };
 			const bool onGround = collisionState.isOnGround;
 

@@ -12,7 +12,7 @@
 			{
 				"Label":
 				{
-					"name": "score",
+					"name": "health_label",
 					"anchor":
 					[
 						0,
@@ -26,6 +26,126 @@
 					"offset":
 					[
 						8,
+						8
+					],
+					"fontName": "main",
+					"characterSize": 16,
+					"color":
+					[
+						255,
+						255,
+						255,
+						255
+					],
+					"outlineColor":
+					[
+						40,
+						40,
+						40,
+						255
+					],
+					"outlineThickness": 1,
+					"text": "Health:"
+				}
+			},
+			{
+				"Image":
+				{
+					"name": "heart0",
+					"anchor":
+					[
+						0,
+						0
+					],
+					"pivot":
+					[
+						0,
+						0
+					],
+					"offset":
+					[
+						66,
+						6
+					],
+					"size":
+					[
+						16,
+						16
+					],
+					"textureName": "heart"
+				}
+			},
+			{
+				"Image":
+				{
+					"name": "heart1",
+					"anchor":
+					[
+						0,
+						0
+					],
+					"pivot":
+					[
+						0,
+						0
+					],
+					"offset":
+					[
+						84,
+						6
+					],
+					"size":
+					[
+						16,
+						16
+					],
+					"textureName": "heart"
+				}
+			},
+			{
+				"Image":
+				{
+					"name": "heart2",
+					"anchor":
+					[
+						0,
+						0
+					],
+					"pivot":
+					[
+						0,
+						0
+					],
+					"offset":
+					[
+						102,
+						6
+					],
+					"size":
+					[
+						16,
+						16
+					],
+					"textureName": "heart"
+				}
+			},
+			{
+				"Label":
+				{
+					"name": "score",
+					"anchor":
+					[
+						1,
+						0
+					],
+					"pivot":
+					[
+						1,
+						0
+					],
+					"offset":
+					[
+						-8,
 						8
 					],
 					"fontName": "main",

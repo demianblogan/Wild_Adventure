@@ -18,5 +18,8 @@
 	"melon": "assets/textures/items/fruits/Melon.png",
 	"orange": "assets/textures/items/fruits/Orange.png",
 	"pineapple": "assets/textures/items/fruits/Pineapple.png",
-	"collected": "assets/textures/items/fruits/Collected.png"
+	"collected": "assets/textures/items/fruits/Collected.png",
+
+	"heart": "assets/textures/ui/heart_32x32.png"
+
 }
