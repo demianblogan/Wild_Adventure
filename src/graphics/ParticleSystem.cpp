@@ -1,6 +1,7 @@
 #include "ParticleSystem.h"
 
 #include "core/Resources.h"
+#include "tilemap/Tilemap.h"
 
 #include <nlohmann/json.hpp>
 
@@ -19,6 +20,11 @@ ParticleSystem::ParticleSystem(Resources& resources)
 	: resources(resources)
 	, randomEngine(std::random_device{}())
 {}
+
+void ParticleSystem::SetTilemap(const Tilemap& tilemap)
+{
+	this->tilemap = &tilemap;
+}
 
 void ParticleSystem::LoadConfig(const std::string& path)
 {
@@ -63,6 +69,10 @@ void ParticleSystem::Emit(const std::string& presetName, sf::Vector2f position, 
 	for (int i = 0; i < config.count; i++)
 	{
 		Particle particle;
+		particle.kind = Kind::Dust;
+		particle.texture = textureName;
+		particle.frameCount = 1;
+		particle.frameIndex = 0;
 		particle.position = position;
 
 		if (directionX == 0)
@@ -79,41 +89,136 @@ void ParticleSystem::Emit(const std::string& presetName, sf::Vector2f position, 
 	}
 }
 
+void ParticleSystem::EmitDebris(sf::Vector2f position, const std::string& textureName, int pieceCount)
+{
+	for (int i = 0; i < pieceCount; i++)
+	{
+		Particle particle;
+		particle.kind = Kind::Debris;
+		particle.texture = textureName;
+		particle.frameCount = pieceCount;
+		particle.frameIndex = i;
+		particle.position = position;
+		particle.velocity = { RandomFloat(-DEBRIS_SPREAD_X, DEBRIS_SPREAD_X), -RandomFloat(DEBRIS_UP_MIN, DEBRIS_UP_MAX) };
+		particle.startScale = 1.0f;
+		particle.phase = DebrisPhase::Flying;
+
+		particles.push_back(particle);
+	}
+}
+
 void ParticleSystem::Update(float deltaTime)
 {
+	const float tileSize = (tilemap != nullptr) ? static_cast<float>(tilemap->tileSize) : 16.0f;
+
 	for (Particle& particle : particles)
 	{
-		particle.velocity.y += gravity * deltaTime;
-		particle.position += particle.velocity * deltaTime;
-		particle.age += deltaTime;
+		if (particle.kind == Kind::Dust)
+		{
+			particle.velocity.y += gravity * deltaTime;
+			particle.position += particle.velocity * deltaTime;
+			particle.age += deltaTime;
+			continue;
+		}
+
+		// Debris.
+		if (particle.phase == DebrisPhase::Flying)
+		{
+			particle.velocity.y += DEBRIS_GRAVITY * deltaTime;
+			particle.position += particle.velocity * deltaTime;
+			particle.flyTimer += deltaTime;
+
+			bool landed = false;
+			if (tilemap != nullptr)
+			{
+				const int column = static_cast<int>(std::floor(particle.position.x / tileSize));
+				const int row = static_cast<int>(std::floor(particle.position.y / tileSize));
+
+				const bool inSolid = tilemap->IsSolid(column, row);
+				const bool solidAbove = tilemap->IsSolid(column, row - 1);
+
+				if (inSolid && !solidAbove && particle.velocity.y >= 0.0f)
+				{
+					// Resting on a top surface (floor or ledge), not a wall side.
+					particle.position.y = row * tileSize;
+					particle.velocity = { 0.0f, 0.0f };
+					particle.phase = DebrisPhase::Resting;
+					particle.phaseTimer = DEBRIS_REST;
+					landed = true;
+				}
+				else if (inSolid)
+				{
+					// Hit a wall from the side: push back out and keep falling along it.
+					if (particle.velocity.x > 0.0f)
+						particle.position.x = column * tileSize - 0.001f;
+					else if (particle.velocity.x < 0.0f)
+						particle.position.x = (column + 1) * tileSize + 0.001f;
+
+					particle.velocity.x = 0.0f;
+				}
+			}
+
+			if (!landed && particle.flyTimer >= DEBRIS_MAX_FLY)
+				particle.dead = true; // fell into a pit / never landed
+		}
+		else if (particle.phase == DebrisPhase::Resting)
+		{
+			particle.phaseTimer -= deltaTime;
+			if (particle.phaseTimer <= 0.0f)
+			{
+				particle.phase = DebrisPhase::Blinking;
+				particle.phaseTimer = DEBRIS_BLINK;
+			}
+		}
+		else // Blinking
+		{
+			particle.phaseTimer -= deltaTime;
+			if (particle.phaseTimer <= 0.0f)
+				particle.dead = true;
+		}
 	}
 
-	std::erase_if(particles, [](const Particle& particle) { return particle.age >= particle.lifetime; });
+	std::erase_if(particles, [](const Particle& particle)
+		{
+			if (particle.kind == Kind::Dust)
+				return particle.age >= particle.lifetime;
+			return particle.dead;
+		});
 }
 
 void ParticleSystem::Draw(sf::RenderTarget& target)
 {
-	if (particles.empty())
-		return;
-
-	const sf::Texture& texture = resources.textures.Get(textureName);
-	const sf::Vector2f textureSize(texture.getSize());
-
-	sf::Sprite sprite(texture);
-	sprite.setOrigin(textureSize / 2.0f);
-
 	for (const Particle& particle : particles)
 	{
-		const float progress = (particle.lifetime > 0.0f) ? (particle.age / particle.lifetime) : 1.0f;
-		const float remaining = std::clamp(1.0f - progress, 0.0f, 1.0f);
+		if (particle.kind == Kind::Debris && particle.phase == DebrisPhase::Blinking)
+		{
+			if (std::fmod(particle.phaseTimer, 0.16f) < 0.08f) // blink off
+				continue;
+		}
 
-		const float scale = particle.startScale * remaining;
-		const auto alpha = static_cast<std::uint8_t>(remaining * 255.0f);
+		const sf::Texture& texture = resources.textures.Get(particle.texture);
+		const int pieceWidth = static_cast<int>(texture.getSize().x) / particle.frameCount;
+		const int pieceHeight = static_cast<int>(texture.getSize().y);
+
+		sf::Sprite sprite(texture);
+		sprite.setTextureRect(sf::IntRect({ particle.frameIndex * pieceWidth, 0 }, { pieceWidth, pieceHeight }));
+		sprite.setOrigin({ pieceWidth / 2.0f, pieceHeight / 2.0f });
+
+		if (particle.kind == Kind::Dust)
+		{
+			const float progress = (particle.lifetime > 0.0f) ? (particle.age / particle.lifetime) : 1.0f;
+			const float remaining = std::clamp(1.0f - progress, 0.0f, 1.0f);
+			const auto alpha = static_cast<std::uint8_t>(remaining * 255.0f);
+
+			sprite.setScale({ particle.startScale * remaining, particle.startScale * remaining });
+			sprite.setColor(sf::Color(255, 255, 255, alpha));
+		}
+		else
+		{
+			sprite.setScale({ particle.startScale, particle.startScale });
+		}
 
 		sprite.setPosition({ std::floor(particle.position.x), std::floor(particle.position.y) });
-		sprite.setScale({ scale, scale });
-		sprite.setColor(sf::Color(255, 255, 255, alpha));
-
 		target.draw(sprite);
 	}
 }

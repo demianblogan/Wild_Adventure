@@ -43,6 +43,7 @@
 			"melon"
 		],
 		"ejectSpeedX": 70,
-		"ejectSpeedUp": 150
+		"ejectSpeedUp": 150,
+		"debrisTexture": "box_wood_hard_break"
 	}
 }

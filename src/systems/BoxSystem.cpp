@@ -11,6 +11,7 @@
 #include "components/Transform.h"
 #include "components/Velocity.h"
 #include "components/PickupDelay.h"
+#include "graphics/ParticleSystem.h"
 #include "core/DataLoader.h"
 #include "core/ecs/Registry.h"
 
@@ -24,9 +25,10 @@ namespace ECS
 		constexpr float FRUIT_MAX_FALL_SPEED = 400.0f;
 	}
 
-	BoxSystem::BoxSystem(Registry& registry, DataLoader& loader)
+	BoxSystem::BoxSystem(Registry& registry, DataLoader& loader, ParticleSystem& particles)
 		: registry(registry)
 		, loader(loader)
+		, particles(particles)
 		, randomEngine(std::random_device{}())
 	{}
 
@@ -137,6 +139,12 @@ namespace ECS
 
 				for (const std::string& fruitName : fruits)
 					EjectFruit(fruitName, x, y, ejectX, ejectUp);
+			}
+
+			if (!box.debrisTexture.empty())
+			{
+				const Transform& debrisTransform = registry.Get<Transform>(entity);
+				particles.EmitDebris({ debrisTransform.x, debrisTransform.y - 12.0f }, box.debrisTexture, 4);
 			}
 
 			registry.DestroyEntity(entity); // (debris on break come in Step 2)

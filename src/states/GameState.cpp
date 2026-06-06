@@ -24,19 +24,19 @@
 
 GameState::GameState(Context& context, const std::string& levelPath)
 	: State(context)
+	, particles(context.resources)
 	, inputSystem(registry)
 	, jumpSystem(registry)
 	, damageSystem(registry)
 	, deathSystem(registry)
 	, patrolSystem(registry)
 	, physicsSystem(registry, tilemap)
-	, boxSystem(registry, sceneLoader)
+	, boxSystem(registry, sceneLoader, particles)
 	, movementSystem(registry)
 	, pickupSystem(registry, score)
 	, animationSystem(registry)
 	, playerAnimationSystem(registry)
 	, renderSystem(registry, context.resources, context.virtualScreen.GetRenderTarget())
-	, particles(context.resources)
 	, hudInterface(context.virtualScreen)
 	, hudLoader(context.resources)
 	, levelPath(levelPath)
@@ -53,6 +53,7 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	particles.LoadConfig("data/particles.json");
 
 	tilemap = LoadTilemap(levelPath, "terrain", 22);
+	particles.SetTilemap(tilemap);
 
 	const sf::Vector2f worldSize =
 	{

@@ -6,6 +6,7 @@
 #include <string>
 
 class DataLoader;
+class ParticleSystem;
 
 namespace ECS
 {
@@ -14,7 +15,7 @@ namespace ECS
 	class BoxSystem
 	{
 	public:
-		BoxSystem(Registry& registry, DataLoader& loader);
+		BoxSystem(Registry& registry, DataLoader& loader, ParticleSystem& particles);
 
 		void Update();
 
@@ -23,6 +24,7 @@ namespace ECS
 
 		Registry& registry;
 		DataLoader& loader;
+		ParticleSystem& particles;
 		std::mt19937 randomEngine;
 	};
 }

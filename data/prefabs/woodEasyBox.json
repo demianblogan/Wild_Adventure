@@ -36,6 +36,7 @@
 		"dropFruitPerHit": false,
 		"fruits":
 		[
-		]
+		],
+		"debrisTexture": "box_wood_easy_break"
 	}
 }

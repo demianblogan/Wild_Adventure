@@ -10,6 +10,7 @@ namespace ECS
 		int hitsToBreak = 1;
 		bool dropFruitPerHit = false;
 		std::vector<std::string> fruits;
+		std::string debrisTexture; // texture id of this box's Break sheet
 
 		int hitsTaken = 0;       // runtime
 		bool isBreaking = false; // runtime: playing the final Hit, destroyed when it ends

@@ -211,6 +211,8 @@ void DataLoader::RegisterLoaders()
 			box.ejectSpeedX = data.value("ejectSpeedX", 0.0f);
 			box.ejectSpeedUp = data.value("ejectSpeedUp", 0.0f);
 
+			box.debrisTexture = data.value("debrisTexture", std::string());
+
 			registry.Add<ECS::Box>(entity, box);
 		};
 }

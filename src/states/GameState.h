@@ -43,6 +43,8 @@ private:
 	Camera camera;
 	Tilemap tilemap;
 
+	ParticleSystem particles;
+
 	int score = 0;
 	int previousScore = -1;
 	int maxHearts = 3;
@@ -64,8 +66,6 @@ private:
 	ECS::AnimationSystem animationSystem;
 	ECS::PlayerAnimationSystem playerAnimationSystem;
 	ECS::RenderSystem renderSystem;
-
-	ParticleSystem particles;
 
 	UI::Root hudInterface;
 	UI::DataLoader hudLoader;
