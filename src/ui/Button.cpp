@@ -40,6 +40,13 @@ namespace UI
 		RefreshVisibility();
 	}
 
+	void Button::SetBackgroundTint(sf::Color color)
+	{
+		for (Element* background : backgrounds)
+			if (background != nullptr)
+				background->SetColor(color);
+	}
+
 	void Button::OnStateChanged()
 	{
 		RefreshVisibility();

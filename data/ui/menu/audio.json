@@ -425,6 +425,7 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "save_button",
 					"anchor":
 					[
 						0.5,
@@ -437,7 +438,47 @@
 					],
 					"offset":
 					[
-						0,
+						-72,
+						55
+					],
+					"backgroundTint":
+					[
+						120,
+						200,
+						120,
+						255
+					],
+					"action": "menu_save",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Save"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"name": "back_button",
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						72,
 						55
 					],
 					"action": "menu_back",

@@ -15,7 +15,9 @@ namespace UI
 	public:
 		void SetBackground(InteractionState state, std::unique_ptr<Element> element);
 		void SetForeground(InteractionState state, std::unique_ptr<Element> element);
+
 		void SetForegroundColor(InteractionState state, sf::Color color);
+		void SetBackgroundTint(sf::Color color);
 
 	protected:
 		void OnStateChanged() override;

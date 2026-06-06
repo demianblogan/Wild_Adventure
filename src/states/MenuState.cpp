@@ -7,11 +7,14 @@
 #include "core/Settings.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "states/ConfirmState.h"
+#include "states/GameState.h"
+#include "ui/Button.h"
 #include "ui/Element.h"
 #include "ui/Label.h"
 #include "ui/Slider.h"
-#include "states/GameState.h"
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
 
 #include <cmath>
@@ -22,6 +25,7 @@
 namespace
 {
 	const std::string MENU_DIRECTORY = "data/ui/menu/";
+	const std::string SETTINGS_PATH = "data/settings.json";
 }
 
 MenuState::MenuState(Context& context)
@@ -56,6 +60,7 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_open_audio", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "audio"; });
 	interfaceLoader.RegisterAction("menu_open_author", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "author"; });
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
+	interfaceLoader.RegisterAction("menu_save", [this] { pendingRequest = NavRequest::Save; });
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
 	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
 
@@ -111,6 +116,53 @@ void MenuState::SetVolumeDisplay(const std::string& sliderName, const std::strin
 		label->SetText(std::to_string(value));
 }
 
+bool MenuState::IsSettingsPanel(const std::string& panelId) const
+{
+	return panelId == "audio"; // graphics and controls will be added later
+}
+
+void MenuState::GoBackPanel()
+{
+	if (panelStack.size() > 1)
+	{
+		panelStack.pop_back();
+		ShowPanel(panelStack.back());
+	}
+}
+
+void MenuState::UpdateSaveButtonTint()
+{
+	auto* save = dynamic_cast<UI::Button*>(userInterface.FindByName("save_button"));
+	if (save == nullptr)
+		return;
+
+	const sf::Color clean(120, 200, 120, 255);  // green: nothing to save
+	const sf::Color dirty(230, 150, 80, 255);    // orange: unsaved changes
+	save->SetBackgroundTint(context.settings.IsDirty() ? dirty : clean);
+}
+
+void MenuState::OpenUnsavedChangesDialog()
+{
+	context.stateMachine.Push(std::make_unique<ConfirmState>(context,
+		"Warning!", "You have unsaved changes. Save them?",
+		[this] { SaveAndGoBack(); },
+		[this] { RevertAndGoBack(); }));
+}
+
+void MenuState::SaveAndGoBack()
+{
+	context.settings.Save(SETTINGS_PATH);
+	GoBackPanel();
+}
+
+void MenuState::RevertAndGoBack()
+{
+	context.settings.Revert();
+	context.audioMixer.SetSoundVolume(context.settings.GetSoundVolume() / 10.0f);
+	context.audioMixer.SetMusicVolume(context.settings.GetMusicVolume() / 10.0f);
+	GoBackPanel();
+}
+
 void MenuState::ApplyPendingNavigation()
 {
 	switch (pendingRequest)
@@ -123,13 +175,15 @@ void MenuState::ApplyPendingNavigation()
 	case NavRequest::Back:
 		if (panelStack.size() > 1)
 		{
-			// Persist audio choices when leaving the Audio panel.
-			if (panelStack.back() == "audio")
-				context.settings.Save("data/settings.json");
-
-			panelStack.pop_back();
-			ShowPanel(panelStack.back());
+			if (IsSettingsPanel(panelStack.back()) && context.settings.IsDirty())
+				OpenUnsavedChangesDialog();
+			else
+				GoBackPanel();
 		}
+		break;
+
+	case NavRequest::Save:
+		context.settings.Save(SETTINGS_PATH);
 		break;
 
 	case NavRequest::StartGame:
@@ -183,7 +237,6 @@ void MenuState::Update(float deltaTime)
 			userInterface.NavigatePrevious();
 		}
 
-		// Left/right adjust the active slider only.
 		if (activated)
 		{
 			if (input.WasPressed(Action::MenuLeft))
@@ -197,6 +250,7 @@ void MenuState::Update(float deltaTime)
 		else if (input.WasReleased(Action::MenuConfirm))
 			userInterface.Confirm(false);
 
+		UpdateSaveButtonTint();
 		ApplyPendingNavigation();
 	}
 }

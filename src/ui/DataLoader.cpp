@@ -279,6 +279,9 @@ namespace UI
 					}
 				}
 
+				if (data.contains("backgroundTint"))
+					button->SetBackgroundTint(ParseColor(data["backgroundTint"]));
+
 				std::function<void()> action;
 				if (data.contains("action"))
 					action = loader.FindAction(data["action"]);

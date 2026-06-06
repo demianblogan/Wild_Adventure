@@ -8,19 +8,22 @@
 
 void Settings::SetSoundVolume(int value)
 {
-	soundVolume = std::clamp(value, 0, 10);
+	current.soundVolume = std::clamp(value, 0, 10);
 }
 
 void Settings::SetMusicVolume(int value)
 {
-	musicVolume = std::clamp(value, 0, 10);
+	current.musicVolume = std::clamp(value, 0, 10);
 }
 
 void Settings::Load(const std::string& path)
 {
 	std::ifstream file(path);
 	if (!file.is_open())
-		return; // no settings yet: keep defaults, the file appears on first Save
+	{
+		saved = current; // no file yet: defaults are the "saved" baseline
+		return;
+	}
 
 	nlohmann::json data;
 	file >> data;
@@ -28,20 +31,24 @@ void Settings::Load(const std::string& path)
 	if (data.contains("audio"))
 	{
 		const auto& audio = data["audio"];
-		SetSoundVolume(audio.value("sound", soundVolume));
-		SetMusicVolume(audio.value("music", musicVolume));
+		SetSoundVolume(audio.value("sound", current.soundVolume));
+		SetMusicVolume(audio.value("music", current.musicVolume));
 	}
+
+	saved = current;
 }
 
-void Settings::Save(const std::string& path) const
+void Settings::Save(const std::string& path)
 {
 	nlohmann::json data;
-	data["audio"]["sound"] = soundVolume;
-	data["audio"]["music"] = musicVolume;
+	data["audio"]["sound"] = current.soundVolume;
+	data["audio"]["music"] = current.musicVolume;
 
 	std::ofstream file(path);
 	if (!file.is_open())
 		throw std::runtime_error("Settings: cannot write '" + path + "'");
 
 	file << data.dump(1, '\t');
+
+	saved = current; // current state is now the saved baseline
 }
