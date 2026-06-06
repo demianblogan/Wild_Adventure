@@ -2,17 +2,22 @@
 
 #include "Context.h"
 #include "audio/Mixer.h"
+#include "core/Input.h"
 #include "core/Resources.h"
+#include "core/Settings.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
-#include "core/Input.h"
 #include "ui/Element.h"
+#include "ui/Label.h"
+#include "ui/Slider.h"
 #include "states/GameState.h"
 
 #include <SFML/Graphics/Font.hpp>
 
+#include <cmath>
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 namespace
 {
@@ -27,7 +32,6 @@ MenuState::MenuState(Context& context)
 {
 	Resources& resources = context.resources;
 
-	// Works even if Menu is the first state (font not yet loaded by Splash).
 	if (!resources.fonts.Has("main"))
 	{
 		resources.fonts.Load("main", "assets/fonts/main.ttf");
@@ -54,6 +58,26 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
 	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
+
+	interfaceLoader.RegisterFloatAction("set_sound_volume", [this](float value)
+		{
+			const int level = static_cast<int>(std::lround(value));
+			context.settings.SetSoundVolume(level);
+			context.audioMixer.SetSoundVolume(level / 10.0f);
+
+			if (auto* label = dynamic_cast<UI::Label*>(userInterface.FindByName("sound_value")))
+				label->SetText(std::to_string(level));
+		});
+
+	interfaceLoader.RegisterFloatAction("set_music_volume", [this](float value)
+		{
+			const int level = static_cast<int>(std::lround(value));
+			context.settings.SetMusicVolume(level);
+			context.audioMixer.SetMusicVolume(level / 10.0f);
+
+			if (auto* label = dynamic_cast<UI::Label*>(userInterface.FindByName("music_value")))
+				label->SetText(std::to_string(level));
+		});
 }
 
 void MenuState::ShowPanel(const std::string& panelId)
@@ -67,6 +91,24 @@ void MenuState::ShowPanel(const std::string& panelId)
 	slot->AddChild(interfaceLoader.LoadFromFile(MENU_DIRECTORY + panelId + ".json"));
 
 	userInterface.SetContent(std::move(frame));
+
+	if (panelId == "audio")
+		SetupAudioPanel();
+}
+
+void MenuState::SetupAudioPanel()
+{
+	SetVolumeDisplay("sound_slider", "sound_value", context.settings.GetSoundVolume());
+	SetVolumeDisplay("music_slider", "music_value", context.settings.GetMusicVolume());
+}
+
+void MenuState::SetVolumeDisplay(const std::string& sliderName, const std::string& labelName, int value)
+{
+	if (auto* slider = dynamic_cast<UI::Slider*>(userInterface.FindByName(sliderName)))
+		slider->SetValue(static_cast<float>(value));
+
+	if (auto* label = dynamic_cast<UI::Label*>(userInterface.FindByName(labelName)))
+		label->SetText(std::to_string(value));
 }
 
 void MenuState::ApplyPendingNavigation()
@@ -81,6 +123,10 @@ void MenuState::ApplyPendingNavigation()
 	case NavRequest::Back:
 		if (panelStack.size() > 1)
 		{
+			// Persist audio choices when leaving the Audio panel.
+			if (panelStack.back() == "audio")
+				context.settings.Save("data/settings.json");
+
 			panelStack.pop_back();
 			ShowPanel(panelStack.back());
 		}
@@ -103,7 +149,6 @@ void MenuState::ApplyPendingNavigation()
 
 void MenuState::HandleEvent(const sf::Event& event)
 {
-	// Buttons become clickable only after the entry wipe finishes.
 	if (transition.GetMode() != Transition::Mode::Idle)
 		return;
 
@@ -120,21 +165,31 @@ void MenuState::Update(float deltaTime)
 	if (transition.GetMode() == Transition::Mode::Idle)
 	{
 		Input& input = context.input;
+		const bool activated = userInterface.IsElementActivated();
 
 		if (input.WasPressed(Action::MenuBack))
 		{
-			if (userInterface.IsElementActivated())
+			if (activated)
 				userInterface.CancelActivation();
 			else
 				pendingRequest = NavRequest::Back;
 		}
-		else if (input.WasPressed(Action::MenuDown))
+		else if (!activated && input.WasPressed(Action::MenuDown))
 		{
 			userInterface.NavigateNext();
 		}
-		else if (input.WasPressed(Action::MenuUp))
+		else if (!activated && input.WasPressed(Action::MenuUp))
 		{
 			userInterface.NavigatePrevious();
+		}
+
+		// Left/right adjust the active slider only.
+		if (activated)
+		{
+			if (input.WasPressed(Action::MenuLeft))
+				userInterface.NavigateValue(-1);
+			else if (input.WasPressed(Action::MenuRight))
+				userInterface.NavigateValue(1);
 		}
 
 		if (input.WasPressed(Action::MenuConfirm))

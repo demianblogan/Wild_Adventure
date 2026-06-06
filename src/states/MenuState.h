@@ -25,6 +25,9 @@ private:
 	void ShowPanel(const std::string& panelId);
 	void ApplyPendingNavigation();
 
+	void SetupAudioPanel();
+	void SetVolumeDisplay(const std::string& sliderName, const std::string& labelName, int value);
+
 	MenuBackdrop backdrop;
 
 	UI::Root userInterface;
