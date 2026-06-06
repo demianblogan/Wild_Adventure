@@ -1,7 +1,8 @@
 {
 	"Sprite":
 	{
-		"textureName": "pineapple"
+		"textureName": "pineapple",
+		"offsetY": 8
 	},
 	"AnimationSet":
 	{

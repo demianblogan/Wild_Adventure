@@ -1,0 +1,49 @@
+{
+	"Sprite":
+	{
+		"textureName": "box_metal_idle"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "box_metal_idle",
+			"frameCount": 1,
+			"frameDuration": 0.1,
+			"isLooping": true
+		},
+		"Hit":
+		{
+			"textureName": "box_metal_hit",
+			"frameCount": 2,
+			"frameDuration": 0.08,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	},
+	"Solid":
+	{
+		"width": 22,
+		"height": 24,
+		"bounceSpeed": 280
+	},
+	"Box":
+	{
+		"hitsToBreak": 5,
+		"dropFruitPerHit": false,
+		"fruits":
+		[
+			"apple",
+			"bananas",
+			"cherries",
+			"kiwi",
+			"melon"
+		],
+		"ejectSpeedX": 70,
+		"ejectSpeedUp": 150,
+		"debrisTexture": "box_metal_break"
+	}
+}

@@ -21,6 +21,8 @@ public:
 
 	ECS::Entity LoadEntity(ECS::Registry& registry, const nlohmann::json& entityJson);
 	ECS::Entity LoadEntityFromFile(ECS::Registry& registry, const std::string& path);
+	
+	ECS::Entity SpawnFromPrefab(ECS::Registry& registry, const std::string& path);
 
 	std::vector<ECS::Entity> LoadScene(ECS::Registry& registry, const std::string& scenePath);
 	std::vector<ECS::Entity> LoadSceneFromMap(ECS::Registry& registry, const std::string& mapPath);

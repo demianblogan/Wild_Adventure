@@ -34,6 +34,70 @@
          "y":0
         }, 
         {
+         "color":"#902501",
+         "draworder":"topdown",
+         "id":6,
+         "name":"boxes",
+         "objects":[
+                {
+                 "height":0,
+                 "id":18,
+                 "name":"woodEasyBox",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"woodEasyBox",
+                 "visible":true,
+                 "width":0,
+                 "x":328,
+                 "y":112
+                }, 
+                {
+                 "height":0,
+                 "id":19,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":188,
+                 "y":84
+                }, 
+                {
+                 "height":0,
+                 "id":20,
+                 "name":"woodHardBox",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"woodHardBox",
+                 "visible":true,
+                 "width":0,
+                 "x":360,
+                 "y":108
+                }, 
+                {
+                 "height":0,
+                 "id":21,
+                 "name":"metalBox",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"metalBox",
+                 "visible":true,
+                 "width":0,
+                 "x":384,
+                 "y":112
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -105,8 +169,8 @@
                  "type":"apple",
                  "visible":true,
                  "width":0,
-                 "x":380,
-                 "y":128
+                 "x":112,
+                 "y":32
                 }, 
                 {
                  "height":0,
@@ -118,7 +182,7 @@
                  "type":"bananas",
                  "visible":true,
                  "width":0,
-                 "x":436,
+                 "x":128,
                  "y":32
                 }, 
                 {
@@ -131,8 +195,8 @@
                  "type":"kiwi",
                  "visible":true,
                  "width":0,
-                 "x":292,
-                 "y":96
+                 "x":32,
+                 "y":32
                 }, 
                 {
                  "height":0,
@@ -144,8 +208,8 @@
                  "type":"melon",
                  "visible":true,
                  "width":0,
-                 "x":108,
-                 "y":184
+                 "x":96,
+                 "y":32
                 }, 
                 {
                  "height":0,
@@ -157,7 +221,7 @@
                  "type":"cherries",
                  "visible":true,
                  "width":0,
-                 "x":36,
+                 "x":64,
                  "y":32
                 }, 
                 {
@@ -170,8 +234,8 @@
                  "type":"orange",
                  "visible":true,
                  "width":0,
-                 "x":172,
-                 "y":120
+                 "x":48,
+                 "y":32
                 }, 
                 {
                  "height":0,
@@ -183,8 +247,8 @@
                  "type":"pineapple",
                  "visible":true,
                  "width":0,
-                 "x":84,
-                 "y":88
+                 "x":80,
+                 "y":32
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -210,19 +274,6 @@
                  "width":0,
                  "x":80,
                  "y":240
-                }, 
-                {
-                 "height":0,
-                 "id":4,
-                 "name":"spikes",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"spikes",
-                 "visible":true,
-                 "width":0,
-                 "x":140,
-                 "y":240
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -230,8 +281,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":6,
- "nextobjectid":18,
+ "nextlayerid":7,
+ "nextobjectid":22,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

@@ -1,0 +1,42 @@
+{
+	"Sprite":
+	{
+		"textureName": "box_wood_easy_idle"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "box_wood_easy_idle",
+			"frameCount": 1,
+			"frameDuration": 0.1,
+			"isLooping": true
+		},
+		"Hit":
+		{
+			"textureName": "box_wood_easy_hit",
+			"frameCount": 3,
+			"frameDuration": 0.053,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	},
+	"Solid":
+	{
+		"width": 22,
+		"height": 24,
+		"bounceSpeed": 280
+	},
+	"Box":
+	{
+		"hitsToBreak": 1,
+		"dropFruitPerHit": false,
+		"fruits":
+		[
+		],
+		"debrisTexture": "box_wood_easy_break"
+	}
+}

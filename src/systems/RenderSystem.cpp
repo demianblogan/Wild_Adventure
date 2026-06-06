@@ -81,7 +81,7 @@ namespace ECS
 				if (registry.Has<Rotation>(entity))
 					drawable.setRotation(sf::degrees(registry.Get<Rotation>(entity).angle));
 
-				drawable.setPosition({ std::floor(renderX), std::floor(renderY) });
+				drawable.setPosition({ std::floor(renderX + sprite.offsetX), std::floor(renderY + sprite.offsetY) });
 
 				renderTarget.draw(drawable);
 			});

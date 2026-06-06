@@ -20,6 +20,17 @@
 	"pineapple": "assets/textures/items/fruits/Pineapple.png",
 	"collected": "assets/textures/items/fruits/Collected.png",
 
-	"heart": "assets/textures/ui/heart_32x32.png"
+	"heart": "assets/textures/ui/heart_32x32.png",
 
+	"box_wood_easy_idle": "assets/textures/items/boxes/Box1/Idle.png",
+	"box_wood_easy_hit": "assets/textures/items/boxes/Box1/Hit (28x24).png",
+	"box_wood_easy_break": "assets/textures/items/boxes/Box1/Break.png",
+
+	"box_wood_hard_idle": "assets/textures/items/boxes/Box2/Idle.png",
+	"box_wood_hard_hit": "assets/textures/items/boxes/Box2/Hit (28x24).png",
+	"box_wood_hard_break": "assets/textures/items/boxes/Box2/Break.png",
+
+	"box_metal_idle": "assets/textures/items/boxes/Box3/Idle.png",
+	"box_metal_hit": "assets/textures/items/boxes/Box3/Hit (28x24).png",
+	"box_metal_break": "assets/textures/items/boxes/Box3/Break.png"
 }

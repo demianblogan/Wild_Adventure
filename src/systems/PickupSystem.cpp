@@ -6,6 +6,7 @@
 #include "components/Collider.h"
 #include "components/Despawning.h"
 #include "components/Hitbox.h"
+#include "components/PickupDelay.h"
 #include "components/Player.h"
 #include "components/Transform.h"
 #include "core/ecs/Registry.h"
@@ -19,9 +20,8 @@ namespace ECS
 		, score(score)
 	{}
 
-	void PickupSystem::Update()
+	void PickupSystem::Update(float deltaTime)
 	{
-		// 1. Player box.
 		bool hasPlayer = false;
 		float playerLeft = 0.0f, playerRight = 0.0f, playerTop = 0.0f, playerBottom = 0.0f;
 
@@ -39,12 +39,22 @@ namespace ECS
 		if (!hasPlayer)
 			return;
 
-		// 2. Find touched fruits (don't mutate during the loop).
 		std::vector<Entity> collected;
 
 		registry.ForEach<Collectible, Hitbox, Transform>(
 			[&](Entity entity, Collectible&, Hitbox& hitbox, Transform& transform)
 			{
+				// Freshly ejected fruit can't be grabbed until its delay runs out.
+				if (registry.Has<PickupDelay>(entity))
+				{
+					PickupDelay& delay = registry.Get<PickupDelay>(entity);
+					if (delay.timer > 0.0f)
+					{
+						delay.timer -= deltaTime;
+						return;
+					}
+				}
+
 				const float halfWidth = hitbox.width / 2.0f;
 				const float left = transform.x - halfWidth;
 				const float right = transform.x + halfWidth;
@@ -72,7 +82,6 @@ namespace ECS
 			registry.Add<Despawning>(entity, {});
 		}
 
-		// 3. Remove fruits whose collect animation has finished.
 		std::vector<Entity> finished;
 
 		registry.ForEach<Despawning, Animation>(
