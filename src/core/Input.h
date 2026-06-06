@@ -20,6 +20,7 @@ enum class Action
 
 enum class InputDevice
 {
+	Mouse,
 	Keyboard,
 	Gamepad
 };
@@ -39,6 +40,8 @@ public:
 	float GetAxisX() const; // -1, 0 or +1 (left/right movement)
 
 	InputDevice GetActiveDevice() const { return activeDevice; }
+
+	void NotifyMouseUsed() { activeDevice = InputDevice::Mouse; }
 
 private:
 	enum class BindingType

@@ -2,10 +2,15 @@
 
 #include "states/SplashState.h"
 
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
 
+#include <algorithm>
+#include <cmath>
 #include <memory>
 
 Application::Application()
@@ -16,6 +21,10 @@ Application::Application()
 	CreateWindow();
 	audioMixer.LoadFromFile("data/audio.json");
 	input.LoadConfig("data/input.json");
+
+	resources.textures.Load("cursor", "assets/textures/cursor/pointer.png");
+	resources.textures.Get("cursor").setSmooth(false);
+
 	RegisterInitialState();
 }
 
@@ -23,6 +32,7 @@ void Application::CreateWindow()
 {
 	window.create(desktopMode, "2D Platformer", sf::Style::None, sf::State::Windowed);
 	window.setVerticalSyncEnabled(true);
+	window.setMouseCursorVisible(false); // we draw our own pixel cursor instead
 }
 
 void Application::RegisterInitialState()
@@ -52,9 +62,6 @@ void Application::Run()
 			remainderTime -= FIXED_DELTA_TIME;
 		}
 
-		// Close only after the game has actually started and then emptied the stack
-		// (e.g. the "Exit" button), not during the first frames before the initial
-		// state's deferred Push has been applied.
 		if (!stateMachine.IsEmpty())
 			hasStateRun = true;
 		else if (hasStateRun)
@@ -73,11 +80,20 @@ void Application::ProcessEvents()
 	while (const std::optional event = window.pollEvent())
 	{
 		if (const auto* moved = event->getIf<sf::Event::MouseMoved>())
+		{
 			virtualScreen.UpdateMousePosition(moved->position, window);
+			input.NotifyMouseUsed();
+		}
 		else if (const auto* pressed = event->getIf<sf::Event::MouseButtonPressed>())
+		{
 			virtualScreen.UpdateMousePosition(pressed->position, window);
+			input.NotifyMouseUsed();
+		}
 		else if (const auto* released = event->getIf<sf::Event::MouseButtonReleased>())
+		{
 			virtualScreen.UpdateMousePosition(released->position, window);
+			input.NotifyMouseUsed();
+		}
 
 		if (event->is<sf::Event::Closed>())
 			window.close();
@@ -106,5 +122,25 @@ void Application::Render(float interpolationFactor)
 
 	window.clear(sf::Color::Black);
 	virtualScreen.RenderToWindow(window);
+	DrawCursor();
 	window.display();
+}
+
+void Application::DrawCursor()
+{
+	if (input.GetActiveDevice() != InputDevice::Mouse)
+		return;
+
+	const sf::Vector2u windowSize = window.getSize();
+	const float scale = std::min(
+		static_cast<float>(windowSize.x) / VirtualScreen::WIDTH,
+		static_cast<float>(windowSize.y) / VirtualScreen::HEIGHT);
+
+	const sf::Vector2i mouse = sf::Mouse::getPosition(window);
+
+	sf::Sprite cursor(resources.textures.Get("cursor"));
+	cursor.setScale({ scale * 0.5f, scale * 0.5f });
+	cursor.setPosition({ std::floor(static_cast<float>(mouse.x)), std::floor(static_cast<float>(mouse.y)) });
+
+	window.draw(cursor);
 }

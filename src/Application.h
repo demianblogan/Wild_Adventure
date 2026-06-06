@@ -20,9 +20,11 @@ public:
 private:
 	void CreateWindow();
 	void RegisterInitialState();
+
 	void ProcessEvents();
 	void Update(float deltaTime);
 	void Render(float interpolationFactor);
+	void DrawCursor();
 
 	static constexpr float FIXED_DELTA_TIME = 1.0f / 60.0f;
 	static constexpr float MAX_FRAME_TIME = 0.25f;
