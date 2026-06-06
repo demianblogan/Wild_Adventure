@@ -19,7 +19,7 @@ public:
 	void Render(float interpolationFactor) override;
 
 private:
-	enum class NavRequest { None, OpenPanel, Back, StartGame, Exit };
+	enum class NavRequest { None, OpenPanel, Back, StartGame, Save, Exit };
 
 	void RegisterActions();
 	void ShowPanel(const std::string& panelId);
@@ -27,6 +27,13 @@ private:
 
 	void SetupAudioPanel();
 	void SetVolumeDisplay(const std::string& sliderName, const std::string& labelName, int value);
+
+	void GoBackPanel();
+	void UpdateSaveButtonTint();
+	void OpenUnsavedChangesDialog();
+	void SaveAndGoBack();
+	void RevertAndGoBack();
+	bool IsSettingsPanel(const std::string& panelId) const;
 
 	MenuBackdrop backdrop;
 
