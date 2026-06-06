@@ -41,6 +41,8 @@
 			"cherries",
 			"kiwi",
 			"melon"
-		]
+		],
+		"ejectSpeedX": 70,
+		"ejectSpeedUp": 150
 	}
 }

@@ -53,6 +53,8 @@ void DataLoader::RegisterLoaders()
 		{
 			ECS::Sprite sprite;
 			sprite.textureName = data.at("textureName");
+			sprite.offsetX = data.value("offsetX", 0.0f);
+			sprite.offsetY = data.value("offsetY", 0.0f);
 			registry.Add<ECS::Sprite>(entity, sprite);
 		};
 
@@ -206,6 +208,9 @@ void DataLoader::RegisterLoaders()
 			for (const auto& fruit : data.at("fruits"))
 				box.fruits.push_back(fruit.get<std::string>());
 
+			box.ejectSpeedX = data.value("ejectSpeedX", 0.0f);
+			box.ejectSpeedUp = data.value("ejectSpeedUp", 0.0f);
+
 			registry.Add<ECS::Box>(entity, box);
 		};
 }
@@ -262,6 +267,13 @@ ECS::Entity DataLoader::LoadEntityFromFile(ECS::Registry& registry, const std::s
 	const nlohmann::json entityJson = nlohmann::json::parse(file);
 
 	return LoadEntity(registry, entityJson);
+}
+
+ECS::Entity DataLoader::SpawnFromPrefab(ECS::Registry& registry, const std::string& path)
+{
+	const ECS::Entity entity = LoadEntityFromFile(registry, path);
+	AddImpliedComponents(registry, { entity });
+	return entity;
 }
 
 ECS::Entity DataLoader::LoadPrefabbedEntity(ECS::Registry& registry, const nlohmann::json& entry)

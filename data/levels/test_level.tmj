@@ -49,8 +49,8 @@
                  "type":"woodEasyBox",
                  "visible":true,
                  "width":0,
-                 "x":336,
-                 "y":160
+                 "x":328,
+                 "y":112
                 }, 
                 {
                  "height":0,
@@ -75,8 +75,8 @@
                  "type":"woodHardBox",
                  "visible":true,
                  "width":0,
-                 "x":368,
-                 "y":144
+                 "x":360,
+                 "y":108
                 }, 
                 {
                  "height":0,
@@ -89,7 +89,7 @@
                  "visible":true,
                  "width":0,
                  "x":384,
-                 "y":96
+                 "y":112
                 }],
          "opacity":1,
          "type":"objectgroup",

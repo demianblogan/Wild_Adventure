@@ -9,7 +9,7 @@ namespace ECS
 	public:
 		PickupSystem(Registry& registry, int& score);
 
-		void Update();
+		void Update(float deltaTime);
 
 	private:
 		Registry& registry;

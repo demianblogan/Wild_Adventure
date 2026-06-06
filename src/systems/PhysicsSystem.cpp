@@ -12,6 +12,7 @@
 #include "components/Velocity.h"
 #include "components/WallSlide.h"
 #include "components/Health.h"
+#include "components/Player.h"
 #include "core/ecs/Registry.h"
 #include "tilemap/Tilemap.h"
 
@@ -27,7 +28,6 @@ namespace ECS
 
 	void PhysicsSystem::Update(float deltaTime)
 	{
-		// Gather solid boxes once (positions are copies; safe to mutate components during the player loop).
 		std::vector<SolidBox> boxes;
 		registry.ForEach<Solid, Transform>(
 			[&boxes](Entity entity, Solid& solid, Transform& transform)
@@ -49,6 +49,7 @@ namespace ECS
 				}
 
 				const bool dead = registry.Has<Health>(entity) && registry.Get<Health>(entity).current <= 0;
+				const bool collidesWithBoxes = registry.Has<Player>(entity);
 
 				velocity.y += gravity.acceleration * deltaTime;
 				if (velocity.y > gravity.maxFallSpeed)
@@ -62,17 +63,23 @@ namespace ECS
 				if (!dead)
 				{
 					ResolveHorizontal(transform, collider, velocity);
-					ResolveHorizontalBoxes(transform, collider, velocity, boxes);
+					if (collidesWithBoxes)
+						ResolveHorizontalBoxes(transform, collider, velocity, boxes);
 				}
 
 				if (!dead)
 				{
-					if (IsWallAt(transform, collider, 1) || IsBoxWallAt(transform, collider, 1, boxes))
+					const bool wallRight = IsWallAt(transform, collider, 1)
+						|| (collidesWithBoxes && IsBoxWallAt(transform, collider, 1, boxes));
+					const bool wallLeft = IsWallAt(transform, collider, -1)
+						|| (collidesWithBoxes && IsBoxWallAt(transform, collider, -1, boxes));
+
+					if (wallRight)
 					{
 						collisionState.isOnWall = true;
 						collisionState.wallDirection = 1;
 					}
-					else if (IsWallAt(transform, collider, -1) || IsBoxWallAt(transform, collider, -1, boxes))
+					else if (wallLeft)
 					{
 						collisionState.isOnWall = true;
 						collisionState.wallDirection = -1;
@@ -90,8 +97,13 @@ namespace ECS
 				if (!dead)
 				{
 					ResolveVertical(transform, collider, velocity, collisionState);
-					ResolveVerticalBoxes(transform, collider, velocity, collisionState, boxes);
+					if (collidesWithBoxes)
+						ResolveVerticalBoxes(transform, collider, velocity, collisionState, boxes);
 				}
+
+				// Dropped items (no player control) stop sliding once they land.
+				if (!collidesWithBoxes && collisionState.isOnGround)
+					velocity.x = 0.0f;
 
 				if (registry.Has<Facing>(entity))
 				{
