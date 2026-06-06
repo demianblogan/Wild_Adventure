@@ -14,5 +14,10 @@
 	"spikes": "assets/textures/traps/spikes/Idle.png",
 	"green": "assets/textures/background/green.png",
 	"button_normal": "assets/textures/ui/button_normal.png",
-	"button_pressed": "assets/textures/ui/button_pressed.png"
+	"button_pressed": "assets/textures/ui/button_pressed.png",
+	"label_background": "assets/textures/ui/label_background.png",
+	"container_background": "assets/textures/ui/container_background.png",
+	"slider_track": "assets/textures/ui/slider_track.png",
+	"slider_fill": "assets/textures/ui/slider_fill.png",
+	"slider_handle": "assets/textures/ui/slider_handle.png"
 }

@@ -38,6 +38,7 @@ namespace UI
 		void Update(float deltaTime);
 		void Draw(sf::RenderTarget& target) const;
 
+		void NavigateValue(int direction);
 		void NavigateNext();
 		void NavigatePrevious();
 		void Confirm(bool pressed);

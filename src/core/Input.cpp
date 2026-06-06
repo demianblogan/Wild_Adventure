@@ -15,6 +15,8 @@ namespace
 		{ "Jump", Action::Jump },
 		{ "MenuUp", Action::MenuUp },
 		{ "MenuDown", Action::MenuDown },
+		{ "MenuLeft", Action::MenuLeft },
+		{ "MenuRight", Action::MenuRight },
 		{ "MenuConfirm", Action::MenuConfirm },
 		{ "MenuBack", Action::MenuBack }
 	};

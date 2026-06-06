@@ -233,6 +233,16 @@ namespace UI
 					image->SetTexture(data["textureName"]);
 				if (data.contains("color"))
 					image->SetColor(ParseColor(data["color"]));
+				if (data.contains("border"))
+				{
+					const auto& b = data["border"];
+					if (b.is_number())
+						image->SetBorder(b, b, b, b);
+					else if (b.size() == 2)
+						image->SetBorder(b[0], b[1], b[0], b[1]);
+					else if (b.size() == 4)
+						image->SetBorder(b[0], b[1], b[2], b[3]);
+				}
 
 				return image;
 			};

@@ -27,6 +27,7 @@ namespace UI
 
 		void OnDragStart(sf::Vector2f mousePosition) override;
 		void OnDragMove(sf::Vector2f mousePosition) override;
+		void OnNavigate(int direction) override;
 
 		void HandleEvent(const sf::Event& event) override;
 

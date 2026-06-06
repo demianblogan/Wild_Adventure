@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Context.h"
+#include "core/Input.h"
+#include "core/Settings.h"
 #include "audio/Mixer.h"
 #include "core/VirtualScreen.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
-#include "core/Input.h"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/VideoMode.hpp>
@@ -20,7 +21,6 @@ public:
 private:
 	void CreateWindow();
 	void RegisterInitialState();
-
 	void ProcessEvents();
 	void Update(float deltaTime);
 	void Render(float interpolationFactor);
@@ -36,5 +36,6 @@ private:
 	Resources resources;
 	Audio::Mixer audioMixer;
 	Input input;
+	Settings settings;
 	Context context;
 };

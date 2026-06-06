@@ -40,6 +40,7 @@ namespace UI
 		virtual void OnDragStart(sf::Vector2f mousePosition) {}
 		virtual void OnDragMove(sf::Vector2f mousePosition) {}
 		virtual void OnDragEnd() {}
+		virtual void OnNavigate(int direction) {}
 
 	protected:
 		virtual void OnStateChanged() {}

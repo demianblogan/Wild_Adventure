@@ -105,6 +105,40 @@
 			{
 				"button": 1
 			}
+		],
+		"MenuLeft":
+		[
+			{
+				"key": "A"
+			},
+			{
+				"key": "Left"
+			},
+			{
+				"axis": "X",
+				"direction": -1
+			},
+			{
+				"axis": "PovX",
+				"direction": -1
+			}
+		],
+		"MenuRight":
+		[
+			{
+				"key": "D"
+			},
+			{
+				"key": "Right"
+			},
+			{
+				"axis": "X",
+				"direction": 1
+			},
+			{
+				"axis": "PovX",
+				"direction": 1
+			}
 		]
 	}
 }

@@ -214,6 +214,12 @@ namespace UI
 				{ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });
 	}
 
+	void Root::NavigateValue(int direction)
+	{
+		if (activatedElement != nullptr)
+			activatedElement->OnNavigate(direction);
+	}
+
 	void Root::NavigateNext()
 	{
 		activeMode = InputMode::Selection;

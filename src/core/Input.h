@@ -13,6 +13,8 @@ enum class Action
 	Jump,
 	MenuUp,
 	MenuDown,
+	MenuLeft,
+	MenuRight,
 	MenuConfirm,
 	MenuBack,
 	Count

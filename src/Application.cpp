@@ -16,11 +16,15 @@
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
 	, audioMixer(resources)
-	, context(virtualScreen, stateMachine, resources, audioMixer, input)
+	, context(virtualScreen, stateMachine, resources, audioMixer, input, settings)
 {
 	CreateWindow();
 	audioMixer.LoadFromFile("data/audio.json");
 	input.LoadConfig("data/input.json");
+
+	settings.Load("data/settings.json");
+	audioMixer.SetSoundVolume(settings.GetSoundVolume() / 10.0f);
+	audioMixer.SetMusicVolume(settings.GetMusicVolume() / 10.0f);
 
 	resources.textures.Load("cursor", "assets/textures/cursor/pointer.png");
 	resources.textures.Get("cursor").setSmooth(false);

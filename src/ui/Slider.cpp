@@ -67,12 +67,18 @@ namespace UI
 
 	void Slider::SetValue(float value)
 	{
-		const float clamped = std::clamp(value, minValue, maxValue);
+		float snapped = std::clamp(value, minValue, maxValue);
 
-		if (clamped == currentValue)
+		// Snap to the nearest step so the value is always discrete (0..10 here).
+		if (step > 0.0f)
+			snapped = minValue + std::round((snapped - minValue) / step) * step;
+
+		snapped = std::clamp(snapped, minValue, maxValue);
+
+		if (snapped == currentValue)
 			return;
 
-		currentValue = clamped;
+		currentValue = snapped;
 		RefreshLayout();
 
 		if (onValueChanged)
@@ -107,6 +113,11 @@ namespace UI
 	void Slider::OnDragMove(sf::Vector2f mousePosition)
 	{
 		SetValueFromMouseX(mousePosition.x);
+	}
+
+	void Slider::OnNavigate(int direction)
+	{
+		SetValue(currentValue + direction * step);
 	}
 
 	void Slider::HandleEvent(const sf::Event& event)
