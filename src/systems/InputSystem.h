@@ -1,5 +1,7 @@
 #pragma once
 
+class Input;
+
 namespace ECS
 {
 	class Registry;
@@ -7,12 +9,12 @@ namespace ECS
 	class InputSystem
 	{
 	public:
-		InputSystem(Registry& registry);
+		InputSystem(Registry& registry, const Input& input);
 
 		void Update(float deltaTime);
 
 	private:
 		Registry& registry;
-		bool wasJumpDown = false;
+		const Input& input;
 	};
 }

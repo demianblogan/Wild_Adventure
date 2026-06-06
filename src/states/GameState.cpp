@@ -10,6 +10,7 @@
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "core/Input.h"
 #include "core/ecs/Registry.h"
 #include "tilemap/TilemapLoader.h"
 #include "tilemap/TilemapRenderer.h"
@@ -25,7 +26,7 @@
 GameState::GameState(Context& context, const std::string& levelPath)
 	: State(context)
 	, particles(context.resources)
-	, inputSystem(registry)
+	, inputSystem(registry, context.input)
 	, jumpSystem(registry)
 	, damageSystem(registry)
 	, deathSystem(registry)

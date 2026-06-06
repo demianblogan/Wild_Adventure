@@ -4,9 +4,8 @@
 #include "components/Jump.h"
 #include "components/Player.h"
 #include "components/Velocity.h"
+#include "core/Input.h"
 #include "core/ecs/Registry.h"
-
-#include <SFML/Window/Keyboard.hpp>
 
 #include <algorithm>
 
@@ -24,27 +23,18 @@ namespace ECS
 		}
 	}
 
-	InputSystem::InputSystem(Registry& registry)
+	InputSystem::InputSystem(Registry& registry, const Input& input)
 		: registry(registry)
+		, input(input)
 	{}
 
 	void InputSystem::Update(float deltaTime)
 	{
-		using Key = sf::Keyboard::Key;
-
-		const bool left = sf::Keyboard::isKeyPressed(Key::A) || sf::Keyboard::isKeyPressed(Key::Left);
-		const bool right = sf::Keyboard::isKeyPressed(Key::D) || sf::Keyboard::isKeyPressed(Key::Right);
-		const float direction = (right ? 1.0f : 0.0f) - (left ? 1.0f : 0.0f);
-
-		const bool jumpDown = sf::Keyboard::isKeyPressed(Key::Space)
-			|| sf::Keyboard::isKeyPressed(Key::W)
-			|| sf::Keyboard::isKeyPressed(Key::Up);
-
-		const bool jumpEdge = jumpDown && !wasJumpDown;
-		wasJumpDown = jumpDown;
+		const float direction = input.GetAxisX();
+		const bool jumpPressed = input.WasPressed(Action::Jump);
 
 		registry.ForEach<Player, Velocity, Jump, Health>(
-			[direction, jumpEdge, deltaTime](Entity, Player& player, Velocity& velocity, Jump& jump, Health& health)
+			[direction, jumpPressed, deltaTime](Entity, Player& player, Velocity& velocity, Jump& jump, Health& health)
 			{
 				if (health.current <= 0)
 					return;
@@ -62,7 +52,7 @@ namespace ECS
 					velocity.x = Approach(velocity.x, target, rate * deltaTime);
 				}
 
-				if (jumpEdge)
+				if (jumpPressed)
 					jump.wantsToJump = true;
 			});
 	}

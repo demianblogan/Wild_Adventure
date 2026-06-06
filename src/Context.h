@@ -3,6 +3,7 @@
 class VirtualScreen;
 class StateMachine;
 class Resources;
+class Input;
 
 namespace Audio
 {
@@ -15,4 +16,5 @@ struct Context
 	StateMachine& stateMachine;
 	Resources& resources;
 	Audio::Mixer& audioMixer;
+	Input& input;
 };

@@ -11,10 +11,11 @@
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
 	, audioMixer(resources)
-	, context(virtualScreen, stateMachine, resources, audioMixer)
+	, context(virtualScreen, stateMachine, resources, audioMixer, input)
 {
 	CreateWindow();
 	audioMixer.LoadFromFile("data/audio.json");
+	input.LoadConfig("data/input.json");
 	RegisterInitialState();
 }
 
@@ -93,6 +94,7 @@ void Application::ProcessEvents()
 
 void Application::Update(float deltaTime)
 {
+	input.Update();
 	stateMachine.Update(deltaTime);
 }
 

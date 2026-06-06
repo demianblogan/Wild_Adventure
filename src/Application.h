@@ -5,6 +5,7 @@
 #include "core/VirtualScreen.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
+#include "core/Input.h"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/VideoMode.hpp>
@@ -32,5 +33,6 @@ private:
 	StateMachine stateMachine;
 	Resources resources;
 	Audio::Mixer audioMixer;
+	Input input;
 	Context context;
 };
