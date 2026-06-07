@@ -60,11 +60,22 @@ void Application::CreateWindow()
 
 	window.setVerticalSyncEnabled(settings.GetVsync());
 	window.setMouseCursorVisible(false);
+
+	appliedWidth = settings.GetResolutionWidth();
+	appliedHeight = settings.GetResolutionHeight();
+	appliedMode = settings.GetScreenMode();
 }
 
 void Application::ApplyGraphics()
 {
-	CreateWindow();
+	const bool changed = appliedWidth != settings.GetResolutionWidth()
+		|| appliedHeight != settings.GetResolutionHeight()
+		|| appliedMode != settings.GetScreenMode();
+
+	if (changed)
+		CreateWindow();   // resolution/mode changed: recreate (also refreshes vsync)
+	else
+		ApplyVsync();     // nothing visual changed: just keep vsync in sync
 }
 
 void Application::ApplyVsync()

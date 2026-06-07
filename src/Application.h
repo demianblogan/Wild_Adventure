@@ -48,4 +48,8 @@ private:
 	float fpsTimer = 0.0f;
 	int fpsFrameCount = 0;
 	int fpsDisplayed = 0;
+
+	int appliedWidth = 0;
+	int appliedHeight = 0;
+	ScreenMode appliedMode = ScreenMode::Borderless;
 };

@@ -20,5 +20,7 @@
 	"slider_track": "assets/textures/ui/slider_track.png",
 	"slider_fill": "assets/textures/ui/slider_fill.png",
 	"slider_handle": "assets/textures/ui/slider_handle.png",
-	"container_background2": "assets/textures/ui/container_background2.png"
+	"container_background2": "assets/textures/ui/container_background2.png",
+	"arrow_left": "assets/textures/ui/arrow_left.png",
+	"arrow_right": "assets/textures/ui/arrow_right.png"
 }

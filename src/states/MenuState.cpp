@@ -10,13 +10,17 @@
 #include "states/ConfirmState.h"
 #include "states/GameState.h"
 #include "ui/Button.h"
+#include "ui/Checkbox.h"
 #include "ui/Element.h"
 #include "ui/Label.h"
 #include "ui/Slider.h"
+#include "core/GraphicsTarget.h"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
+#include <SFML/Window/VideoMode.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <memory>
 #include <stdexcept>
@@ -58,6 +62,7 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_open_single", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "single"; });
 	interfaceLoader.RegisterAction("menu_open_settings", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "settings"; });
 	interfaceLoader.RegisterAction("menu_open_audio", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "audio"; });
+	interfaceLoader.RegisterAction("menu_open_graphics", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "graphics"; });
 	interfaceLoader.RegisterAction("menu_open_author", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "author"; });
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
 	interfaceLoader.RegisterAction("menu_save", [this] { pendingRequest = NavRequest::Save; });
@@ -83,6 +88,22 @@ void MenuState::RegisterActions()
 			if (auto* label = dynamic_cast<UI::Label*>(userInterface.FindByName("music_value")))
 				label->SetText(std::to_string(level));
 		});
+
+	interfaceLoader.RegisterAction("resolution_prev", [this] { StepResolution(-1); });
+	interfaceLoader.RegisterAction("resolution_next", [this] { StepResolution(1); });
+	interfaceLoader.RegisterAction("screenmode_prev", [this] { StepScreenMode(-1); });
+	interfaceLoader.RegisterAction("screenmode_next", [this] { StepScreenMode(1); });
+
+	interfaceLoader.RegisterBoolAction("set_vsync", [this](bool value)
+		{
+			context.settings.SetVsync(value);
+			context.graphics.ApplyVsync(); // vsync applies immediately
+		});
+
+	interfaceLoader.RegisterBoolAction("set_showfps", [this](bool value)
+		{
+			context.settings.SetShowFps(value); // read by the app each frame
+		});
 }
 
 void MenuState::ShowPanel(const std::string& panelId)
@@ -99,6 +120,8 @@ void MenuState::ShowPanel(const std::string& panelId)
 
 	if (panelId == "audio")
 		SetupAudioPanel();
+	else if (panelId == "graphics")
+		SetupGraphicsPanel();
 }
 
 void MenuState::SetupAudioPanel()
@@ -116,9 +139,105 @@ void MenuState::SetVolumeDisplay(const std::string& sliderName, const std::strin
 		label->SetText(std::to_string(value));
 }
 
+void MenuState::SetupGraphicsPanel()
+{
+	resolutions.clear();
+	for (const sf::VideoMode& mode : sf::VideoMode::getFullscreenModes())
+	{
+		if (std::find(resolutions.begin(), resolutions.end(), mode.size) == resolutions.end())
+			resolutions.push_back(mode.size);
+	}
+
+	const sf::Vector2u current(static_cast<unsigned int>(context.settings.GetResolutionWidth()),
+		static_cast<unsigned int>(context.settings.GetResolutionHeight()));
+
+	const auto found = std::find(resolutions.begin(), resolutions.end(), current);
+	if (found != resolutions.end())
+	{
+		resolutionIndex = static_cast<int>(std::distance(resolutions.begin(), found));
+	}
+	else
+	{
+		resolutions.insert(resolutions.begin(), current);
+		resolutionIndex = 0;
+	}
+
+	UpdateResolutionLabel();
+	UpdateScreenModeLabel();
+	UpdateResolutionRowEnabled();
+
+	if (auto* vsync = dynamic_cast<UI::Checkbox*>(userInterface.FindByName("vsync_checkbox")))
+		vsync->SetChecked(context.settings.GetVsync());
+	if (auto* showFps = dynamic_cast<UI::Checkbox*>(userInterface.FindByName("showfps_checkbox")))
+		showFps->SetChecked(context.settings.GetShowFps());
+}
+
+void MenuState::StepResolution(int direction)
+{
+	if (context.settings.GetScreenMode() == ScreenMode::Borderless)
+		return; // borderless uses the desktop resolution
+	if (resolutions.empty())
+		return;
+
+	resolutionIndex = std::clamp(resolutionIndex + direction, 0, static_cast<int>(resolutions.size()) - 1);
+
+	const sf::Vector2u resolution = resolutions[resolutionIndex];
+	context.settings.SetResolution(static_cast<int>(resolution.x), static_cast<int>(resolution.y));
+
+	UpdateResolutionLabel();
+}
+
+void MenuState::StepScreenMode(int direction)
+{
+	const ScreenMode order[3] = { ScreenMode::Fullscreen, ScreenMode::Borderless, ScreenMode::Window };
+
+	int current = 0;
+	for (int i = 0; i < 3; i++)
+		if (order[i] == context.settings.GetScreenMode())
+			current = i;
+
+	current = (current + direction + 3) % 3;
+	context.settings.SetScreenMode(order[current]);
+
+	UpdateScreenModeLabel();
+	UpdateResolutionRowEnabled();
+}
+
+void MenuState::UpdateResolutionLabel()
+{
+	if (auto* label = dynamic_cast<UI::Label*>(userInterface.FindByName("resolution_value")))
+		label->SetText(std::to_string(context.settings.GetResolutionWidth()) + " x "
+			+ std::to_string(context.settings.GetResolutionHeight()));
+}
+
+void MenuState::UpdateScreenModeLabel()
+{
+	std::string text = "Borderless";
+	switch (context.settings.GetScreenMode())
+	{
+	case ScreenMode::Fullscreen: text = "Fullscreen"; break;
+	case ScreenMode::Borderless: text = "Borderless"; break;
+	case ScreenMode::Window:     text = "Window"; break;
+	}
+
+	if (auto* label = dynamic_cast<UI::Label*>(userInterface.FindByName("screenmode_value")))
+		label->SetText(text);
+}
+
+void MenuState::UpdateResolutionRowEnabled()
+{
+	const bool enabled = context.settings.GetScreenMode() != ScreenMode::Borderless;
+	const sf::Color color = enabled ? sf::Color(226, 210, 255, 255) : sf::Color(120, 120, 120, 255);
+
+	if (auto* caption = dynamic_cast<UI::Label*>(userInterface.FindByName("resolution_caption")))
+		caption->SetColor(color);
+	if (auto* value = dynamic_cast<UI::Label*>(userInterface.FindByName("resolution_value")))
+		value->SetColor(color);
+}
+
 bool MenuState::IsSettingsPanel(const std::string& panelId) const
 {
-	return panelId == "audio"; // graphics and controls will be added later
+	return panelId == "audio" || panelId == "graphics";
 }
 
 void MenuState::GoBackPanel()
@@ -136,8 +255,8 @@ void MenuState::UpdateSaveButtonTint()
 	if (save == nullptr)
 		return;
 
-	const sf::Color clean(120, 200, 120, 255);  // green: nothing to save
-	const sf::Color dirty(230, 150, 80, 255);    // orange: unsaved changes
+	const sf::Color clean(120, 200, 120, 255); // green: nothing to save
+	const sf::Color dirty(230, 150, 80, 255);  // orange: unsaved changes
 	save->SetBackgroundTint(context.settings.IsDirty() ? dirty : clean);
 }
 
@@ -152,6 +271,7 @@ void MenuState::OpenUnsavedChangesDialog()
 void MenuState::SaveAndGoBack()
 {
 	context.settings.Save(SETTINGS_PATH);
+	context.graphics.ApplyGraphics();
 	GoBackPanel();
 }
 
@@ -160,6 +280,7 @@ void MenuState::RevertAndGoBack()
 	context.settings.Revert();
 	context.audioMixer.SetSoundVolume(context.settings.GetSoundVolume() / 10.0f);
 	context.audioMixer.SetMusicVolume(context.settings.GetMusicVolume() / 10.0f);
+	context.graphics.ApplyVsync(); // restore vsync (resolution/mode were not applied yet)
 	GoBackPanel();
 }
 
@@ -184,6 +305,7 @@ void MenuState::ApplyPendingNavigation()
 
 	case NavRequest::Save:
 		context.settings.Save(SETTINGS_PATH);
+		context.graphics.ApplyGraphics();
 		break;
 
 	case NavRequest::StartGame:

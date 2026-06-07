@@ -17,6 +17,7 @@
 						0,
 						-54
 					],
+					"action": "menu_open_graphics",
 					"foregrounds":
 					{
 						"Normal":
