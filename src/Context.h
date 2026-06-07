@@ -5,6 +5,7 @@ class StateMachine;
 class Resources;
 class Input;
 class Settings;
+class GraphicsTarget;
 
 namespace Audio
 {
@@ -19,4 +20,5 @@ struct Context
 	Audio::Mixer& audioMixer;
 	Input& input;
 	Settings& settings;
+	GraphicsTarget& graphics;
 };

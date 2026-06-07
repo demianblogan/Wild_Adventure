@@ -6,6 +6,8 @@
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
 
+#include <SFML/System/Vector2.hpp>
+
 #include <string>
 #include <vector>
 
@@ -35,6 +37,13 @@ private:
 	void RevertAndGoBack();
 	bool IsSettingsPanel(const std::string& panelId) const;
 
+	void SetupGraphicsPanel();
+	void UpdateResolutionLabel();
+	void UpdateScreenModeLabel();
+	void UpdateResolutionRowEnabled();
+	void StepResolution(int direction);
+	void StepScreenMode(int direction);
+
 	MenuBackdrop backdrop;
 
 	UI::Root userInterface;
@@ -46,4 +55,7 @@ private:
 
 	NavRequest pendingRequest = NavRequest::None;
 	std::string pendingPanelId;
+
+	std::vector<sf::Vector2u> resolutions;
+	int resolutionIndex = 0;
 };

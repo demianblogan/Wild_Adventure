@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Context.h"
+#include "core/GraphicsTarget.h"
 #include "core/Input.h"
 #include "core/Settings.h"
 #include "audio/Mixer.h"
@@ -11,12 +12,15 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/VideoMode.hpp>
 
-class Application
+class Application : public GraphicsTarget
 {
 public:
 	Application();
 
 	void Run();
+
+	void ApplyGraphics() override;
+	void ApplyVsync() override;
 
 private:
 	void CreateWindow();
@@ -25,6 +29,8 @@ private:
 	void Update(float deltaTime);
 	void Render(float interpolationFactor);
 	void DrawCursor();
+	void DrawFps();
+	void UpdateFps(float deltaTime);
 
 	static constexpr float FIXED_DELTA_TIME = 1.0f / 60.0f;
 	static constexpr float MAX_FRAME_TIME = 0.25f;
@@ -38,4 +44,12 @@ private:
 	Input input;
 	Settings settings;
 	Context context;
+
+	float fpsTimer = 0.0f;
+	int fpsFrameCount = 0;
+	int fpsDisplayed = 0;
+
+	int appliedWidth = 0;
+	int appliedHeight = 0;
+	ScreenMode appliedMode = ScreenMode::Borderless;
 };

@@ -2,7 +2,9 @@
 
 #include "states/SplashState.h"
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
@@ -12,19 +14,22 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <string>
 
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
 	, audioMixer(resources)
-	, context(virtualScreen, stateMachine, resources, audioMixer, input, settings)
+	, context(virtualScreen, stateMachine, resources, audioMixer, input, settings, *this)
 {
-	CreateWindow();
-	audioMixer.LoadFromFile("data/audio.json");
-	input.LoadConfig("data/input.json");
-
 	settings.Load("data/settings.json");
+
+	CreateWindow();
+
+	audioMixer.LoadFromFile("data/audio.json");
 	audioMixer.SetSoundVolume(settings.GetSoundVolume() / 10.0f);
 	audioMixer.SetMusicVolume(settings.GetMusicVolume() / 10.0f);
+
+	input.LoadConfig("data/input.json");
 
 	resources.textures.Load("cursor", "assets/textures/cursor/pointer.png");
 	resources.textures.Get("cursor").setSmooth(false);
@@ -34,9 +39,48 @@ Application::Application()
 
 void Application::CreateWindow()
 {
-	window.create(desktopMode, "2D Platformer", sf::Style::None, sf::State::Windowed);
-	window.setVerticalSyncEnabled(true);
-	window.setMouseCursorVisible(false); // we draw our own pixel cursor instead
+	const ScreenMode mode = settings.GetScreenMode();
+
+	if (mode == ScreenMode::Fullscreen)
+	{
+		const sf::VideoMode videoMode({ static_cast<unsigned int>(settings.GetResolutionWidth()),
+			static_cast<unsigned int>(settings.GetResolutionHeight()) });
+		window.create(videoMode, "2D Platformer", sf::Style::None, sf::State::Fullscreen);
+	}
+	else if (mode == ScreenMode::Window)
+	{
+		const sf::VideoMode videoMode({ static_cast<unsigned int>(settings.GetResolutionWidth()),
+			static_cast<unsigned int>(settings.GetResolutionHeight()) });
+		window.create(videoMode, "2D Platformer", sf::Style::Default, sf::State::Windowed);
+	}
+	else // Borderless: desktop-sized, no frame
+	{
+		window.create(desktopMode, "2D Platformer", sf::Style::None, sf::State::Windowed);
+	}
+
+	window.setVerticalSyncEnabled(settings.GetVsync());
+	window.setMouseCursorVisible(false);
+
+	appliedWidth = settings.GetResolutionWidth();
+	appliedHeight = settings.GetResolutionHeight();
+	appliedMode = settings.GetScreenMode();
+}
+
+void Application::ApplyGraphics()
+{
+	const bool changed = appliedWidth != settings.GetResolutionWidth()
+		|| appliedHeight != settings.GetResolutionHeight()
+		|| appliedMode != settings.GetScreenMode();
+
+	if (changed)
+		CreateWindow();   // resolution/mode changed: recreate (also refreshes vsync)
+	else
+		ApplyVsync();     // nothing visual changed: just keep vsync in sync
+}
+
+void Application::ApplyVsync()
+{
+	window.setVerticalSyncEnabled(settings.GetVsync());
 }
 
 void Application::RegisterInitialState()
@@ -73,6 +117,8 @@ void Application::Run()
 			window.close();
 			break;
 		}
+
+		UpdateFps(frameTime);
 
 		const float interpolationFactor = remainderTime / FIXED_DELTA_TIME;
 		Render(interpolationFactor);
@@ -118,16 +164,51 @@ void Application::Update(float deltaTime)
 	stateMachine.Update(deltaTime);
 }
 
+void Application::UpdateFps(float deltaTime)
+{
+	fpsTimer += deltaTime;
+	fpsFrameCount++;
+
+	if (fpsTimer >= 0.5f)
+	{
+		fpsDisplayed = static_cast<int>(std::round(fpsFrameCount / fpsTimer));
+		fpsTimer = 0.0f;
+		fpsFrameCount = 0;
+	}
+}
+
 void Application::Render(float interpolationFactor)
 {
 	virtualScreen.Clear();
 	stateMachine.Render(interpolationFactor);
+	DrawFps();
 	virtualScreen.Display();
 
 	window.clear(sf::Color::Black);
 	virtualScreen.RenderToWindow(window);
 	DrawCursor();
 	window.display();
+}
+
+void Application::DrawFps()
+{
+	if (!settings.GetShowFps())
+		return;
+
+	if (!resources.fonts.Has("main"))
+		return;
+
+	virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+
+	sf::Text text(resources.fonts.Get("main"), "FPS: " + std::to_string(fpsDisplayed), 16);
+	text.setFillColor(sf::Color::White);
+	text.setOutlineColor(sf::Color(40, 40, 40));
+	text.setOutlineThickness(1.0f);
+
+	const sf::FloatRect bounds = text.getLocalBounds();
+	text.setPosition({ std::floor(VirtualScreen::WIDTH - bounds.size.x - 6.0f), std::floor(VirtualScreen::HEIGHT - 20.0f) });
+
+	virtualScreen.GetRenderTarget().draw(text);
 }
 
 void Application::DrawCursor()
@@ -143,7 +224,7 @@ void Application::DrawCursor()
 	const sf::Vector2i mouse = sf::Mouse::getPosition(window);
 
 	sf::Sprite cursor(resources.textures.Get("cursor"));
-	cursor.setScale({ scale * 0.5f, scale * 0.5f });
+	cursor.setScale({ scale, scale });
 	cursor.setPosition({ std::floor(static_cast<float>(mouse.x)), std::floor(static_cast<float>(mouse.y)) });
 
 	window.draw(cursor);
