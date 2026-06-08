@@ -21,6 +21,7 @@ public:
 
 	void ApplyGraphics() override;
 	void ApplyVsync() override;
+	void SetCursorVisible(bool visible) override;
 
 private:
 	void CreateWindow();
@@ -52,4 +53,6 @@ private:
 	int appliedWidth = 0;
 	int appliedHeight = 0;
 	ScreenMode appliedMode = ScreenMode::Borderless;
+
+	bool cursorVisible = true;
 };

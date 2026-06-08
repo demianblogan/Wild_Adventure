@@ -9,4 +9,5 @@ public:
 
 	virtual void ApplyGraphics() = 0; // recreate window from current settings
 	virtual void ApplyVsync() = 0;    // vsync only (cheap, no window recreate)
+	virtual void SetCursorVisible(bool visible) = 0; // show/hide the custom cursor
 };

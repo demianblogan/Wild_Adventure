@@ -1,6 +1,6 @@
 #include "Application.h"
 
-#include "states/SplashState.h"
+#include "states/CompanySplashState.h"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -83,9 +83,14 @@ void Application::ApplyVsync()
 	window.setVerticalSyncEnabled(settings.GetVsync());
 }
 
+void Application::SetCursorVisible(bool visible)
+{
+	cursorVisible = visible;
+}
+
 void Application::RegisterInitialState()
 {
-	stateMachine.Push(std::make_unique<SplashState>(context));
+	stateMachine.Push(std::make_unique<CompanySplashState>(context));
 }
 
 void Application::Run()
@@ -213,7 +218,7 @@ void Application::DrawFps()
 
 void Application::DrawCursor()
 {
-	if (input.GetActiveDevice() != InputDevice::Mouse)
+	if (!cursorVisible || input.GetActiveDevice() != InputDevice::Mouse)
 		return;
 
 	const sf::Vector2u windowSize = window.getSize();

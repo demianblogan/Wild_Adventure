@@ -63,6 +63,11 @@
 		{
 			"path": "assets/audio/music/menu.ogg",
 			"loop": true
+		},
+		"company_splash":
+		{
+			"path": "assets/audio/music/company_splash.ogg",
+			"loop": false
 		}
 	}
 }
