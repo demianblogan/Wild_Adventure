@@ -1,0 +1,27 @@
+{
+	"Transform":
+	{
+		"x": 0,
+		"y": 0
+	},
+	"Sprite":
+	{
+		"textureName": "player_appear",
+		"offsetY": 26
+
+	},
+	"AnimationSet":
+	{
+		"appear":
+		{
+			"textureName": "player_appear",
+			"frameCount": 7,
+			"frameDuration": 0.1,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "appear"
+	}
+}

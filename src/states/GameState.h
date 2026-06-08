@@ -36,6 +36,15 @@ public:
 private:
 	void UpdateScoreLabel();
 	void UpdateHearts(int currentHealth, float deltaTime);
+	void UpdateLevelFlow(float deltaTime);
+	bool IsPlayerOnStartPlatform();
+
+	enum class LevelPhase
+	{
+		Revealing,
+		Appearing,
+		Playing
+	};
 
 	ECS::Registry registry;
 	DataLoader sceneLoader;
@@ -84,4 +93,12 @@ private:
 	float previousLockTimer = 0.0f;
 
 	static constexpr float RUN_DUST_INTERVAL = 0.12f;
+
+	LevelPhase levelPhase = LevelPhase::Revealing;
+	ECS::Entity playerEntity = ECS::INVALID_ENTITY;
+	ECS::Entity startPlatformEntity = ECS::INVALID_ENTITY;
+	ECS::Entity appearEffectEntity = ECS::INVALID_ENTITY;
+	bool startMovingPlayed = false;
+
+	static constexpr float APPEAR_HEIGHT = 50.0f;
 };

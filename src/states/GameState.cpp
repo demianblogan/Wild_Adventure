@@ -7,6 +7,14 @@
 #include "components/Player.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
+#include "components/Animation.h"
+#include "components/AnimationState.h"
+#include "components/Collider.h"
+#include "components/Frozen.h"
+#include "components/PreviousTransform.h"
+#include "components/Solid.h"
+#include "components/AnimationSet.h"
+#include "components/StartPlatform.h"	
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
@@ -23,6 +31,7 @@
 
 #include <cmath>
 #include <memory>
+#include <iostream> //DEBUG
 
 GameState::GameState(Context& context, const std::string& levelPath)
 	: State(context)
@@ -68,20 +77,45 @@ GameState::GameState(Context& context, const std::string& levelPath)
 
 	sceneLoader.LoadSceneFromMap(registry, levelPath);
 
-	registry.ForEach<ECS::Player, ECS::Transform>(
-		[this](ECS::Entity, ECS::Player&, ECS::Transform& transform)
-		{
-			camera.SnapTo({ transform.x, transform.y });
-		});
+	// The hero spawns above the start platform, so a level only needs a single
+	// "start" marker in the "marks" object layer.
+	registry.ForEach<ECS::StartPlatform>(
+		[this](ECS::Entity entity, ECS::StartPlatform&) { startPlatformEntity = entity; });
 
-	registry.ForEach<ECS::Player, ECS::Transform, ECS::Health>(
-		[this](ECS::Entity, ECS::Player&, ECS::Transform& transform, ECS::Health& health)
-		{
-			camera.SnapTo({ transform.x, transform.y });
-			maxHearts = health.maximum;
-			displayedHealth = health.maximum;
-			previousPlayerHealth = health.maximum;
-		});
+	if (startPlatformEntity != ECS::INVALID_ENTITY)
+	{
+		playerEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/player.json");
+
+		// A prefab-spawned player has no Transform (the scene loader normally supplies
+		// it from the Tiled object); add it (and PreviousTransform) before use.
+		registry.Add<ECS::Transform>(playerEntity, {});
+		registry.Add<ECS::PreviousTransform>(playerEntity, {});
+
+		// Air position the hero falls from: centred on the platform surface,
+		// APPEAR_HEIGHT above the start marker. Read by value, since the adds below
+		// can reallocate the component pools.
+		const ECS::Transform startTransform = registry.Get<ECS::Transform>(startPlatformEntity);
+		const ECS::Solid startSolid = registry.Get<ECS::Solid>(startPlatformEntity);
+		const float airX = startTransform.x + startSolid.offsetX;
+		const float airY = startTransform.y - APPEAR_HEIGHT;
+
+		ECS::Transform& playerTransform = registry.Get<ECS::Transform>(playerEntity);
+		playerTransform.x = airX;
+		playerTransform.y = airY;
+
+		ECS::PreviousTransform& previous = registry.Get<ECS::PreviousTransform>(playerEntity);
+		previous.x = airX;
+		previous.y = airY;
+
+		const ECS::Health& health = registry.Get<ECS::Health>(playerEntity);
+		maxHearts = health.maximum;
+		displayedHealth = health.maximum;
+		previousPlayerHealth = health.maximum;
+
+		registry.Add<ECS::Frozen>(playerEntity, {});
+		camera.SnapTo({ airX, airY });
+		// The appear animation is spawned once the reveal finishes (see UpdateLevelFlow).
+	}
 
 	hudInterface.SetContent(hudLoader.LoadFromFile("data/ui/hud.json"));
 	UpdateScoreLabel();
@@ -91,6 +125,109 @@ GameState::GameState(Context& context, const std::string& levelPath)
 
 void GameState::HandleEvent(const sf::Event& event)
 {}
+
+void GameState::UpdateLevelFlow(float deltaTime)
+{
+	if (playerEntity == ECS::INVALID_ENTITY)
+		return;
+
+	if (levelPhase == LevelPhase::Revealing)
+	{
+		// Wait for the wipe to clear, then spawn the appear effect so it is visible.
+		if (transition.GetMode() != Transition::Mode::Idle)
+			return;
+
+		// Copy the position by value: SpawnFromPrefab can reallocate the pools and
+		// invalidate any reference into them.
+		const float playerX = registry.Get<ECS::Transform>(playerEntity).x;
+		const float playerY = registry.Get<ECS::Transform>(playerEntity).y;
+
+		appearEffectEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/appear_effect.json");
+
+		ECS::Transform& effectTransform = registry.Get<ECS::Transform>(appearEffectEntity);
+		effectTransform.x = playerX;
+		effectTransform.y = playerY;
+
+		// Initialise the animation now so the very first rendered frame is one cell
+		// wide; otherwise AnimationSystem only sets it next tick and frame 0 shows
+		// the whole sheet.
+		ECS::Animation& animation = registry.Get<ECS::Animation>(appearEffectEntity);
+		const ECS::AnimationSet& set = registry.Get<ECS::AnimationSet>(appearEffectEntity);
+		animation.data = set.animations.at("appear");
+		animation.playingState = "appear";
+
+		context.audioMixer.PlaySound("player_appear");
+
+		levelPhase = LevelPhase::Appearing;
+		return;
+	}
+
+	if (levelPhase == LevelPhase::Appearing)
+	{
+		const bool finished = appearEffectEntity != ECS::INVALID_ENTITY
+			&& registry.Has<ECS::Animation>(appearEffectEntity)
+			&& registry.Get<ECS::Animation>(appearEffectEntity).isFinished;
+
+		if (finished)
+		{
+			registry.DestroyEntity(appearEffectEntity);
+			appearEffectEntity = ECS::INVALID_ENTITY;
+
+			if (registry.Has<ECS::Frozen>(playerEntity))
+				registry.RemoveFrom<ECS::Frozen>(playerEntity);
+
+			levelPhase = LevelPhase::Playing;
+		}
+
+		return;
+	}
+
+	// Playing: the start platform plays its "moving" animation once, when the hero
+	// first lands on it, then returns to idle.
+	if (startPlatformEntity == ECS::INVALID_ENTITY)
+		return;
+
+	if (!startMovingPlayed && IsPlayerOnStartPlatform())
+	{
+		registry.Get<ECS::AnimationState>(startPlatformEntity).current = "moving";
+		startMovingPlayed = true;
+	}
+	else if (startMovingPlayed)
+	{
+		const ECS::Animation& animation = registry.Get<ECS::Animation>(startPlatformEntity);
+		if (animation.playingState == "moving" && animation.isFinished)
+			registry.Get<ECS::AnimationState>(startPlatformEntity).current = "idle";
+	}
+}
+
+bool GameState::IsPlayerOnStartPlatform()
+{
+	if (!registry.Has<ECS::CollisionState>(playerEntity)
+		|| !registry.Get<ECS::CollisionState>(playerEntity).isOnGround)
+		return false;
+
+	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
+	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
+	const ECS::Transform& platform = registry.Get<ECS::Transform>(startPlatformEntity);
+	const ECS::Solid& solid = registry.Get<ECS::Solid>(startPlatformEntity);
+
+	const float playerHalf = collider.width / 2.0f;
+	const float playerLeft = player.x - playerHalf;
+	const float playerRight = player.x + playerHalf;
+	const float playerBottom = player.y;
+
+	const float solidHalf = solid.width / 2.0f;
+	const float solidCenterX = platform.x + solid.offsetX;
+	const float solidBottom = platform.y + solid.offsetY;
+	const float solidLeft = solidCenterX - solidHalf;
+	const float solidRight = solidCenterX + solidHalf;
+	const float solidTop = solidBottom - solid.height;
+
+	const bool horizontalOverlap = playerLeft < solidRight && playerRight > solidLeft;
+	const bool restingOnTop = std::fabs(playerBottom - solidTop) < 2.0f;
+
+	return horizontalOverlap && restingOnTop;
+}
 
 void GameState::UpdateScoreLabel()
 {
@@ -171,6 +308,8 @@ void GameState::Update(float deltaTime)
 
 	playerAnimationSystem.Update();
 	animationSystem.Update(deltaTime);
+
+	UpdateLevelFlow(deltaTime);
 
 	particles.Update(deltaTime);
 

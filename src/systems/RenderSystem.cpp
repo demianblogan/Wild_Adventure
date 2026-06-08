@@ -7,6 +7,7 @@
 #include "components/Sprite.h"
 #include "components/Transform.h"
 #include "components/Rotation.h"
+#include "components/Frozen.h"
 #include "core/Resources.h"
 #include "core/ecs/Registry.h"
 
@@ -15,6 +16,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 
 #include <cmath>
+#include <iostream> // DEBUG
 
 namespace ECS
 {
@@ -29,6 +31,9 @@ namespace ECS
 		registry.ForEach<Transform, Sprite>(
 			[this, interpolationFactor](Entity entity, Transform& transform, Sprite& sprite)
 			{
+				if (registry.Has<Frozen>(entity))
+					return;
+
 				// Blink while invulnerable: hide on alternate short windows.
 				if (registry.Has<Health>(entity))
 				{

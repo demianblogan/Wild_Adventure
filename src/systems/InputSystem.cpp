@@ -4,6 +4,7 @@
 #include "components/Jump.h"
 #include "components/Player.h"
 #include "components/Velocity.h"
+#include "components/Frozen.h"
 #include "core/Input.h"
 #include "core/ecs/Registry.h"
 
@@ -34,8 +35,11 @@ namespace ECS
 		const bool jumpPressed = input.WasPressed(Action::Jump);
 
 		registry.ForEach<Player, Velocity, Jump, Health>(
-			[direction, jumpPressed, deltaTime](Entity, Player& player, Velocity& velocity, Jump& jump, Health& health)
+			[this, direction, jumpPressed, deltaTime](Entity entity, Player& player, Velocity& velocity, Jump& jump, Health& health)
 			{
+				if (registry.Has<Frozen>(entity))
+					return;
+
 				if (health.current <= 0)
 					return;
 

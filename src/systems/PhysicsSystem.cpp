@@ -13,6 +13,7 @@
 #include "components/WallSlide.h"
 #include "components/Health.h"
 #include "components/Player.h"
+#include "components/Frozen.h"
 #include "core/ecs/Registry.h"
 #include "tilemap/Tilemap.h"
 
@@ -33,14 +34,19 @@ namespace ECS
 			[&boxes](Entity entity, Solid& solid, Transform& transform)
 			{
 				const float halfWidth = solid.width / 2.0f;
-				boxes.push_back({ entity, transform.x - halfWidth, transform.x + halfWidth,
-					transform.y - solid.height, transform.y, solid.bounceSpeed });
+				const float centerX = transform.x + solid.offsetX;
+				const float bottom = transform.y + solid.offsetY;
+				boxes.push_back({ entity, centerX - halfWidth, centerX + halfWidth,
+					bottom - solid.height, bottom, solid.bounceSpeed });
 			});
 
 		registry.ForEach<Transform, Velocity, Collider, Gravity, CollisionState>(
 			[this, deltaTime, &boxes](Entity entity, Transform& transform, Velocity& velocity,
 				Collider& collider, Gravity& gravity, CollisionState& collisionState)
 			{
+				if (registry.Has<Frozen>(entity))
+					return;
+
 				if (registry.Has<PreviousTransform>(entity))
 				{
 					PreviousTransform& previous = registry.Get<PreviousTransform>(entity);
@@ -298,7 +304,7 @@ namespace ECS
 				velocity.y = 0.0f;
 			}
 
-			if (!registry.Has<BoxHit>(box.entity))
+			if (!registry.Has<BoxHit>(box.entity) && registry.Has<Box>(box.entity))
 				registry.Add<BoxHit>(box.entity, {});
 		}
 	}

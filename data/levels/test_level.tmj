@@ -3,6 +3,31 @@
  "infinite":false,
  "layers":[
         {
+         "color":"#00aaff",
+         "draworder":"topdown",
+         "id":7,
+         "name":"marks",
+         "objects":[
+                {
+                 "height":0,
+                 "id":22,
+                 "name":"start",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"start",
+                 "visible":true,
+                 "width":0,
+                 "x":208,
+                 "y":160
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
          "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -112,31 +137,6 @@
          "type":"tilelayer",
          "visible":true,
          "width":30,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "color":"#00aaff",
-         "draworder":"topdown",
-         "id":3,
-         "name":"player",
-         "objects":[
-                {
-                 "height":0,
-                 "id":1,
-                 "name":"player",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"player",
-                 "visible":true,
-                 "width":0,
-                 "x":216,
-                 "y":132
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -268,8 +268,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":22,
+ "nextlayerid":8,
+ "nextobjectid":24,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

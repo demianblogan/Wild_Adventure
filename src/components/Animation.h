@@ -12,5 +12,6 @@ namespace ECS
 		std::string playingState;
 		int currentFrame = 0;
 		float elapsedTime = 0.0f;
+		bool isFinished = false; // set when a non-looping animation reaches its last frame
 	};
 }

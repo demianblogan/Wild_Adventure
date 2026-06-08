@@ -21,6 +21,7 @@
 #include "components/Collectible.h"
 #include "components/Box.h"
 #include "components/Solid.h"
+#include "components/StartPlatform.h"
 #include "core/ecs/Registry.h"
 
 #include <fstream>
@@ -196,7 +197,14 @@ void DataLoader::RegisterLoaders()
 			solid.width = data.at("width");
 			solid.height = data.at("height");
 			solid.bounceSpeed = data.value("bounceSpeed", 0.0f);
+			solid.offsetX = data.value("offsetX", 0.0f);
+			solid.offsetY = data.value("offsetY", 0.0f);
 			registry.Add<ECS::Solid>(entity, solid);
+		};
+
+	loaders["StartPlatform"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::StartPlatform>(entity, {});
 		};
 
 	loaders["Box"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)

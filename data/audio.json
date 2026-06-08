@@ -26,6 +26,11 @@
 			"path": "assets/audio/sounds/player/death.ogg",
 			"volume": 0.9
 		},
+		"player_appear":
+		{
+			"path": "assets/audio/sounds/player/appearing.ogg",
+			"volume": 0.8
+		},
 		"fruit_collect":
 		{
 			"path": "assets/audio/sounds/fruits/collect.ogg",
