@@ -38,12 +38,16 @@ private:
 	void UpdateHearts(int currentHealth, float deltaTime);
 	void UpdateLevelFlow(float deltaTime);
 	bool IsPlayerOnStartPlatform();
+	bool IsPlayerOnFinish();
 
 	enum class LevelPhase
 	{
 		Revealing,
 		Appearing,
-		Playing
+		Playing,
+		Finishing,
+		Disappearing,
+		Complete
 	};
 
 	ECS::Registry registry;
@@ -100,5 +104,11 @@ private:
 	ECS::Entity appearEffectEntity = ECS::INVALID_ENTITY;
 	bool startMovingPlayed = false;
 
+	ECS::Entity finishEntity = ECS::INVALID_ENTITY;
+	ECS::Entity disappearEffectEntity = ECS::INVALID_ENTITY;
+	float finishTimer = 0.0f;
+	bool isCompleting = false;
+
 	static constexpr float APPEAR_HEIGHT = 50.0f;
+	static constexpr float FINISH_RISE_TIME = 0.3f; // bounce arc before the hero vanishes
 };

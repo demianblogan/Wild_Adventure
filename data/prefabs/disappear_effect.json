@@ -1,0 +1,26 @@
+{
+	"Transform":
+	{
+		"x": 0,
+		"y": 0
+	},
+	"Sprite":
+	{
+		"textureName": "player_disappear",
+		"offsetY": 26
+	},
+	"AnimationSet":
+	{
+		"disappear":
+		{
+			"textureName": "player_disappear",
+			"frameCount": 7,
+			"frameDuration": 0.06,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "disappear"
+	}
+}

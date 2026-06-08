@@ -20,6 +20,19 @@
                  "width":0,
                  "x":208,
                  "y":160
+                }, 
+                {
+                 "height":0,
+                 "id":24,
+                 "name":"finish",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"finish",
+                 "visible":true,
+                 "width":0,
+                 "x":368,
+                 "y":160
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -269,7 +282,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":24,
+ "nextobjectid":25,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",
