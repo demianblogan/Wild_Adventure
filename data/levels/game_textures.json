@@ -32,5 +32,9 @@
 
 	"box_metal_idle": "assets/textures/items/boxes/Box3/Idle.png",
 	"box_metal_hit": "assets/textures/items/boxes/Box3/Hit (28x24).png",
-	"box_metal_break": "assets/textures/items/boxes/Box3/Break.png"
+	"box_metal_break": "assets/textures/items/boxes/Box3/Break.png",
+
+	"start_idle": "assets/textures/items/checkpoints/Start/Start (Idle).png",
+	"start_moving": "assets/textures/items/checkpoints/Start/Start (Moving) (64x64).png",
+	"player_appear": "assets/textures/main_characters/Appearing (96x96).png"
 }

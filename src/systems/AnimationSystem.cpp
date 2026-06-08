@@ -29,6 +29,7 @@ namespace ECS
 					animation.playingState = state.current;
 					animation.currentFrame = 0;
 					animation.elapsedTime = 0.0f;
+					animation.isFinished = false;
 
 					sprite.textureName = animation.data.textureName;
 				}
@@ -46,7 +47,10 @@ namespace ECS
 					if (animation.data.isLooping)
 						animation.currentFrame = 0;
 					else
+					{
 						animation.currentFrame = animation.data.frameCount - 1;
+						animation.isFinished = true;
+					}
 				}
 			});
 	}

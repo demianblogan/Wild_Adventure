@@ -9,5 +9,7 @@ namespace ECS
 		float width = 0.0f;
 		float height = 0.0f;
 		float bounceSpeed = 0.0f;
+		float offsetX = 0.0f;
+		float offsetY = 0.0f;
 	};
 }

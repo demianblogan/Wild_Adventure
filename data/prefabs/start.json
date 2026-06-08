@@ -1,0 +1,37 @@
+{
+	"Sprite":
+	{
+		"textureName": "start_idle"
+	},
+	"AnimationSet":
+	{
+		"idle":
+		{
+			"textureName": "start_idle",
+			"frameCount": 1,
+			"frameDuration": 0.1,
+			"isLooping": true
+		},
+		"moving":
+		{
+			"textureName": "start_moving",
+			"frameCount": 17,
+			"frameDuration": 0.06,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "idle"
+	},
+	"Solid":
+	{
+		"width": 34,
+		"height": 8,
+		"offsetX": 11,
+		"offsetY": 0
+	},
+	"StartPlatform":
+	{
+	}
+}
