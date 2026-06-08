@@ -454,6 +454,11 @@
 							{
 								"prefab": "menu_button",
 								"name": "save_button",
+								"size":
+								[
+									140,
+									32
+								],
 								"anchor":
 								[
 									0.5,
@@ -466,7 +471,7 @@
 								],
 								"offset":
 								[
-									-72,
+									-150,
 									55
 								],
 								"backgroundTint":
@@ -493,7 +498,12 @@
 							"Button":
 							{
 								"prefab": "menu_button",
-								"name": "back_button",
+								"name": "default_button",
+								"size":
+								[
+									140,
+									32
+								],
 								"anchor":
 								[
 									0.5,
@@ -506,7 +516,45 @@
 								],
 								"offset":
 								[
-									72,
+									0,
+									55
+								],
+								"action": "menu_default",
+								"foregrounds":
+								{
+									"Normal":
+									{
+										"Label":
+										{
+											"text": "Default"
+										}
+									}
+								}
+							}
+						},
+						{
+							"Button":
+							{
+								"prefab": "menu_button",
+								"name": "back_button",
+								"size":
+								[
+									140,
+									32
+								],
+								"anchor":
+								[
+									0.5,
+									0.5
+								],
+								"pivot":
+								[
+									0.5,
+									0.5
+								],
+								"offset":
+								[
+									150,
 									55
 								],
 								"action": "menu_back",

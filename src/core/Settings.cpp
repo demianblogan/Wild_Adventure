@@ -110,3 +110,20 @@ void Settings::Save(const std::string& path)
 
 	saved = current;
 }
+
+void Settings::ResetAudioToDefaults()
+{
+	const SettingsData defaults;
+	current.soundVolume = defaults.soundVolume;
+	current.musicVolume = defaults.musicVolume;
+}
+
+void Settings::ResetGraphicsToDefaults()
+{
+	const SettingsData defaults;
+	current.resolutionWidth = defaults.resolutionWidth;
+	current.resolutionHeight = defaults.resolutionHeight;
+	current.screenMode = defaults.screenMode;
+	current.vsync = defaults.vsync;
+	current.showFps = defaults.showFps;
+}

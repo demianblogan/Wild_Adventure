@@ -32,6 +32,9 @@ public:
 	bool IsDirty() const { return !(current == saved); }
 	void Revert() { current = saved; }
 
+	void ResetAudioToDefaults();
+	void ResetGraphicsToDefaults();
+
 	int GetSoundVolume() const { return current.soundVolume; }
 	int GetMusicVolume() const { return current.musicVolume; }
 	void SetSoundVolume(int value);

@@ -33,6 +33,7 @@ private:
 
 	void GoBackPanel();
 	void UpdateSaveButtonTint();
+	void ResetCurrentPanelToDefaults();
 	void OpenUnsavedChangesDialog();
 	void SaveAndGoBack();
 	void RevertAndGoBack();
@@ -61,4 +62,5 @@ private:
 	int resolutionIndex = 0;
 
 	sf::Color resolutionCaptionColor; // caption color while the resolution row is enabled
+	bool resolutionCaptionColorKnown = false;
 };

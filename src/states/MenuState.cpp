@@ -67,6 +67,7 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_open_author", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "author"; });
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
 	interfaceLoader.RegisterAction("menu_save", [this] { pendingRequest = NavRequest::Save; });
+	interfaceLoader.RegisterAction("menu_default", [this] { ResetCurrentPanelToDefaults(); });
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
 	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
 
@@ -170,8 +171,14 @@ void MenuState::SetupGraphicsPanel()
 	const auto found = std::find(resolutions.begin(), resolutions.end(), current);
 	resolutionIndex = static_cast<int>(std::distance(resolutions.begin(), found));
 
-	if (auto* caption = dynamic_cast<UI::Label*>(userInterface.FindByName("resolution_caption")))
-		resolutionCaptionColor = caption->GetColor();
+	if (!resolutionCaptionColorKnown)
+	{
+		if (auto* caption = dynamic_cast<UI::Label*>(userInterface.FindByName("resolution_caption")))
+		{
+			resolutionCaptionColor = caption->GetColor();
+			resolutionCaptionColorKnown = true;
+		}
+	}
 
 	UpdateResolutionLabel();
 	UpdateScreenModeLabel();
@@ -275,6 +282,30 @@ void MenuState::UpdateSaveButtonTint()
 	const sf::Color clean(120, 200, 120, 255); // green: nothing to save
 	const sf::Color dirty(230, 150, 80, 255);  // orange: unsaved changes
 	save->SetBackgroundTint(context.settings.IsDirty() ? dirty : clean);
+}
+
+void MenuState::ResetCurrentPanelToDefaults()
+{
+	if (panelStack.empty())
+		return;
+
+	const std::string& panel = panelStack.back();
+
+	if (panel == "audio")
+	{
+		context.settings.ResetAudioToDefaults();
+		context.audioMixer.SetSoundVolume(context.settings.GetSoundVolume() / 10.0f);
+		context.audioMixer.SetMusicVolume(context.settings.GetMusicVolume() / 10.0f);
+		SetupAudioPanel();
+	}
+	else if (panel == "graphics")
+	{
+		context.settings.ResetGraphicsToDefaults();
+		context.graphics.ApplyVsync(); // vsync applies live; resolution/mode wait for Save
+		SetupGraphicsPanel();
+	}
+
+	UpdateSaveButtonTint();
 }
 
 void MenuState::OpenUnsavedChangesDialog()
