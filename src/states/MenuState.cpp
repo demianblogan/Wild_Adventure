@@ -31,6 +31,7 @@ namespace
 {
 	const std::string MENU_DIRECTORY = "data/ui/menu/";
 	const std::string SETTINGS_PATH = "data/settings.json";
+	const std::string INPUT_PATH = "data/input.json";
 }
 
 MenuState::MenuState(Context& context)
@@ -68,6 +69,13 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
 	interfaceLoader.RegisterAction("menu_save", [this] { pendingRequest = NavRequest::Save; });
 	interfaceLoader.RegisterAction("menu_default", [this] { ResetCurrentPanelToDefaults(); });
+	interfaceLoader.RegisterAction("menu_open_controls", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "controls"; });
+	interfaceLoader.RegisterAction("menu_open_keyboard", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "keyboard"; });
+	interfaceLoader.RegisterAction("menu_open_joystick", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "joystick"; });
+	interfaceLoader.RegisterAction("rebind_moveleft", [this] { BeginKeyCapture(Action::MoveLeft); });
+	interfaceLoader.RegisterAction("rebind_moveright", [this] { BeginKeyCapture(Action::MoveRight); });
+	interfaceLoader.RegisterAction("rebind_jump", [this] { BeginKeyCapture(Action::Jump); });
+	interfaceLoader.RegisterAction("rebind_pause", [this] { BeginKeyCapture(Action::Pause); });
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
 	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
 
@@ -124,6 +132,8 @@ void MenuState::ShowPanel(const std::string& panelId)
 		SetupAudioPanel();
 	else if (panelId == "graphics")
 		SetupGraphicsPanel();
+	else if (panelId == "keyboard")
+		SetupKeyboardPanel();
 
 	userInterface.ResetFocus();
 }
@@ -141,6 +151,72 @@ void MenuState::SetVolumeDisplay(const std::string& sliderName, const std::strin
 
 	if (auto* label = dynamic_cast<UI::Label*>(userInterface.FindByName(labelName)))
 		label->SetText(std::to_string(value));
+}
+
+void MenuState::SetupKeyboardPanel()
+{
+	const Action actions[] = { Action::MoveLeft, Action::MoveRight, Action::Jump, Action::Pause };
+
+	for (Action action : actions)
+	{
+		if (auto* label = dynamic_cast<UI::Label*>(userInterface.FindByName(KeyLabelName(action))))
+			label->SetText(Input::KeyName(context.input.GetPrimaryKey(action)));
+	}
+}
+
+std::string MenuState::KeyLabelName(Action action)
+{
+	switch (action)
+	{
+	case Action::MoveLeft:  return "moveleft_key";
+	case Action::MoveRight: return "moveright_key";
+	case Action::Jump:      return "jump_key";
+	case Action::Pause:     return "pause_key";
+	default:                return "";
+	}
+}
+
+void MenuState::BeginKeyCapture(Action action)
+{
+	capturingKey = true;
+	captureAction = action;
+
+	if (auto* label = dynamic_cast<UI::Label*>(userInterface.FindByName(KeyLabelName(action))))
+		label->SetText("...");
+}
+
+void MenuState::ApplyKeyCapture(sf::Keyboard::Key key)
+{
+	// Escape cancels the capture; it is therefore reserved and cannot be bound
+	// here (Default restores the Escape binding for Pause).
+	if (key == sf::Keyboard::Key::Escape)
+	{
+		capturingKey = false;
+		waitForKeyRelease = true;
+		SetupKeyboardPanel();
+		return;
+	}
+
+	// Keep keys unique among the rebindable game actions by swapping.
+	const Action editable[] = { Action::MoveLeft, Action::MoveRight, Action::Jump, Action::Pause };
+	const sf::Keyboard::Key previousKey = context.input.GetPrimaryKey(captureAction);
+
+	for (Action other : editable)
+	{
+		if (other != captureAction && context.input.GetPrimaryKey(other) == key)
+		{
+			context.input.SetPrimaryKey(other, previousKey);
+			break;
+		}
+	}
+
+	context.input.SetPrimaryKey(captureAction, key);
+
+	capturingKey = false;
+	waitForKeyRelease = true;
+
+	SetupKeyboardPanel();
+	UpdateSaveButtonTint();
 }
 
 void MenuState::SetupGraphicsPanel()
@@ -261,27 +337,7 @@ void MenuState::UpdateResolutionRowEnabled()
 
 bool MenuState::IsSettingsPanel(const std::string& panelId) const
 {
-	return panelId == "audio" || panelId == "graphics";
-}
-
-void MenuState::GoBackPanel()
-{
-	if (panelStack.size() > 1)
-	{
-		panelStack.pop_back();
-		ShowPanel(panelStack.back());
-	}
-}
-
-void MenuState::UpdateSaveButtonTint()
-{
-	auto* save = dynamic_cast<UI::Button*>(userInterface.FindByName("save_button"));
-	if (save == nullptr)
-		return;
-
-	const sf::Color clean(120, 200, 120, 255); // green: nothing to save
-	const sf::Color dirty(230, 150, 80, 255);  // orange: unsaved changes
-	save->SetBackgroundTint(context.settings.IsDirty() ? dirty : clean);
+	return panelId == "audio" || panelId == "graphics" || panelId == "keyboard";
 }
 
 void MenuState::ResetCurrentPanelToDefaults()
@@ -304,8 +360,33 @@ void MenuState::ResetCurrentPanelToDefaults()
 		context.graphics.ApplyVsync(); // vsync applies live; resolution/mode wait for Save
 		SetupGraphicsPanel();
 	}
+	else if (panel == "keyboard")
+	{
+		context.input.ResetToDefaults();
+		SetupKeyboardPanel();
+	}
 
 	UpdateSaveButtonTint();
+}
+
+void MenuState::GoBackPanel()
+{
+	if (panelStack.size() > 1)
+	{
+		panelStack.pop_back();
+		ShowPanel(panelStack.back());
+	}
+}
+
+void MenuState::UpdateSaveButtonTint()
+{
+	auto* save = dynamic_cast<UI::Button*>(userInterface.FindByName("save_button"));
+	if (save == nullptr)
+		return;
+
+	const sf::Color clean(120, 200, 120, 255); // green: nothing to save
+	const sf::Color dirty(230, 150, 80, 255);  // orange: unsaved changes
+	save->SetBackgroundTint(PanelIsDirty(panelStack.back()) ? dirty : clean);
 }
 
 void MenuState::OpenUnsavedChangesDialog()
@@ -318,18 +399,51 @@ void MenuState::OpenUnsavedChangesDialog()
 
 void MenuState::SaveAndGoBack()
 {
-	context.settings.Save(SETTINGS_PATH);
-	context.graphics.ApplyGraphics();
+	SavePanel(panelStack.back());
 	GoBackPanel();
 }
 
 void MenuState::RevertAndGoBack()
 {
-	context.settings.Revert();
-	context.audioMixer.SetSoundVolume(context.settings.GetSoundVolume() / 10.0f);
-	context.audioMixer.SetMusicVolume(context.settings.GetMusicVolume() / 10.0f);
-	context.graphics.ApplyVsync(); // restore vsync (resolution/mode were not applied yet)
+	RevertPanel(panelStack.back());
 	GoBackPanel();
+}
+
+bool MenuState::PanelIsDirty(const std::string& panel) const
+{
+	if (panel == "keyboard")
+		return context.input.IsDirty();
+	if (panel == "audio" || panel == "graphics")
+		return context.settings.IsDirty();
+	return false;
+}
+
+void MenuState::SavePanel(const std::string& panel)
+{
+	if (panel == "keyboard")
+	{
+		context.input.SaveConfig(INPUT_PATH);
+	}
+	else if (panel == "audio" || panel == "graphics")
+	{
+		context.settings.Save(SETTINGS_PATH);
+		context.graphics.ApplyGraphics();
+	}
+}
+
+void MenuState::RevertPanel(const std::string& panel)
+{
+	if (panel == "keyboard")
+	{
+		context.input.Revert();
+	}
+	else if (panel == "audio" || panel == "graphics")
+	{
+		context.settings.Revert();
+		context.audioMixer.SetSoundVolume(context.settings.GetSoundVolume() / 10.0f);
+		context.audioMixer.SetMusicVolume(context.settings.GetMusicVolume() / 10.0f);
+		context.graphics.ApplyVsync();
+	}
 }
 
 void MenuState::ApplyPendingNavigation()
@@ -344,7 +458,7 @@ void MenuState::ApplyPendingNavigation()
 	case NavRequest::Back:
 		if (panelStack.size() > 1)
 		{
-			if (IsSettingsPanel(panelStack.back()) && context.settings.IsDirty())
+			if (IsSettingsPanel(panelStack.back()) && PanelIsDirty(panelStack.back()))
 				OpenUnsavedChangesDialog();
 			else
 				GoBackPanel();
@@ -352,8 +466,7 @@ void MenuState::ApplyPendingNavigation()
 		break;
 
 	case NavRequest::Save:
-		context.settings.Save(SETTINGS_PATH);
-		context.graphics.ApplyGraphics();
+		SavePanel(panelStack.back());
 		break;
 
 	case NavRequest::StartGame:
@@ -376,6 +489,14 @@ void MenuState::HandleEvent(const sf::Event& event)
 	if (transition.GetMode() != Transition::Mode::Idle)
 		return;
 
+	if (capturingKey)
+	{
+		if (const auto* key = event.getIf<sf::Event::KeyPressed>())
+			ApplyKeyCapture(key->code);
+
+		return; // swallow every event until a key is pressed
+	}
+
 	userInterface.HandleEvent(event);
 }
 
@@ -390,31 +511,46 @@ void MenuState::Update(float deltaTime)
 	{
 		Input& input = context.input;
 
-		if (input.WasPressed(Action::MenuBack))
+		if (waitForKeyRelease && !capturingKey)
 		{
-			pendingRequest = NavRequest::Back;
-		}
-		else if (input.WasPressed(Action::MenuDown))
-		{
-			userInterface.NavigateDown();
-		}
-		else if (input.WasPressed(Action::MenuUp))
-		{
-			userInterface.NavigateUp();
-		}
-		else if (input.WasPressed(Action::MenuLeft))
-		{
-			userInterface.NavigateLeft();
-		}
-		else if (input.WasPressed(Action::MenuRight))
-		{
-			userInterface.NavigateRight();
+			const bool anyMenuKeyDown = input.IsDown(Action::MenuUp) || input.IsDown(Action::MenuDown)
+				|| input.IsDown(Action::MenuLeft) || input.IsDown(Action::MenuRight)
+				|| input.IsDown(Action::MenuConfirm) || input.IsDown(Action::MenuBack);
+			if (!anyMenuKeyDown)
+				waitForKeyRelease = false;
 		}
 
-		if (input.WasPressed(Action::MenuConfirm))
-			userInterface.Confirm(true);
-		else if (input.WasReleased(Action::MenuConfirm))
-			userInterface.Confirm(false);
+		// While capturing a key (or until the keys from a finished capture are
+		// released) menu navigation is suppressed, so the rebound key does not also
+		// trigger a navigation action.
+		if (!capturingKey && !waitForKeyRelease)
+		{
+			if (input.WasPressed(Action::MenuBack))
+			{
+				pendingRequest = NavRequest::Back;
+			}
+			else if (input.WasPressed(Action::MenuDown))
+			{
+				userInterface.NavigateDown();
+			}
+			else if (input.WasPressed(Action::MenuUp))
+			{
+				userInterface.NavigateUp();
+			}
+			else if (input.WasPressed(Action::MenuLeft))
+			{
+				userInterface.NavigateLeft();
+			}
+			else if (input.WasPressed(Action::MenuRight))
+			{
+				userInterface.NavigateRight();
+			}
+
+			if (input.WasPressed(Action::MenuConfirm))
+				userInterface.Confirm(true);
+			else if (input.WasReleased(Action::MenuConfirm))
+				userInterface.Confirm(false);
+		}
 
 		UpdateSaveButtonTint();
 		ApplyPendingNavigation();

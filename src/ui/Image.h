@@ -3,7 +3,9 @@
 #include "ui/Element.h"
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Rect.hpp>
 
+#include <optional>
 #include <string>
 
 struct Resources;
@@ -21,6 +23,7 @@ namespace UI
 		Image(Resources& resources);
 
 		void SetTexture(const std::string& textureName);
+		void SetTextureRect(sf::IntRect rect); // sub-rectangle for spritesheets
 		void SetColor(sf::Color color) override;
 		void SetAlpha(float alpha);
 
@@ -38,6 +41,7 @@ namespace UI
 
 		Resources& resources;
 		std::string textureName;
+		std::optional<sf::IntRect> textureRect;
 		sf::Color color = sf::Color::White;
 
 		float borderLeft = 0.0f;

@@ -26,5 +26,7 @@
 	"arrow_right_normal": "assets/textures/ui/arrow_right_normal.png",
 	"arrow_right_pressed": "assets/textures/ui/arrow_right_pressed.png",
 	"checkbox_off": "assets/textures/ui/checkbox_off.png",
-	"checkbox_on": "assets/textures/ui/checkbox_on.png"
+	"checkbox_on": "assets/textures/ui/checkbox_on.png",
+	"xbox_controller_spritesheet": "assets/textures/ui/controls/xbox_controller_spritesheet.png",
+	"playstation_controller_spritesheet": "assets/textures/ui/controls/playstation_controller_spritesheet.png"
 }

@@ -11,6 +11,7 @@
 #include "ui/Stepper.h"
 #include "ui/TextField.h"
 
+#include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Color.hpp>
 
 #include <fstream>
@@ -236,6 +237,13 @@ namespace UI
 
 				if (data.contains("textureName"))
 					image->SetTexture(data["textureName"]);
+				if (data.contains("textureRect"))
+				{
+					const auto& r = data["textureRect"];
+					image->SetTextureRect(sf::IntRect(
+						{ r[0].get<int>(), r[1].get<int>() },
+						{ r[2].get<int>(), r[3].get<int>() }));
+				}
 				if (data.contains("color"))
 					image->SetColor(ParseColor(data["color"]));
 				if (data.contains("border"))

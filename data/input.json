@@ -1,123 +1,23 @@
 {
-	"axisThreshold": 50,
-	"bindings":
-	{
-		"MoveLeft":
-		[
+	"axisThreshold": 50.0,
+	"bindings": {
+		"Jump": [
 			{
-				"key": "A"
-			},
-			{
-				"axis": "X",
-				"direction": -1
-			},
-			{
-				"axis": "PovX",
-				"direction": -1
-			}
-		],
-		"MoveRight":
-		[
-			{
-				"key": "D"
-			},
-			{
-				"axis": "X",
-				"direction": 1
-			},
-			{
-				"axis": "PovX",
-				"direction": 1
-			}
-		],
-		"Jump":
-		[
-			{
-				"key": "Space"
+				"key": "J"
 			},
 			{
 				"button": 0
 			}
 		],
-		"Pause":
-		[
+		"MenuBack": [
 			{
-				"key": "Escape"
+				"key": "Backspace"
 			},
 			{
-				"button": 7
+				"button": 1
 			}
 		],
-		"MenuUp":
-		[
-			{
-				"key": "W"
-			},
-			{
-				"key": "Up"
-			},
-			{
-				"axis": "Y",
-				"direction": -1
-			},
-			{
-				"axis": "PovY",
-				"direction": 1
-			}
-		],
-		"MenuDown":
-		[
-			{
-				"key": "S"
-			},
-			{
-				"key": "Down"
-			},
-			{
-				"axis": "Y",
-				"direction": 1
-			},
-			{
-				"axis": "PovY",
-				"direction": -1
-			}
-		],
-		"MenuLeft":
-		[
-			{
-				"key": "A"
-			},
-			{
-				"key": "Left"
-			},
-			{
-				"axis": "X",
-				"direction": -1
-			},
-			{
-				"axis": "PovX",
-				"direction": -1
-			}
-		],
-		"MenuRight":
-		[
-			{
-				"key": "D"
-			},
-			{
-				"key": "Right"
-			},
-			{
-				"axis": "X",
-				"direction": 1
-			},
-			{
-				"axis": "PovX",
-				"direction": 1
-			}
-		],
-		"MenuConfirm":
-		[
+		"MenuConfirm": [
 			{
 				"key": "Enter"
 			},
@@ -128,13 +28,102 @@
 				"button": 0
 			}
 		],
-		"MenuBack":
-		[
+		"MenuDown": [
 			{
-				"key": "Backspace"
+				"key": "S"
 			},
 			{
-				"button": 1
+				"key": "Down"
+			},
+			{
+				"axis": "Y",
+				"direction": 1.0
+			},
+			{
+				"axis": "PovY",
+				"direction": -1.0
+			}
+		],
+		"MenuLeft": [
+			{
+				"key": "A"
+			},
+			{
+				"key": "Left"
+			},
+			{
+				"axis": "X",
+				"direction": -1.0
+			},
+			{
+				"axis": "PovX",
+				"direction": -1.0
+			}
+		],
+		"MenuRight": [
+			{
+				"key": "D"
+			},
+			{
+				"key": "Right"
+			},
+			{
+				"axis": "X",
+				"direction": 1.0
+			},
+			{
+				"axis": "PovX",
+				"direction": 1.0
+			}
+		],
+		"MenuUp": [
+			{
+				"key": "W"
+			},
+			{
+				"key": "Up"
+			},
+			{
+				"axis": "Y",
+				"direction": -1.0
+			},
+			{
+				"axis": "PovY",
+				"direction": 1.0
+			}
+		],
+		"MoveLeft": [
+			{
+				"key": "Left"
+			},
+			{
+				"axis": "X",
+				"direction": -1.0
+			},
+			{
+				"axis": "PovX",
+				"direction": -1.0
+			}
+		],
+		"MoveRight": [
+			{
+				"key": "Right"
+			},
+			{
+				"axis": "X",
+				"direction": 1.0
+			},
+			{
+				"axis": "PovX",
+				"direction": 1.0
+			}
+		],
+		"Pause": [
+			{
+				"key": "P"
+			},
+			{
+				"button": 7
 			}
 		]
 	}

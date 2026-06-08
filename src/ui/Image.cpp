@@ -20,6 +20,11 @@ namespace UI
 		this->textureName = textureName;
 	}
 
+	void Image::SetTextureRect(sf::IntRect rect)
+	{
+		textureRect = rect;
+	}
+
 	void Image::SetColor(sf::Color color)
 	{
 		this->color = color;
@@ -69,10 +74,17 @@ namespace UI
 		sprite.setPosition(absolutePosition);
 		sprite.setColor(color);
 
-		const sf::Vector2u textureSize = texture.getSize();
+		// A sub-rectangle (spritesheet glyph) takes priority over the full texture.
+		const sf::Vector2f sourceSize = textureRect.has_value()
+			? sf::Vector2f(textureRect->size)
+			: sf::Vector2f(texture.getSize());
+
+		if (textureRect.has_value())
+			sprite.setTextureRect(textureRect.value());
+
 		sprite.setScale({
-			size.x / static_cast<float>(textureSize.x),
-			size.y / static_cast<float>(textureSize.y) });
+			size.x / sourceSize.x,
+			size.y / sourceSize.y });
 
 		target.draw(sprite);
 	}
