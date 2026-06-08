@@ -33,6 +33,7 @@ namespace UI
 		desiredColumn = 0;
 		draggedElement = nullptr;
 		activatedElement = nullptr;
+		confirmHeld = false;
 
 		rows.clear();
 
@@ -264,6 +265,7 @@ namespace UI
 
 		if (InteractiveElement* previous = CurrentElement())
 		{
+			previous->ClearPressed(); // a held-confirm press must not stick to the old element
 			previous->SetHighlighted(false);
 
 			if (previous == activatedElement)
@@ -284,6 +286,11 @@ namespace UI
 				current->Activate();
 				activatedElement = current;
 			}
+			else if (confirmHeld)
+			{
+				// Confirm is still held: the pressed visual follows the focus.
+				current->Press();
+			}
 		}
 	}
 
@@ -291,6 +298,7 @@ namespace UI
 	{
 		if (InteractiveElement* current = CurrentElement())
 		{
+			current->ClearPressed();
 			current->SetHighlighted(false);
 
 			if (current == activatedElement)
@@ -367,6 +375,7 @@ namespace UI
 	void Root::Confirm(bool pressed)
 	{
 		activeMode = InputMode::Selection;
+		confirmHeld = pressed;
 		HandleConfirm(pressed);
 	}
 }

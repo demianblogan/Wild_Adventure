@@ -26,6 +26,7 @@ namespace UI
 		void SetHighlighted(bool highlighted, bool playSound = true);
 		void Press();
 		void Release();
+		void ClearPressed(); // drop the pressed visual without firing the action
 
 		void Activate();
 		void Deactivate();
@@ -58,7 +59,6 @@ namespace UI
 		virtual void OnActivated() {}
 		virtual void OnDeactivated() {}
 		virtual void OnEnabledChanged() {}
-
 
 		InteractionState state = InteractionState::Normal;
 		bool isActivated = false;

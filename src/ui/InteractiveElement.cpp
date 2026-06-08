@@ -48,6 +48,15 @@ namespace UI
 		}
 	}
 
+	void InteractiveElement::ClearPressed()
+	{
+		if (state == InteractionState::Pressed)
+		{
+			state = InteractionState::Normal;
+			OnStateChanged();
+		}
+	}
+
 	void InteractiveElement::Activate()
 	{
 		if (!isActivated)

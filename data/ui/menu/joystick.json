@@ -9,6 +9,33 @@
 		"children":
 		[
 			{
+				"Image":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						-72
+					],
+					"size":
+					[
+						330,
+						24
+					],
+					"textureName": "container_background2",
+					"border": 15
+				}
+			},
+			{
 				"Label":
 				{
 					"anchor":
@@ -119,10 +146,37 @@
 						255
 					],
 					"outlineThickness": 1,
-					"text": "PlayStation"
+					"text": "PS"
 				}
 			},
 
+			{
+				"Image":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						-42
+					],
+					"size":
+					[
+						330,
+						24
+					],
+					"textureName": "container_background",
+					"border": 15
+				}
+			},
 			{
 				"Label":
 				{
@@ -229,6 +283,33 @@
 			},
 
 			{
+				"Image":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						-16
+					],
+					"size":
+					[
+						330,
+						24
+					],
+					"textureName": "container_background",
+					"border": 15
+				}
+			},
+			{
 				"Label":
 				{
 					"anchor":
@@ -334,6 +415,33 @@
 			},
 
 			{
+				"Image":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						10
+					],
+					"size":
+					[
+						330,
+						24
+					],
+					"textureName": "container_background",
+					"border": 15
+				}
+			},
+			{
 				"Label":
 				{
 					"anchor":
@@ -438,6 +546,33 @@
 				}
 			},
 
+			{
+				"Image":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						36
+					],
+					"size":
+					[
+						330,
+						24
+					],
+					"textureName": "container_background",
+					"border": 15
+				}
+			},
 			{
 				"Label":
 				{

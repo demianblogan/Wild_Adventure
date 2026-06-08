@@ -74,5 +74,7 @@ namespace UI
 		int desiredColumn = 0; // remembered column when moving between rows
 		InteractiveElement* draggedElement = nullptr;
 		InteractiveElement* activatedElement = nullptr;
+
+		bool confirmHeld = false; // true while the confirm key is held down
 	};
 }
