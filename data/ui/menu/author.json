@@ -9,22 +9,49 @@
 		"children":
 		[
 			{
+				"Image":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						-9
+					],
+					"size":
+					[
+						400,
+						124
+					],
+					"textureName": "container_background",
+					"border": 15
+				}
+			},
+			{
 				"Label":
 				{
 					"anchor":
 					[
 						0.5,
-						0
+						0.5
 					],
 					"pivot":
 					[
 						0.5,
-						0
+						0.5
 					],
 					"offset":
 					[
 						0,
-						90
+						-9
 					],
 					"fontName": "main",
 					"characterSize": 16,
@@ -43,7 +70,7 @@
 						255
 					],
 					"outlineThickness": 1,
-					"text": "Made by Demian. Replace this text."
+					"text": "Made by Demian Blogan.\n\nI also run a C++ education channel.\n\nGitHub:  github.com/demianblogan\nYouTube: https://www.youtube.com/@BloganProgrammer\nContact: demianblogan@gmail.com"
 				}
 			},
 			{
