@@ -36,5 +36,9 @@
 
 	"start_idle": "assets/textures/items/checkpoints/Start/Start (Idle).png",
 	"start_moving": "assets/textures/items/checkpoints/Start/Start (Moving) (64x64).png",
-	"player_appear": "assets/textures/main_characters/Appearing (96x96).png"
+	"player_appear": "assets/textures/main_characters/Appearing (96x96).png",
+
+	"end_idle": "assets/textures/items/checkpoints/End/End (Idle).png",
+	"end_pressed": "assets/textures/items/checkpoints/End/End (Pressed) (64x64).png",
+	"player_disappear": "assets/textures/main_characters/Desappearing (96x96).png"
 }

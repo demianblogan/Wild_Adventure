@@ -15,6 +15,7 @@
 #include "components/Solid.h"
 #include "components/AnimationSet.h"
 #include "components/StartPlatform.h"	
+#include "components/Finish.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
@@ -24,6 +25,7 @@
 #include "tilemap/TilemapRenderer.h"
 #include "ui/Label.h"
 #include "audio/Mixer.h"
+#include "states/MenuState.h"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -81,6 +83,9 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	// "start" marker in the "marks" object layer.
 	registry.ForEach<ECS::StartPlatform>(
 		[this](ECS::Entity entity, ECS::StartPlatform&) { startPlatformEntity = entity; });
+
+	registry.ForEach<ECS::Finish>(
+		[this](ECS::Entity entity, ECS::Finish&) { finishEntity = entity; });
 
 	if (startPlatformEntity != ECS::INVALID_ENTITY)
 	{
@@ -182,22 +187,110 @@ void GameState::UpdateLevelFlow(float deltaTime)
 		return;
 	}
 
-	// Playing: the start platform plays its "moving" animation once, when the hero
-	// first lands on it, then returns to idle.
-	if (startPlatformEntity == ECS::INVALID_ENTITY)
+	if (levelPhase == LevelPhase::Finishing)
+	{
+		// The hero bounced off the cup and rises for a moment, then vanishes mid-air.
+		finishTimer -= deltaTime;
+		if (finishTimer > 0.0f)
+			return;
+
+		const float playerX = registry.Get<ECS::Transform>(playerEntity).x;
+		const float playerY = registry.Get<ECS::Transform>(playerEntity).y;
+
+		registry.Add<ECS::Frozen>(playerEntity, {}); // hide and hold the hero in place
+
+		disappearEffectEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/disappear_effect.json");
+
+		ECS::Transform& effectTransform = registry.Get<ECS::Transform>(disappearEffectEntity);
+		effectTransform.x = playerX;
+		effectTransform.y = playerY;
+
+		ECS::Animation& animation = registry.Get<ECS::Animation>(disappearEffectEntity);
+		const ECS::AnimationSet& set = registry.Get<ECS::AnimationSet>(disappearEffectEntity);
+		animation.data = set.animations.at("disappear");
+		animation.playingState = "disappear";
+
+		levelPhase = LevelPhase::Disappearing;
+		return;
+	}
+
+	if (levelPhase == LevelPhase::Disappearing)
+	{
+		const bool finished = disappearEffectEntity != ECS::INVALID_ENTITY
+			&& registry.Has<ECS::Animation>(disappearEffectEntity)
+			&& registry.Get<ECS::Animation>(disappearEffectEntity).isFinished;
+
+		if (finished)
+		{
+			registry.DestroyEntity(disappearEffectEntity);
+			disappearEffectEntity = ECS::INVALID_ENTITY;
+
+			transition.StartCover();
+			isCompleting = true;
+			levelPhase = LevelPhase::Complete;
+		}
+
+		return;
+	}
+
+	if (levelPhase == LevelPhase::Complete)
 		return;
 
-	if (!startMovingPlayed && IsPlayerOnStartPlatform())
+	// Playing.
+
+	// The start platform plays its "moving" animation once the hero lands on it,
+	// then returns to idle.
+	if (startPlatformEntity != ECS::INVALID_ENTITY)
 	{
-		registry.Get<ECS::AnimationState>(startPlatformEntity).current = "moving";
-		startMovingPlayed = true;
+		if (!startMovingPlayed && IsPlayerOnStartPlatform())
+		{
+			registry.Get<ECS::AnimationState>(startPlatformEntity).current = "moving";
+			startMovingPlayed = true;
+		}
+		else if (startMovingPlayed)
+		{
+			const ECS::Animation& animation = registry.Get<ECS::Animation>(startPlatformEntity);
+			if (animation.playingState == "moving" && animation.isFinished)
+				registry.Get<ECS::AnimationState>(startPlatformEntity).current = "idle";
+		}
 	}
-	else if (startMovingPlayed)
+
+	// Touching the top of the finish cup bounces the hero and ends the level.
+	if (finishEntity != ECS::INVALID_ENTITY && IsPlayerOnFinish())
 	{
-		const ECS::Animation& animation = registry.Get<ECS::Animation>(startPlatformEntity);
-		if (animation.playingState == "moving" && animation.isFinished)
-			registry.Get<ECS::AnimationState>(startPlatformEntity).current = "idle";
+		registry.Get<ECS::AnimationState>(finishEntity).current = "pressed";
+		context.audioMixer.PlaySound("level_complete");
+
+		// The Solid's bounceSpeed already launched the hero upward this frame; he
+		// rises for FINISH_RISE_TIME, then vanishes.
+		finishTimer = FINISH_RISE_TIME;
+		levelPhase = LevelPhase::Finishing;
 	}
+}
+
+bool GameState::IsPlayerOnFinish()
+{
+	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
+	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
+	const ECS::Transform& finish = registry.Get<ECS::Transform>(finishEntity);
+	const ECS::Solid& solid = registry.Get<ECS::Solid>(finishEntity);
+
+	const float playerHalf = collider.width / 2.0f;
+	const float playerLeft = player.x - playerHalf;
+	const float playerRight = player.x + playerHalf;
+	const float playerBottom = player.y;
+
+	const float solidHalf = solid.width / 2.0f;
+	const float solidCenterX = finish.x + solid.offsetX;
+	const float solidBottom = finish.y + solid.offsetY;
+	const float solidLeft = solidCenterX - solidHalf;
+	const float solidRight = solidCenterX + solidHalf;
+	const float solidTop = solidBottom - solid.height;
+
+	const bool horizontalOverlap = playerLeft < solidRight && playerRight > solidLeft;
+	const bool restingOnTop = std::fabs(playerBottom - solidTop) < 4.0f;
+
+	return horizontalOverlap && restingOnTop;
 }
 
 bool GameState::IsPlayerOnStartPlatform()
@@ -281,6 +374,16 @@ void GameState::UpdateHearts(int currentHealth, float deltaTime)
 void GameState::Update(float deltaTime)
 {
 	transition.Update(deltaTime);
+
+	if (isCompleting)
+	{
+		if (transition.GetMode() == Transition::Mode::Done)
+		{
+			context.stateMachine.Clear();
+			context.stateMachine.Push(std::make_unique<MenuState>(context));
+		}
+		return;
+	}
 
 	if (isRestarting)
 	{

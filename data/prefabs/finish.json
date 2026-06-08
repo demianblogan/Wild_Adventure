@@ -1,0 +1,38 @@
+{
+	"Sprite":
+	{
+		"textureName": "end_idle"
+	},
+	"AnimationSet":
+	{
+		"idle":
+		{
+			"textureName": "end_idle",
+			"frameCount": 1,
+			"frameDuration": 0.1,
+			"isLooping": true
+		},
+		"pressed":
+		{
+			"textureName": "end_pressed",
+			"frameCount": 8,
+			"frameDuration": 0.06,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "idle"
+	},
+	"Solid":
+	{
+		"width": 46,
+		"height": 43,
+		"offsetX": 0,
+		"offsetY": 0,
+		"bounceSpeed": 280
+	},
+	"Finish":
+	{
+	}
+}

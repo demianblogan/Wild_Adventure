@@ -22,6 +22,7 @@
 #include "components/Box.h"
 #include "components/Solid.h"
 #include "components/StartPlatform.h"
+#include "components/Finish.h"
 #include "core/ecs/Registry.h"
 
 #include <fstream>
@@ -205,6 +206,11 @@ void DataLoader::RegisterLoaders()
 	loaders["StartPlatform"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
 		{
 			registry.Add<ECS::StartPlatform>(entity, {});
+		};
+
+	loaders["Finish"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::Finish>(entity, {});
 		};
 
 	loaders["Box"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
