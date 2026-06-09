@@ -16,6 +16,8 @@
 #include "components/AnimationSet.h"
 #include "components/StartPlatform.h"	
 #include "components/Finish.h"
+#include "components/Checkpoint.h"
+#include "components/Hitbox.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
@@ -35,7 +37,8 @@
 #include <memory>
 #include <iostream> //DEBUG
 
-GameState::GameState(Context& context, const std::string& levelPath)
+GameState::GameState(Context& context, const std::string& levelPath,
+	std::optional<sf::Vector2f> respawnAt)
 	: State(context)
 	, particles(context.resources)
 	, inputSystem(registry, context.input)
@@ -53,6 +56,7 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	, hudInterface(context.virtualScreen)
 	, hudLoader(context.resources)
 	, levelPath(levelPath)
+	, respawnOverride(respawnAt)
 {
 	Resources& resources = context.resources;
 
@@ -87,22 +91,33 @@ GameState::GameState(Context& context, const std::string& levelPath)
 	registry.ForEach<ECS::Finish>(
 		[this](ECS::Entity entity, ECS::Finish&) { finishEntity = entity; });
 
-	if (startPlatformEntity != ECS::INVALID_ENTITY)
+	if (startPlatformEntity != ECS::INVALID_ENTITY || respawnOverride.has_value())
 	{
 		playerEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/player.json");
 
-		// A prefab-spawned player has no Transform (the scene loader normally supplies
-		// it from the Tiled object); add it (and PreviousTransform) before use.
 		registry.Add<ECS::Transform>(playerEntity, {});
 		registry.Add<ECS::PreviousTransform>(playerEntity, {});
 
-		// Air position the hero falls from: centred on the platform surface,
-		// APPEAR_HEIGHT above the start marker. Read by value, since the adds below
-		// can reallocate the component pools.
-		const ECS::Transform startTransform = registry.Get<ECS::Transform>(startPlatformEntity);
-		const ECS::Solid startSolid = registry.Get<ECS::Solid>(startPlatformEntity);
-		const float airX = startTransform.x + startSolid.offsetX;
-		const float airY = startTransform.y - APPEAR_HEIGHT;
+		float feetX = 0.0f;
+		float feetY = 0.0f;
+
+		if (respawnOverride.has_value())
+		{
+			feetX = respawnOverride->x;
+			feetY = respawnOverride->y;
+		}
+		else
+		{
+			const ECS::Transform startTransform = registry.Get<ECS::Transform>(startPlatformEntity);
+			const ECS::Solid startSolid = registry.Get<ECS::Solid>(startPlatformEntity);
+			feetX = startTransform.x + startSolid.offsetX;
+			feetY = startTransform.y + startSolid.offsetY - startSolid.height; // platform surface
+		}
+
+		respawnPoint = { feetX, feetY };
+
+		const float airX = feetX;
+		const float airY = feetY - APPEAR_HEIGHT;
 
 		ECS::Transform& playerTransform = registry.Get<ECS::Transform>(playerEntity);
 		playerTransform.x = airX;
@@ -119,7 +134,6 @@ GameState::GameState(Context& context, const std::string& levelPath)
 
 		registry.Add<ECS::Frozen>(playerEntity, {});
 		camera.SnapTo({ airX, airY });
-		// The appear animation is spawned once the reveal finishes (see UpdateLevelFlow).
 	}
 
 	hudInterface.SetContent(hudLoader.LoadFromFile("data/ui/hud.json"));
@@ -255,6 +269,8 @@ void GameState::UpdateLevelFlow(float deltaTime)
 		}
 	}
 
+	UpdateCheckpoints();
+
 	// Touching the top of the finish cup bounces the hero and ends the level.
 	if (finishEntity != ECS::INVALID_ENTITY && IsPlayerOnFinish())
 	{
@@ -266,6 +282,54 @@ void GameState::UpdateLevelFlow(float deltaTime)
 		finishTimer = FINISH_RISE_TIME;
 		levelPhase = LevelPhase::Finishing;
 	}
+}
+
+void GameState::UpdateCheckpoints()
+{
+	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
+	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
+
+	const float playerHalf = collider.width / 2.0f;
+	const float playerLeft = player.x - playerHalf;
+	const float playerRight = player.x + playerHalf;
+	const float playerTop = player.y - collider.height;
+	const float playerBottom = player.y;
+
+	// Touching an inactive checkpoint activates it: raise the flag, save the respawn
+	// point and play the sound. Already-active checkpoints can't be re-triggered.
+	registry.ForEach<ECS::Checkpoint, ECS::Transform, ECS::Hitbox, ECS::AnimationState>(
+		[&](ECS::Entity, ECS::Checkpoint& checkpoint, ECS::Transform& transform,
+			ECS::Hitbox& hitbox, ECS::AnimationState& state)
+		{
+			if (checkpoint.activated)
+				return;
+
+			const float halfWidth = hitbox.width / 2.0f;
+			const float left = transform.x - halfWidth;
+			const float right = transform.x + halfWidth;
+			const float top = transform.y - hitbox.height;
+			const float bottom = transform.y;
+
+			const bool overlap = playerLeft < right && playerRight > left
+				&& playerTop < bottom && playerBottom > top;
+
+			if (!overlap)
+				return;
+
+			checkpoint.activated = true;
+			state.current = "flag_out";
+			respawnPoint = { transform.x, transform.y };
+			context.audioMixer.PlaySound("checkpoint");
+		});
+
+	// Once the flag has finished raising, loop the idle waving animation.
+	registry.ForEach<ECS::Checkpoint, ECS::Animation, ECS::AnimationState>(
+		[](ECS::Entity, ECS::Checkpoint& checkpoint, ECS::Animation& animation,
+			ECS::AnimationState& state)
+		{
+			if (checkpoint.activated && animation.playingState == "flag_out" && animation.isFinished)
+				state.current = "flag_idle";
+		});
 }
 
 bool GameState::IsPlayerOnFinish()
@@ -390,7 +454,7 @@ void GameState::Update(float deltaTime)
 		if (transition.GetMode() == Transition::Mode::Done)
 		{
 			context.stateMachine.Pop();
-			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath));
+			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath, respawnPoint));
 		}
 		return;
 	}

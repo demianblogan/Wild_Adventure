@@ -4,12 +4,12 @@
 		"player_jump":
 		{
 			"path": "assets/audio/sounds/player/first_jump.ogg",
-			"volume": 0.8
+			"volume": 0.6
 		},
 		"player_double_jump":
 		{
 			"path": "assets/audio/sounds/player/second_jump.ogg",
-			"volume": 0.8
+			"volume": 0.6
 		},
 		"player_wall_slide":
 		{
@@ -31,10 +31,15 @@
 			"path": "assets/audio/sounds/player/appearing.ogg",
 			"volume": 0.8
 		},
+		"checkpoint":
+		{
+			"path": "assets/audio/sounds/checkpoint.ogg",
+			"volume": 1.0
+		},
 		"level_complete":
 		{
 			"path": "assets/audio/sounds/player/level_complete.ogg",
-			"volume": 0.9
+			"volume": 1.0
 		},
 		"fruit_collect":
 		{
@@ -66,6 +71,7 @@
 			"path": "assets/audio/sounds/ui_press.ogg",
 			"volume": 0.6
 		}
+
 	},
 	"music":
 	{

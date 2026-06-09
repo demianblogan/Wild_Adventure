@@ -23,6 +23,7 @@
 #include "components/Solid.h"
 #include "components/StartPlatform.h"
 #include "components/Finish.h"
+#include "components/Checkpoint.h"
 #include "core/ecs/Registry.h"
 
 #include <fstream>
@@ -207,7 +208,10 @@ void DataLoader::RegisterLoaders()
 		{
 			registry.Add<ECS::StartPlatform>(entity, {});
 		};
-
+	loaders["Checkpoint"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::Checkpoint>(entity, {});
+		};
 	loaders["Finish"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
 		{
 			registry.Add<ECS::Finish>(entity, {});

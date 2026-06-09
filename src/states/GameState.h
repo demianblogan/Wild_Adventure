@@ -22,12 +22,16 @@
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
 
+#include <SFML/System/Vector2.hpp>
+
+#include <optional>
 #include <string>
 
 class GameState : public State
 {
 public:
-	GameState(Context& context, const std::string& levelPath);
+	GameState(Context& context, const std::string& levelPath,
+		std::optional<sf::Vector2f> respawnOverride = std::nullopt);
 
 	void HandleEvent(const sf::Event& event) override;
 	void Update(float deltaTime) override;
@@ -37,9 +41,10 @@ private:
 	void UpdateScoreLabel();
 	void UpdateHearts(int currentHealth, float deltaTime);
 	void UpdateLevelFlow(float deltaTime);
+	void UpdateCheckpoints();
+
 	bool IsPlayerOnStartPlatform();
 	bool IsPlayerOnFinish();
-
 	enum class LevelPhase
 	{
 		Revealing,
@@ -108,6 +113,9 @@ private:
 	ECS::Entity disappearEffectEntity = ECS::INVALID_ENTITY;
 	float finishTimer = 0.0f;
 	bool isCompleting = false;
+
+	std::optional<sf::Vector2f> respawnOverride; // set when reloading at a checkpoint
+	sf::Vector2f respawnPoint;                   // current respawn (start, or last checkpoint)
 
 	static constexpr float APPEAR_HEIGHT = 50.0f;
 	static constexpr float FINISH_RISE_TIME = 0.3f; // bounce arc before the hero vanishes

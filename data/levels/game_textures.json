@@ -40,5 +40,9 @@
 
 	"end_idle": "assets/textures/items/checkpoints/End/End (Idle).png",
 	"end_pressed": "assets/textures/items/checkpoints/End/End (Pressed) (64x64).png",
-	"player_disappear": "assets/textures/main_characters/Desappearing (96x96).png"
+	"player_disappear": "assets/textures/main_characters/Desappearing (96x96).png",
+
+	"checkpoint_no_flag": "assets/textures/items/checkpoints/Checkpoint/Checkpoint (No Flag).png",
+	"checkpoint_flag_out": "assets/textures/items/checkpoints/Checkpoint/Checkpoint (Flag Out) (64x64).png",
+	"checkpoint_flag_idle": "assets/textures/items/checkpoints/Checkpoint/Checkpoint (Flag Idle)(64x64).png"
 }

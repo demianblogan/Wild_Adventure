@@ -1,0 +1,42 @@
+{
+	"Sprite":
+	{
+		"textureName": "checkpoint_no_flag"
+	},
+	"AnimationSet":
+	{
+		"no_flag":
+		{
+			"textureName": "checkpoint_no_flag",
+			"frameCount": 1,
+			"frameDuration": 0.1,
+			"isLooping": true
+		},
+		"flag_out":
+		{
+			"textureName": "checkpoint_flag_out",
+			"frameCount": 26,
+			"frameDuration": 0.04,
+			"isLooping": false
+		},
+		"flag_idle":
+		{
+			"textureName": "checkpoint_flag_idle",
+			"frameCount": 10,
+			"frameDuration": 0.08,
+			"isLooping": true
+		}
+	},
+	"AnimationState":
+	{
+		"current": "no_flag"
+	},
+	"Hitbox":
+	{
+		"width": 24,
+		"height": 56
+	},
+	"Checkpoint":
+	{
+	}
+}
