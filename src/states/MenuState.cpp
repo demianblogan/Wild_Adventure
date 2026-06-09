@@ -55,6 +55,8 @@ MenuState::MenuState(Context& context)
 	panelStack.push_back("main");
 	ShowPanel("main");
 
+	context.audioMixer.PlayMusic("menu_theme");
+
 	transition.StartReveal();
 }
 
@@ -470,7 +472,7 @@ void MenuState::ApplyPendingNavigation()
 		break;
 
 	case NavRequest::StartGame:
-		context.stateMachine.Push(std::make_unique<GameState>(context, "data/levels/test_level.tmj"));
+		context.stateMachine.Push(std::make_unique<GameState>(context, "data/levels/test_level.tmj", 1));
 		break;
 
 	case NavRequest::Exit:

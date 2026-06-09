@@ -37,7 +37,31 @@
 #include <memory>
 #include <iostream> //DEBUG
 
-GameState::GameState(Context& context, const std::string& levelPath,
+namespace
+{
+	// Each block of five levels shares one music track. New tracks are registered in
+	// data/audio.json; the level-number ranges are wired here.
+	const std::string& LevelMusicTrack(int levelNumber)
+	{
+		static const std::string tracks[] =
+		{
+			"level_music_1_5",
+			"level_music_6_10",
+			"level_music_11_15",
+			"level_music_16_20"
+		};
+
+		int index = (levelNumber - 1) / 5;
+		if (index < 0)
+			index = 0;
+		if (index > 3)
+			index = 3;
+
+		return tracks[index];
+	}
+}
+
+GameState::GameState(Context& context, const std::string& levelPath, int levelNumber,
 	std::optional<sf::Vector2f> respawnAt)
 	: State(context)
 	, particles(context.resources)
@@ -56,6 +80,7 @@ GameState::GameState(Context& context, const std::string& levelPath,
 	, hudInterface(context.virtualScreen)
 	, hudLoader(context.resources)
 	, levelPath(levelPath)
+	, levelNumber(levelNumber)
 	, respawnOverride(respawnAt)
 	, confetti(context.resources)
 {
@@ -139,6 +164,8 @@ GameState::GameState(Context& context, const std::string& levelPath,
 
 	hudInterface.SetContent(hudLoader.LoadFromFile("data/ui/hud.json"));
 	UpdateScoreLabel();
+
+	context.audioMixer.PlayMusic(LevelMusicTrack(levelNumber));
 
 	transition.StartReveal();
 }
@@ -466,7 +493,7 @@ void GameState::Update(float deltaTime)
 		if (transition.GetMode() == Transition::Mode::Done)
 		{
 			context.stateMachine.Pop();
-			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath, respawnPoint));
+			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath, levelNumber, respawnPoint));
 		}
 		return;
 	}

@@ -84,6 +84,26 @@
 		{
 			"path": "assets/audio/music/company_splash.ogg",
 			"loop": false
+		},
+		"level_music_1_5":
+		{
+			"path": "assets/audio/music/levels_1-5.ogg",
+			"loop": true
+		},
+		"level_music_6_10":
+		{
+			"path": "assets/audio/music/levels_6-10.ogg",
+			"loop": true
+		},
+		"level_music_11_15":
+		{
+			"path": "assets/audio/music/levels_11-15.ogg",
+			"loop": true
+		},
+		"level_music_16_20":
+		{
+			"path": "assets/audio/music/levels_16-20.ogg",
+			"loop": true
 		}
 	}
 }

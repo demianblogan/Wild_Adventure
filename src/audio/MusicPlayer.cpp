@@ -16,9 +16,14 @@ namespace Audio
 		if (iter == registeredMusics.end())
 			throw std::runtime_error("MusicPlayer: music '" + name + "' is not registered");
 
+		// Already playing this track: leave it running instead of restarting from 0.
+		if (currentMusic && currentName == name)
+			return;
+
 		if (currentMusic)
 			currentMusic->stop();
 
+		currentName = name;
 		currentMusic = std::make_unique<sf::Music>();
 		if (!currentMusic->openFromFile(iter->second.path))
 			throw std::runtime_error("MusicPlayer: cannot open music file '" + iter->second.path + "'");
@@ -35,6 +40,7 @@ namespace Audio
 			currentMusic->stop();
 			currentMusic.reset();
 		}
+		currentName.clear();
 	}
 
 	void MusicPlayer::SetVolume(float newVolume)
