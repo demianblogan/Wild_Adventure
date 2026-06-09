@@ -3,7 +3,7 @@
 	"bindings": {
 		"Jump": [
 			{
-				"key": "J"
+				"key": "Space"
 			},
 			{
 				"button": 0

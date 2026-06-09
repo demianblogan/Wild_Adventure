@@ -57,6 +57,7 @@ GameState::GameState(Context& context, const std::string& levelPath,
 	, hudLoader(context.resources)
 	, levelPath(levelPath)
 	, respawnOverride(respawnAt)
+	, confetti(context.resources)
 {
 	Resources& resources = context.resources;
 
@@ -260,6 +261,7 @@ void GameState::UpdateLevelFlow(float deltaTime)
 		{
 			registry.Get<ECS::AnimationState>(startPlatformEntity).current = "moving";
 			startMovingPlayed = true;
+			confetti.Emit(PlayerCenter());
 		}
 		else if (startMovingPlayed)
 		{
@@ -276,6 +278,7 @@ void GameState::UpdateLevelFlow(float deltaTime)
 	{
 		registry.Get<ECS::AnimationState>(finishEntity).current = "pressed";
 		context.audioMixer.PlaySound("level_complete");
+		confetti.Emit(PlayerCenter());
 
 		// The Solid's bounceSpeed already launched the hero upward this frame; he
 		// rises for FINISH_RISE_TIME, then vanishes.
@@ -320,6 +323,7 @@ void GameState::UpdateCheckpoints()
 			state.current = "flag_out";
 			respawnPoint = { transform.x, transform.y };
 			context.audioMixer.PlaySound("checkpoint");
+			confetti.Emit({ player.x, player.y - collider.height / 2.0f });
 		});
 
 	// Once the flag has finished raising, loop the idle waving animation.
@@ -355,6 +359,14 @@ bool GameState::IsPlayerOnFinish()
 	const bool restingOnTop = std::fabs(playerBottom - solidTop) < 4.0f;
 
 	return horizontalOverlap && restingOnTop;
+}
+
+sf::Vector2f GameState::PlayerCenter()
+{
+	const ECS::Transform& transform = registry.Get<ECS::Transform>(playerEntity);
+	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
+
+	return { transform.x, transform.y - collider.height / 2.0f };
 }
 
 bool GameState::IsPlayerOnStartPlatform()
@@ -479,6 +491,7 @@ void GameState::Update(float deltaTime)
 	UpdateLevelFlow(deltaTime);
 
 	particles.Update(deltaTime);
+	confetti.Update(deltaTime);
 
 	UpdateScoreLabel();
 	hudInterface.Update(deltaTime);
@@ -569,6 +582,7 @@ void GameState::Render(float interpolationFactor)
 	DrawTilemap(tilemap, renderTarget, context.resources);
 	particles.Draw(renderTarget);
 	renderSystem.Render(interpolationFactor);
+	confetti.Draw(renderTarget);
 
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
 	hudInterface.Draw(renderTarget);
