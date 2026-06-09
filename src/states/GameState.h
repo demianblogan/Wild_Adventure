@@ -5,6 +5,7 @@
 #include "core/State.h"
 #include "core/ecs/Registry.h"
 #include "graphics/ParticleSystem.h"
+#include "graphics/ConfettiSystem.h"
 #include "graphics/Transition.h"
 #include "systems/AnimationSystem.h"
 #include "systems/DamageSystem.h"
@@ -45,6 +46,9 @@ private:
 
 	bool IsPlayerOnStartPlatform();
 	bool IsPlayerOnFinish();
+
+	sf::Vector2f PlayerCenter();
+
 	enum class LevelPhase
 	{
 		Revealing,
@@ -62,6 +66,7 @@ private:
 	Tilemap tilemap;
 
 	ParticleSystem particles;
+	ConfettiSystem confetti;
 
 	int score = 0;
 	int previousScore = -1;
