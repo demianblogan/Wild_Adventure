@@ -31,7 +31,7 @@
 class GameState : public State
 {
 public:
-	GameState(Context& context, const std::string& levelPath,
+	GameState(Context& context, const std::string& levelPath, int levelNumber = 1,
 		std::optional<sf::Vector2f> respawnOverride = std::nullopt);
 
 	void HandleEvent(const sf::Event& event) override;
@@ -96,6 +96,7 @@ private:
 	Transition transition;
 
 	std::string levelPath;
+	int levelNumber = 1;
 	float fallLimit = 0.0f;
 	bool isRestarting = false;
 

@@ -29,6 +29,7 @@ namespace Audio
 
 		std::unordered_map<std::string, MusicConfig> registeredMusics;
 		std::unique_ptr<sf::Music> currentMusic;
+		std::string currentName;
 		float volume = 1.0f;
 	};
 }
