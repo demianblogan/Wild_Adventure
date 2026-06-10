@@ -1,0 +1,62 @@
+{
+	"Sprite":
+	{
+		"textureName": "mushroom_run"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "mushroom_idle",
+			"frameCount": 14,
+			"frameDuration": 0.05,
+			"isLooping": true
+		},
+		"Run":
+		{
+			"textureName": "mushroom_run",
+			"frameCount": 16,
+			"frameDuration": 0.07,
+			"isLooping": true
+		},
+		"Hit":
+		{
+			"textureName": "mushroom_hit",
+			"frameCount": 5,
+			"frameDuration": 0.08,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Run"
+	},
+	"Facing":
+	{
+		"isLookingRight": false,
+		"isTextureRight": false
+	},
+	"Gravity":
+	{
+		"acceleration": 800,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 22,
+		"height": 26
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	},
+	"Enemy": {},
+	"GroundPatrol":
+	{
+		"speed": 40,
+		"direction": -1
+	}
+}

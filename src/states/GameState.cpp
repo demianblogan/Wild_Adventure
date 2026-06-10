@@ -3,6 +3,9 @@
 #include "Context.h"
 #include "components/Box.h"
 #include "components/Collectible.h"
+#include "components/Enemy.h"
+#include "components/EnemyDeath.h"
+#include "components/GroundPatrol.h"
 #include "components/CollisionState.h"
 #include "components/Health.h"
 #include "components/Jump.h"
@@ -79,6 +82,9 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, damageSystem(registry)
 	, deathSystem(registry)
 	, patrolSystem(registry)
+	, enemySystem(registry, score, context.audioMixer)
+	, groundPatrolSystem(registry, tilemap)
+	, enemyDeathSystem(registry)
 	, physicsSystem(registry, tilemap)
 	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
 	, movementSystem(registry)
@@ -122,8 +128,18 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 
 	sceneLoader.LoadSceneFromMap(registry, levelPath);
 
+	// Record each mushroom's spawn position right after loading, before any movement occurs.
+	// This is used by checkpoint snapshots to identify which mushrooms were alive.
+	registry.ForEach<ECS::Enemy, ECS::Transform>(
+		[](ECS::Entity, ECS::Enemy& enemy, ECS::Transform& t)
+		{
+			enemy.spawnX = t.x;
+			enemy.spawnY = t.y;
+		});
+
 	// Restore the world to the state it was in at the last checkpoint: remove
-	// collectibles that had already been picked up and boxes that had been broken.
+	// collectibles that had already been picked up, boxes that had been broken,
+	// and enemies that had already been killed.
 	if (progressSnapshot.has_value())
 	{
 		auto positionMatch = [](const sf::Vector2f& a, const sf::Vector2f& b)
@@ -149,6 +165,16 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 				const sf::Vector2f pos{ t.x, t.y };
 				const bool wasAlive = std::ranges::any_of(progressSnapshot->aliveBoxes,
 					[&](const sf::Vector2f& p) { return positionMatch(pos, p); });
+				if (!wasAlive)
+					toDestroy.push_back(entity);
+			});
+
+		registry.ForEach<ECS::Enemy>(
+			[&](ECS::Entity entity, ECS::Enemy& enemy)
+			{
+				const sf::Vector2f spawnPos{ enemy.spawnX, enemy.spawnY };
+				const bool wasAlive = std::ranges::any_of(progressSnapshot->aliveEnemies,
+					[&](const sf::Vector2f& p) { return positionMatch(spawnPos, p); });
 				if (!wasAlive)
 					toDestroy.push_back(entity);
 			});
@@ -416,6 +442,12 @@ void GameState::UpdateCheckpoints()
 					if (!box.isBreaking)
 						snap.aliveBoxes.push_back({ t.x, t.y });
 				});
+			registry.ForEach<ECS::Enemy, ECS::Health>(
+				[&](ECS::Entity entity, ECS::Enemy& enemy, ECS::Health& health)
+				{
+					if (health.current > 0 && !registry.Has<ECS::EnemyDeath>(entity))
+						snap.aliveEnemies.push_back({ enemy.spawnX, enemy.spawnY });
+				});
 			checkpointSnapshot = std::move(snap);
 		});
 
@@ -585,6 +617,9 @@ void GameState::Update(float deltaTime)
 	damageSystem.Update(deltaTime);
 	deathSystem.Update(deltaTime);
 	patrolSystem.Update();
+	enemySystem.Update();
+	groundPatrolSystem.Update(deltaTime);
+	enemyDeathSystem.Update(deltaTime);
 	physicsSystem.Update(deltaTime);
 	boxSystem.Update();
 	movementSystem.Update(deltaTime);

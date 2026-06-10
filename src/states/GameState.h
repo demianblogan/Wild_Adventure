@@ -11,6 +11,9 @@
 #include "systems/AnimationSystem.h"
 #include "systems/DamageSystem.h"
 #include "systems/DeathSystem.h"
+#include "systems/EnemyDeathSystem.h"
+#include "systems/EnemySystem.h"
+#include "systems/GroundPatrolSystem.h"
 #include "systems/InputSystem.h"
 #include "systems/JumpSystem.h"
 #include "systems/MovementSystem.h"
@@ -34,6 +37,7 @@ struct ProgressSnapshot
 {
 	std::vector<sf::Vector2f> aliveCollectibles; // positions of uncollected fruits at checkpoint
 	std::vector<sf::Vector2f> aliveBoxes;        // positions of unbroken boxes at checkpoint
+	std::vector<sf::Vector2f> aliveEnemies;      // spawn positions of living enemies at checkpoint
 };
 
 class GameState : public State
@@ -93,6 +97,9 @@ private:
 	ECS::DamageSystem damageSystem;
 	ECS::DeathSystem deathSystem;
 	ECS::PatrolSystem patrolSystem;
+	ECS::EnemySystem enemySystem;
+	ECS::GroundPatrolSystem groundPatrolSystem;
+	ECS::EnemyDeathSystem enemyDeathSystem;
 	ECS::PhysicsSystem physicsSystem;
 	ECS::BoxSystem boxSystem;
 	ECS::MovementSystem movementSystem;

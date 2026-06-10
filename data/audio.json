@@ -61,6 +61,11 @@
 			"path": "assets/audio/sounds/boxes/destroy.ogg",
 			"volume": 0.9
 		},
+		"jump_on_enemy":
+		{
+			"path": "assets/audio/sounds/jump_on_enemy.ogg",
+			"volume": 0.8
+		},
 		"ui_hover":
 		{
 			"path": "assets/audio/sounds/ui_hover.ogg",

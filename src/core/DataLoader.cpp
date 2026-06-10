@@ -22,8 +22,10 @@
 #include "components/Box.h"
 #include "components/Solid.h"
 #include "components/StartPlatform.h"
+#include "components/Enemy.h"
 #include "components/Finish.h"
 #include "components/Checkpoint.h"
+#include "components/GroundPatrol.h"
 #include "core/ecs/Registry.h"
 
 #include <fstream>
@@ -215,6 +217,19 @@ void DataLoader::RegisterLoaders()
 	loaders["Finish"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
 		{
 			registry.Add<ECS::Finish>(entity, {});
+		};
+
+	loaders["Enemy"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::Enemy>(entity, {});
+		};
+
+	loaders["GroundPatrol"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::GroundPatrol patrol;
+			patrol.speed     = data.value("speed",     30.0f);
+			patrol.direction = data.value("direction", -1);
+			registry.Add<ECS::GroundPatrol>(entity, patrol);
 		};
 
 	loaders["Box"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
