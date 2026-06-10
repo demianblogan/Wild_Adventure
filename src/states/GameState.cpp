@@ -1,6 +1,8 @@
 #include "GameState.h"
 
 #include "Context.h"
+#include "components/Box.h"
+#include "components/Collectible.h"
 #include "components/CollisionState.h"
 #include "components/Health.h"
 #include "components/Jump.h"
@@ -28,12 +30,14 @@
 #include "ui/Label.h"
 #include "audio/Mixer.h"
 #include "states/MenuState.h"
+#include "states/PauseState.h"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <cmath>
 #include <memory>
@@ -64,7 +68,8 @@ namespace
 }
 
 GameState::GameState(Context& context, const std::string& levelPath, int levelNumber,
-	std::optional<sf::Vector2f> respawnAt)
+	std::optional<sf::Vector2f> respawnAt, int initialScore,
+	std::optional<ProgressSnapshot> progressSnapshot)
 	: State(context)
 	, background(context.resources)
 	, particles(context.resources)
@@ -86,6 +91,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, levelPath(levelPath)
 	, levelNumber(levelNumber)
 	, respawnOverride(respawnAt)
+	, score(initialScore)
 {
 	Resources& resources = context.resources;
 
@@ -115,6 +121,41 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	fallLimit = worldSize.y + 64.0f;
 
 	sceneLoader.LoadSceneFromMap(registry, levelPath);
+
+	// Restore the world to the state it was in at the last checkpoint: remove
+	// collectibles that had already been picked up and boxes that had been broken.
+	if (progressSnapshot.has_value())
+	{
+		auto positionMatch = [](const sf::Vector2f& a, const sf::Vector2f& b)
+		{
+			return std::abs(a.x - b.x) < 2.0f && std::abs(a.y - b.y) < 2.0f;
+		};
+
+		std::vector<ECS::Entity> toDestroy;
+
+		registry.ForEach<ECS::Collectible, ECS::Transform>(
+			[&](ECS::Entity entity, ECS::Collectible&, ECS::Transform& t)
+			{
+				const sf::Vector2f pos{ t.x, t.y };
+				const bool wasAlive = std::ranges::any_of(progressSnapshot->aliveCollectibles,
+					[&](const sf::Vector2f& p) { return positionMatch(pos, p); });
+				if (!wasAlive)
+					toDestroy.push_back(entity);
+			});
+
+		registry.ForEach<ECS::Box, ECS::Transform>(
+			[&](ECS::Entity entity, ECS::Box&, ECS::Transform& t)
+			{
+				const sf::Vector2f pos{ t.x, t.y };
+				const bool wasAlive = std::ranges::any_of(progressSnapshot->aliveBoxes,
+					[&](const sf::Vector2f& p) { return positionMatch(pos, p); });
+				if (!wasAlive)
+					toDestroy.push_back(entity);
+			});
+
+		for (ECS::Entity e : toDestroy)
+			registry.DestroyEntity(e);
+	}
 
 	// The hero spawns above the start platform, so a level only needs a single
 	// "start" marker in the "marks" object layer.
@@ -358,6 +399,24 @@ void GameState::UpdateCheckpoints()
 			respawnPoint = { transform.x, transform.y };
 			context.audioMixer.PlaySound("checkpoint");
 			confetti.Emit({ player.x, player.y - collider.height / 2.0f });
+
+			// Freeze the score and snapshot all alive collectibles and unbroken boxes
+			// so we can restore this exact state if the player dies here.
+			checkpointScore = score;
+
+			ProgressSnapshot snap;
+			registry.ForEach<ECS::Collectible, ECS::Transform>(
+				[&snap](ECS::Entity, ECS::Collectible&, ECS::Transform& t)
+				{
+					snap.aliveCollectibles.push_back({ t.x, t.y });
+				});
+			registry.ForEach<ECS::Box, ECS::Transform>(
+				[&snap](ECS::Entity, ECS::Box& box, ECS::Transform& t)
+				{
+					if (!box.isBreaking)
+						snap.aliveBoxes.push_back({ t.x, t.y });
+				});
+			checkpointSnapshot = std::move(snap);
 		});
 
 	// Once the flag has finished raising, loop the idle waving animation.
@@ -505,8 +564,19 @@ void GameState::Update(float deltaTime)
 		if (transition.GetMode() == Transition::Mode::Done)
 		{
 			context.stateMachine.Pop();
-			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath, levelNumber, respawnPoint));
+			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath, levelNumber, respawnPoint, checkpointScore, checkpointSnapshot));
 		}
+		return;
+	}
+
+	if (levelPhase == LevelPhase::Playing && context.input.WasPressed(Action::Pause))
+	{
+		// Freeze interpolation so the level doesn't jitter while paused.
+		camera.SnapTo(camera.GetRenderCenter(1.0f));
+		registry.ForEach<ECS::Transform, ECS::PreviousTransform>(
+			[](ECS::Entity, ECS::Transform& t, ECS::PreviousTransform& pt) { pt.x = t.x; pt.y = t.y; });
+
+		context.stateMachine.Push(std::make_unique<PauseState>(context, levelPath, levelNumber));
 		return;
 	}
 

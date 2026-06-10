@@ -28,7 +28,7 @@ class SettingsController
 public:
 	SettingsController(Context& context);
 
-	void Open();
+	void Open(const std::string& settingsFrame = "frame");
 	bool WantsClose() const { return wantsClose; }
 
 	void HandleEvent(const sf::Event& event);
@@ -75,6 +75,7 @@ private:
 	UI::DataLoader settingsLoader;
 
 	std::vector<std::string> panelStack;
+	std::string activeFrame = "frame";
 	bool wantsClose = false;
 
 	NavRequest pendingRequest = NavRequest::None;

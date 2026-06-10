@@ -28,12 +28,21 @@
 
 #include <optional>
 #include <string>
+#include <vector>
+
+struct ProgressSnapshot
+{
+	std::vector<sf::Vector2f> aliveCollectibles; // positions of uncollected fruits at checkpoint
+	std::vector<sf::Vector2f> aliveBoxes;        // positions of unbroken boxes at checkpoint
+};
 
 class GameState : public State
 {
 public:
 	GameState(Context& context, const std::string& levelPath, int levelNumber = 1,
-		std::optional<sf::Vector2f> respawnOverride = std::nullopt);
+		std::optional<sf::Vector2f> respawnOverride = std::nullopt,
+		int initialScore = 0,
+		std::optional<ProgressSnapshot> progressSnapshot = std::nullopt);
 
 	void HandleEvent(const sf::Event& event) override;
 	void Update(float deltaTime) override;
@@ -126,8 +135,10 @@ private:
 	float finishTimer = 0.0f;
 	bool isCompleting = false;
 
-	std::optional<sf::Vector2f> respawnOverride; // set when reloading at a checkpoint
-	sf::Vector2f respawnPoint;                   // current respawn (start, or last checkpoint)
+	std::optional<sf::Vector2f> respawnOverride;           // set when reloading at a checkpoint
+	sf::Vector2f respawnPoint;                             // current respawn (start, or last checkpoint)
+	int checkpointScore = 0;                               // score frozen at the last checkpoint touch
+	std::optional<ProgressSnapshot> checkpointSnapshot;   // entity state at the last checkpoint touch
 
 	static constexpr float APPEAR_HEIGHT = 50.0f;
 	static constexpr float FINISH_RISE_TIME = 0.3f; // bounce arc before the hero vanishes

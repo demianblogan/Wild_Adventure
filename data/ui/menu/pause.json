@@ -1,0 +1,409 @@
+{
+	"Element":
+	{
+		"size":
+		[
+			480,
+			270
+		],
+		"children":
+		[
+			{
+				"Element":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						-88
+					],
+					"size":
+					[
+						150,
+						30
+					],
+					"children":
+					[
+						{
+							"Image":
+							{
+								"anchor":
+								[
+									0.5,
+									0.5
+								],
+								"pivot":
+								[
+									0.5,
+									0.5
+								],
+								"offset":
+								[
+									0,
+									0
+								],
+								"size":
+								[
+									150,
+									30
+								],
+								"textureName": "label_background",
+								"border":
+								[
+									32,
+									2
+								]
+							}
+						},
+						{
+							"Label":
+							{
+								"anchor":
+								[
+									0.5,
+									0.5
+								],
+								"pivot":
+								[
+									0.5,
+									0.5
+								],
+								"offset":
+								[
+									0,
+									0
+								],
+								"fontName": "main",
+								"characterSize": 16,
+								"color":
+								[
+									244,
+									199,
+									110,
+									255
+								],
+								"outlineColor":
+								[
+									58,
+									42,
+									77,
+									255
+								],
+								"outlineThickness": 1,
+								"text": "Pause"
+							}
+						}
+					]
+				}
+			},
+			{
+				"Image":
+				{
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						8
+					],
+					"size":
+					[
+						220,
+						156
+					],
+					"textureName": "container_background",
+					"border": 15
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						-46
+					],
+					"action": "pause_continue",
+					"backgrounds":
+					{
+						"Normal":
+						{
+							"Image":
+							{
+								"size": [ 180, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color": [ 210, 210, 210, 255 ]
+							}
+						},
+						"Highlighted":
+						{
+							"Image":
+							{
+								"size": [ 200, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color": [ 255, 255, 255, 255 ]
+							}
+						},
+						"Pressed":
+						{
+							"Image":
+							{
+								"size": [ 200, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_pressed",
+								"color": [ 255, 255, 255, 255 ]
+							}
+						}
+					},
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Continue"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						-10
+					],
+					"action": "pause_restart",
+					"backgrounds":
+					{
+						"Normal":
+						{
+							"Image":
+							{
+								"size": [ 180, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color": [ 210, 210, 210, 255 ]
+							}
+						},
+						"Highlighted":
+						{
+							"Image":
+							{
+								"size": [ 200, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color": [ 255, 255, 255, 255 ]
+							}
+						},
+						"Pressed":
+						{
+							"Image":
+							{
+								"size": [ 200, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_pressed",
+								"color": [ 255, 255, 255, 255 ]
+							}
+						}
+					},
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Restart Level"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						26
+					],
+					"action": "pause_options",
+					"backgrounds":
+					{
+						"Normal":
+						{
+							"Image":
+							{
+								"size": [ 180, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color": [ 210, 210, 210, 255 ]
+							}
+						},
+						"Highlighted":
+						{
+							"Image":
+							{
+								"size": [ 200, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color": [ 255, 255, 255, 255 ]
+							}
+						},
+						"Pressed":
+						{
+							"Image":
+							{
+								"size": [ 200, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_pressed",
+								"color": [ 255, 255, 255, 255 ]
+							}
+						}
+					},
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Options"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"anchor":
+					[
+						0.5,
+						0.5
+					],
+					"pivot":
+					[
+						0.5,
+						0.5
+					],
+					"offset":
+					[
+						0,
+						62
+					],
+					"action": "pause_quit",
+					"backgrounds":
+					{
+						"Normal":
+						{
+							"Image":
+							{
+								"size": [ 180, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color": [ 210, 210, 210, 255 ]
+							}
+						},
+						"Highlighted":
+						{
+							"Image":
+							{
+								"size": [ 200, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color": [ 255, 255, 255, 255 ]
+							}
+						},
+						"Pressed":
+						{
+							"Image":
+							{
+								"size": [ 200, 32 ],
+								"anchor": [ 0.5, 0.5 ],
+								"pivot": [ 0.5, 0.5 ],
+								"textureName": "button_pressed",
+								"color": [ 255, 255, 255, 255 ]
+							}
+						}
+					},
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Quit to Main Menu"
+							}
+						}
+					}
+				}
+			}
+		]
+	}
+}

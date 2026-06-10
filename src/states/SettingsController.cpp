@@ -38,12 +38,13 @@ SettingsController::SettingsController(Context& context)
 	RegisterActions();
 }
 
-void SettingsController::Open()
+void SettingsController::Open(const std::string& settingsFrame)
 {
 	wantsClose = false;
 	capturingKey = false;
 	waitForKeyRelease = false;
 	pendingRequest = NavRequest::None;
+	activeFrame = settingsFrame;
 
 	panelStack.clear();
 	panelStack.push_back("settings");
@@ -104,7 +105,7 @@ void SettingsController::RegisterActions()
 
 void SettingsController::ShowPanel(const std::string& panelId)
 {
-	std::unique_ptr<UI::Element> frame = settingsLoader.LoadFromFile(MENU_DIRECTORY + "frame.json");
+	std::unique_ptr<UI::Element> frame = settingsLoader.LoadFromFile(MENU_DIRECTORY + activeFrame + ".json");
 
 	UI::Element* slot = frame->FindByName("panel_slot");
 	if (slot == nullptr)
@@ -113,6 +114,27 @@ void SettingsController::ShowPanel(const std::string& panelId)
 	slot->AddChild(settingsLoader.LoadFromFile(MENU_DIRECTORY + panelId + ".json"));
 
 	settingsInterface.SetContent(std::move(frame));
+
+	// In pause context: show/hide the title block and container depending on whether
+	// this panel has its own embedded title (audio, graphics, keyboard do; settings and
+	// controls don't).
+	if (activeFrame != "frame")
+	{
+		const bool hasOwnTitle = (panelId == "audio" || panelId == "graphics"
+			|| panelId == "keyboard" || panelId == "joystick");
+
+		if (UI::Element* block = settingsInterface.FindByName("frame_title_block"))
+			block->isVisible = !hasOwnTitle;
+		if (UI::Element* container = settingsInterface.FindByName("frame_container"))
+			container->isVisible = !hasOwnTitle;
+
+		if (!hasOwnTitle)
+		{
+			const std::string titleText = (panelId == "controls") ? "Controls" : "Options";
+			if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("frame_title_label")))
+				label->SetText(titleText);
+		}
+	}
 
 	if (panelId == "audio")
 		SetupAudioPanel();
