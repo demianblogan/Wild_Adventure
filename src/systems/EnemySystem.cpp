@@ -42,7 +42,7 @@ namespace ECS
 			playerAnimState = &registry.Get<AnimationState>(playerEntity);
 
 		registry.ForEach<Enemy, Transform, Collider, Health>(
-			[&](Entity entity, Enemy&, Transform& transform, Collider& collider, Health& health)
+			[&](Entity entity, Enemy& enemy, Transform& transform, Collider& collider, Health& health)
 			{
 				// Skip enemies that are already dying.
 				if (health.current <= 0 || registry.Has<EnemyDeath>(entity))
@@ -73,7 +73,7 @@ namespace ECS
 
 					mixer.PlaySound("jump_on_enemy");
 					playerVelocity.y = -200.0f;
-					score += 100;
+					score += enemy.scoreValue;
 				}
 				else
 				{

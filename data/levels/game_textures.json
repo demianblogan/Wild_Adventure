@@ -52,5 +52,12 @@
 
 	"mushroom_idle": "assets/textures/enemies/mushroom/Idle (32x32).png",
 	"mushroom_run":  "assets/textures/enemies/mushroom/Run (32x32).png",
-	"mushroom_hit":  "assets/textures/enemies/mushroom/Hit.png"
+	"mushroom_hit":  "assets/textures/enemies/mushroom/Hit.png",
+
+	"trunk_idle":          "assets/textures/enemies/trunk/Idle (64x32).png",
+	"trunk_run":           "assets/textures/enemies/trunk/Run (64x32).png",
+	"trunk_attack":        "assets/textures/enemies/trunk/Attack (64x32).png",
+	"trunk_hit":           "assets/textures/enemies/trunk/Hit (64x32).png",
+	"trunk_bullet":        "assets/textures/enemies/trunk/Bullet.png",
+	"trunk_bullet_pieces": "assets/textures/enemies/trunk/Bullet Pieces.png"
 }

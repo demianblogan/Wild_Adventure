@@ -29,6 +29,10 @@ namespace ECS
 				if (registry.Has<EnemyDeath>(entity))
 					return;
 
+				// AI systems (e.g. TrunkSystem) can suspend patrol during special behaviour.
+				if (patrol.paused)
+					return;
+
 				switch (patrol.state)
 				{
 				case GroundPatrol::State::Patrolling:

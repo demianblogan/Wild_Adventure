@@ -83,11 +83,13 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, deathSystem(registry)
 	, patrolSystem(registry)
 	, enemySystem(registry, score, context.audioMixer)
+	, trunkSystem(registry)
 	, groundPatrolSystem(registry, tilemap)
 	, enemyDeathSystem(registry)
 	, physicsSystem(registry, tilemap)
 	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
 	, movementSystem(registry)
+	, bulletSystem(registry, tilemap)
 	, pickupSystem(registry, score)
 	, animationSystem(registry)
 	, playerAnimationSystem(registry)
@@ -618,11 +620,13 @@ void GameState::Update(float deltaTime)
 	deathSystem.Update(deltaTime);
 	patrolSystem.Update();
 	enemySystem.Update();
+	trunkSystem.Update(deltaTime);
 	groundPatrolSystem.Update(deltaTime);
 	enemyDeathSystem.Update(deltaTime);
 	physicsSystem.Update(deltaTime);
 	boxSystem.Update();
 	movementSystem.Update(deltaTime);
+	bulletSystem.Update(deltaTime);
 
 	const int scoreBeforePickup = score;
 	pickupSystem.Update(deltaTime);

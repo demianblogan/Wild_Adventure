@@ -1,27 +1,34 @@
 {
 	"Sprite":
 	{
-		"textureName": "mushroom_run"
+		"textureName": "trunk_run"
 	},
 	"AnimationSet":
 	{
 		"Idle":
 		{
-			"textureName": "mushroom_idle",
-			"frameCount": 14,
-			"frameDuration": 0.05,
+			"textureName": "trunk_idle",
+			"frameCount": 18,
+			"frameDuration": 0.04,
 			"isLooping": true
 		},
 		"Run":
 		{
-			"textureName": "mushroom_run",
-			"frameCount": 16,
+			"textureName": "trunk_run",
+			"frameCount": 14,
 			"frameDuration": 0.07,
 			"isLooping": true
 		},
+		"Attack":
+		{
+			"textureName": "trunk_attack",
+			"frameCount": 11,
+			"frameDuration": 0.04,
+			"isLooping": false
+		},
 		"Hit":
 		{
-			"textureName": "mushroom_hit",
+			"textureName": "trunk_hit",
 			"frameCount": 5,
 			"frameDuration": 0.08,
 			"isLooping": false
@@ -43,8 +50,8 @@
 	},
 	"Collider":
 	{
-		"width": 22,
-		"height": 26
+		"width": 24,
+		"height": 28
 	},
 	"Health":
 	{
@@ -53,10 +60,11 @@
 		"hitStunDuration": 0.0,
 		"knockbackSpeed": 0.0
 	},
-	"Enemy": { "scoreValue": 10 },
+	"Enemy": { "scoreValue": 15 },
 	"GroundPatrol":
 	{
-		"speed": 40,
+		"speed": 30,
 		"direction": -1
-	}
+	},
+	"TrunkAI": {}
 }

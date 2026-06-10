@@ -100,7 +100,7 @@ namespace ECS
 						const std::string fruitName = box.fruits[index];
 						const Transform& boxTransform = registry.Get<Transform>(entity);
 						const float x = boxTransform.x;
-						const float y = boxTransform.y - 12.0f;
+						const float y = boxTransform.y - 5.0f;
 						const float ejectX = box.ejectSpeedX;
 						const float ejectUp = box.ejectSpeedUp;
 
@@ -138,7 +138,7 @@ namespace ECS
 				const std::vector<std::string> fruits = box.fruits;
 				const Transform& boxTransform = registry.Get<Transform>(entity);
 				const float x = boxTransform.x;
-				const float y = boxTransform.y - 12.0f;
+				const float y = boxTransform.y - 5.0f;
 				const float ejectX = box.ejectSpeedX;
 				const float ejectUp = box.ejectSpeedUp;
 
@@ -149,7 +149,7 @@ namespace ECS
 			if (!box.debrisTexture.empty())
 			{
 				const Transform& debrisTransform = registry.Get<Transform>(entity);
-				particles.EmitDebris({ debrisTransform.x, debrisTransform.y - 12.0f }, box.debrisTexture, 4);
+				particles.EmitDebris({ debrisTransform.x, debrisTransform.y - 5.0f }, box.debrisTexture, 4);
 			}
 
 			if (!box.breakSound.empty())

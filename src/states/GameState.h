@@ -9,6 +9,7 @@
 #include "graphics/Transition.h"
 #include "graphics/AnimatedBackground.h"
 #include "systems/AnimationSystem.h"
+#include "systems/BulletSystem.h"
 #include "systems/DamageSystem.h"
 #include "systems/DeathSystem.h"
 #include "systems/EnemyDeathSystem.h"
@@ -23,6 +24,7 @@
 #include "systems/PlayerAnimationSystem.h"
 #include "systems/RenderSystem.h"
 #include "systems/BoxSystem.h"
+#include "systems/TrunkSystem.h"
 #include "tilemap/Tilemap.h"
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
@@ -98,11 +100,13 @@ private:
 	ECS::DeathSystem deathSystem;
 	ECS::PatrolSystem patrolSystem;
 	ECS::EnemySystem enemySystem;
+	ECS::TrunkSystem trunkSystem;
 	ECS::GroundPatrolSystem groundPatrolSystem;
 	ECS::EnemyDeathSystem enemyDeathSystem;
 	ECS::PhysicsSystem physicsSystem;
 	ECS::BoxSystem boxSystem;
 	ECS::MovementSystem movementSystem;
+	ECS::BulletSystem bulletSystem;
 	ECS::PickupSystem pickupSystem;
 	ECS::AnimationSystem animationSystem;
 	ECS::PlayerAnimationSystem playerAnimationSystem;

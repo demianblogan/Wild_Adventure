@@ -26,6 +26,7 @@
 #include "components/Finish.h"
 #include "components/Checkpoint.h"
 #include "components/GroundPatrol.h"
+#include "components/TrunkAI.h"
 #include "core/ecs/Registry.h"
 
 #include <fstream>
@@ -219,9 +220,16 @@ void DataLoader::RegisterLoaders()
 			registry.Add<ECS::Finish>(entity, {});
 		};
 
-	loaders["Enemy"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+	loaders["Enemy"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
-			registry.Add<ECS::Enemy>(entity, {});
+			ECS::Enemy enemy;
+			enemy.scoreValue = data.value("scoreValue", 0);
+			registry.Add<ECS::Enemy>(entity, enemy);
+		};
+
+	loaders["TrunkAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::TrunkAI>(entity, {});
 		};
 
 	loaders["GroundPatrol"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
@@ -274,7 +282,29 @@ void DataLoader::AddImpliedComponents(ECS::Registry& registry, const std::vector
 			registry.Add<ECS::CollisionState>(entity, {});
 
 		if (registry.Has<ECS::AnimationSet>(entity) && !registry.Has<ECS::Animation>(entity))
-			registry.Add<ECS::Animation>(entity, {});
+		{
+			ECS::Animation anim;
+
+			if (registry.Has<ECS::AnimationState>(entity))
+			{
+				const ECS::AnimationSet& set   = registry.Get<ECS::AnimationSet>(entity);
+				const std::string&       state = registry.Get<ECS::AnimationState>(entity).current;
+				const auto               found = set.animations.find(state);
+
+				if (found != set.animations.end())
+				{
+					anim.data         = found->second;
+					anim.playingState = state;
+
+					// Keep sprite in sync so the first Render is correct before
+					// AnimationSystem ticks.
+					if (registry.Has<ECS::Sprite>(entity))
+						registry.Get<ECS::Sprite>(entity).textureName = anim.data.textureName;
+				}
+			}
+
+			registry.Add<ECS::Animation>(entity, std::move(anim));
+		}
 	}
 }
 

@@ -105,15 +105,15 @@
                 }, 
                 {
                  "height":0,
-                 "id":29,
-                 "name":"mushroom",
+                 "id":30,
+                 "name":"trunk",
                  "opacity":1,
                  "point":true,
                  "rotation":0,
-                 "type":"mushroom",
+                 "type":"trunk",
                  "visible":true,
                  "width":0,
-                 "x":540,
+                 "x":532,
                  "y":160
                 }],
          "opacity":1,
@@ -138,8 +138,8 @@
                  "type":"woodEasyBox",
                  "visible":true,
                  "width":0,
-                 "x":160,
-                 "y":192
+                 "x":648,
+                 "y":100
                 }, 
                 {
                  "height":0,
@@ -151,8 +151,8 @@
                  "type":"woodHardBox",
                  "visible":true,
                  "width":0,
-                 "x":144,
-                 "y":208
+                 "x":632,
+                 "y":116
                 }, 
                 {
                  "height":0,
@@ -164,8 +164,8 @@
                  "type":"metalBox",
                  "visible":true,
                  "width":0,
-                 "x":128,
-                 "y":224
+                 "x":616,
+                 "y":132
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -220,8 +220,8 @@
                  "type":"apple",
                  "visible":true,
                  "width":0,
-                 "x":112,
-                 "y":32
+                 "x":564,
+                 "y":76
                 }, 
                 {
                  "height":0,
@@ -233,8 +233,8 @@
                  "type":"bananas",
                  "visible":true,
                  "width":0,
-                 "x":128,
-                 "y":32
+                 "x":580,
+                 "y":76
                 }, 
                 {
                  "height":0,
@@ -246,8 +246,8 @@
                  "type":"kiwi",
                  "visible":true,
                  "width":0,
-                 "x":32,
-                 "y":32
+                 "x":484,
+                 "y":76
                 }, 
                 {
                  "height":0,
@@ -259,8 +259,8 @@
                  "type":"melon",
                  "visible":true,
                  "width":0,
-                 "x":96,
-                 "y":32
+                 "x":548,
+                 "y":76
                 }, 
                 {
                  "height":0,
@@ -272,8 +272,8 @@
                  "type":"cherries",
                  "visible":true,
                  "width":0,
-                 "x":64,
-                 "y":32
+                 "x":516,
+                 "y":76
                 }, 
                 {
                  "height":0,
@@ -285,8 +285,8 @@
                  "type":"orange",
                  "visible":true,
                  "width":0,
-                 "x":48,
-                 "y":32
+                 "x":500,
+                 "y":76
                 }, 
                 {
                  "height":0,
@@ -298,8 +298,8 @@
                  "type":"pineapple",
                  "visible":true,
                  "width":0,
-                 "x":80,
-                 "y":32
+                 "x":532,
+                 "y":76
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -323,8 +323,8 @@
                  "type":"spikes",
                  "visible":true,
                  "width":0,
-                 "x":80,
-                 "y":240
+                 "x":48,
+                 "y":64
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -333,7 +333,7 @@
          "y":0
         }],
  "nextlayerid":9,
- "nextobjectid":30,
+ "nextobjectid":31,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",
