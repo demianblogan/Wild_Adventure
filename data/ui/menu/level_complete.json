@@ -1,0 +1,180 @@
+{
+	"Element":
+	{
+		"size": [ 480, 270 ],
+		"children":
+		[
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"anchor": [ 0.5, 0.5 ],
+					"pivot":  [ 0.5, 0.5 ],
+					"offset": [ -150, 70 ],
+					"size":   [ 140, 32 ],
+					"action": "lc_continue",
+					"backgrounds":
+					{
+						"Normal":
+						{
+							"Image":
+							{
+								"size":        [ 140, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color":       [ 210, 210, 210, 255 ]
+							}
+						},
+						"Highlighted":
+						{
+							"Image":
+							{
+								"size":        [ 150, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color":       [ 255, 255, 255, 255 ]
+							}
+						},
+						"Pressed":
+						{
+							"Image":
+							{
+								"size":        [ 150, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_pressed",
+								"color":       [ 255, 255, 255, 255 ]
+							}
+						}
+					},
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Continue"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"anchor": [ 0.5, 0.5 ],
+					"pivot":  [ 0.5, 0.5 ],
+					"offset": [ 0, 70 ],
+					"size":   [ 140, 32 ],
+					"action": "lc_restart",
+					"backgrounds":
+					{
+						"Normal":
+						{
+							"Image":
+							{
+								"size":        [ 140, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color":       [ 210, 210, 210, 255 ]
+							}
+						},
+						"Highlighted":
+						{
+							"Image":
+							{
+								"size":        [ 150, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color":       [ 255, 255, 255, 255 ]
+							}
+						},
+						"Pressed":
+						{
+							"Image":
+							{
+								"size":        [ 150, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_pressed",
+								"color":       [ 255, 255, 255, 255 ]
+							}
+						}
+					},
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Restart"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"anchor": [ 0.5, 0.5 ],
+					"pivot":  [ 0.5, 0.5 ],
+					"offset": [ 150, 70 ],
+					"size":   [ 140, 32 ],
+					"action": "lc_menu",
+					"backgrounds":
+					{
+						"Normal":
+						{
+							"Image":
+							{
+								"size":        [ 140, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color":       [ 210, 210, 210, 255 ]
+							}
+						},
+						"Highlighted":
+						{
+							"Image":
+							{
+								"size":        [ 150, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color":       [ 255, 255, 255, 255 ]
+							}
+						},
+						"Pressed":
+						{
+							"Image":
+							{
+								"size":        [ 150, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_pressed",
+								"color":       [ 255, 255, 255, 255 ]
+							}
+						}
+					},
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Main Menu"
+							}
+						}
+					}
+				}
+			}
+		]
+	}
+}

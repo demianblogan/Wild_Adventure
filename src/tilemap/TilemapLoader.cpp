@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <functional>
 #include <fstream>
 #include <stdexcept>
 
@@ -70,11 +71,20 @@ Tilemap LoadTilemap(const std::string& path, const std::string& textureName, int
 	if (data.contains("tilesets") && !data["tilesets"].empty())
 		tilemap.firstGid = data["tilesets"][0].value("firstgid", 1);
 
-	if (data.contains("layers"))
+	// Recursive lambda that processes both top-level and group-nested tile layers.
+	std::function<void(const nlohmann::json&)> processLayers = [&](const nlohmann::json& layers)
 	{
-		for (const auto& layerData : data["layers"])
+		for (const auto& layerData : layers)
 		{
 			const std::string type = layerData.value("type", "");
+
+			if (type == "group")
+			{
+				if (layerData.contains("layers"))
+					processLayers(layerData.at("layers"));
+				continue;
+			}
+
 			if (type != "tilelayer")
 				continue;
 
@@ -106,7 +116,10 @@ Tilemap LoadTilemap(const std::string& path, const std::string& textureName, int
 
 			tilemap.layers.push_back(std::move(layer));
 		}
-	}
+	};
+
+	if (data.contains("layers"))
+		processLayers(data.at("layers"));
 
 	return tilemap;
 }

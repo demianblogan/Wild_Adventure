@@ -48,7 +48,10 @@ public:
 	GameState(Context& context, const std::string& levelPath, int levelNumber = 1,
 		std::optional<sf::Vector2f> respawnOverride = std::nullopt,
 		int initialScore = 0,
-		std::optional<ProgressSnapshot> progressSnapshot = std::nullopt);
+		std::optional<ProgressSnapshot> progressSnapshot = std::nullopt,
+		int initialDeathCount = 0,
+		int initialFruitsCollected = 0,
+		int initialEnemiesKilled = 0);
 
 	void HandleEvent(const sf::Event& event) override;
 	void Update(float deltaTime) override;
@@ -88,6 +91,14 @@ private:
 	int score = 0;
 	int previousScore = -1;
 	int maxHearts = 3;
+
+	int deathCount = 0;
+	int fruitsCollected = 0;
+	int enemiesKilled = 0;
+	int maxFruits = 0;
+	int maxEnemies = 0;
+	int checkpointFruitsCollected = 0;
+	int checkpointEnemiesKilled = 0;
 	int displayedHealth = 3;
 	int blinkingHeart = -1;
 	float blinkTimer = 0.0f;
@@ -144,7 +155,7 @@ private:
 	ECS::Entity finishEntity = ECS::INVALID_ENTITY;
 	ECS::Entity disappearEffectEntity = ECS::INVALID_ENTITY;
 	float finishTimer = 0.0f;
-	bool isCompleting = false;
+	bool levelCompleteShown = false;
 
 	std::optional<sf::Vector2f> respawnOverride;           // set when reloading at a checkpoint
 	sf::Vector2f respawnPoint;                             // current respawn (start, or last checkpoint)

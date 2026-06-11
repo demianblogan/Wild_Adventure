@@ -32,6 +32,7 @@
 #include "tilemap/TilemapRenderer.h"
 #include "ui/Label.h"
 #include "audio/Mixer.h"
+#include "states/LevelCompleteState.h"
 #include "states/MenuState.h"
 #include "states/PauseState.h"
 
@@ -72,7 +73,8 @@ namespace
 
 GameState::GameState(Context& context, const std::string& levelPath, int levelNumber,
 	std::optional<sf::Vector2f> respawnAt, int initialScore,
-	std::optional<ProgressSnapshot> progressSnapshot)
+	std::optional<ProgressSnapshot> progressSnapshot,
+	int initialDeathCount, int initialFruitsCollected, int initialEnemiesKilled)
 	: State(context)
 	, background(context.resources)
 	, particles(context.resources)
@@ -82,7 +84,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, damageSystem(registry)
 	, deathSystem(registry)
 	, patrolSystem(registry)
-	, enemySystem(registry, score, context.audioMixer)
+	, enemySystem(registry, score, context.audioMixer, enemiesKilled)
 	, trunkSystem(registry)
 	, groundPatrolSystem(registry, tilemap)
 	, enemyDeathSystem(registry)
@@ -90,7 +92,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
 	, movementSystem(registry)
 	, bulletSystem(registry, tilemap)
-	, pickupSystem(registry, score)
+	, pickupSystem(registry, score, fruitsCollected)
 	, animationSystem(registry)
 	, playerAnimationSystem(registry)
 	, renderSystem(registry, context.resources, context.virtualScreen.GetRenderTarget())
@@ -100,6 +102,9 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, levelNumber(levelNumber)
 	, respawnOverride(respawnAt)
 	, score(initialScore)
+	, deathCount(initialDeathCount)
+	, fruitsCollected(initialFruitsCollected)
+	, enemiesKilled(initialEnemiesKilled)
 {
 	Resources& resources = context.resources;
 
@@ -129,6 +134,12 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	fallLimit = worldSize.y + 64.0f;
 
 	sceneLoader.LoadSceneFromMap(registry, levelPath);
+
+	// Compute totals from the full scene before any checkpoint pruning.
+	registry.ForEach<ECS::Collectible>([&](ECS::Entity, ECS::Collectible&) { maxFruits++; });
+	registry.ForEach<ECS::Box>([&](ECS::Entity, ECS::Box& box)
+		{ maxFruits += static_cast<int>(box.fruits.size()); });
+	registry.ForEach<ECS::Enemy>([&](ECS::Entity, ECS::Enemy&) { maxEnemies++; });
 
 	// Record each mushroom's spawn position right after loading, before any movement occurs.
 	// This is used by checkpoint snapshots to identify which mushrooms were alive.
@@ -343,9 +354,20 @@ void GameState::UpdateLevelFlow(float deltaTime)
 			registry.DestroyEntity(disappearEffectEntity);
 			disappearEffectEntity = ECS::INVALID_ENTITY;
 
-			transition.StartCover();
-			isCompleting = true;
+			// Freeze interpolation so the level doesn't jitter while the complete menu shows.
+			camera.SnapTo(camera.GetRenderCenter(1.0f));
+			registry.ForEach<ECS::Transform, ECS::PreviousTransform>(
+				[](ECS::Entity, ECS::Transform& t, ECS::PreviousTransform& pt) { pt.x = t.x; pt.y = t.y; });
+
 			levelPhase = LevelPhase::Complete;
+
+			if (!levelCompleteShown)
+			{
+				levelCompleteShown = true;
+				context.stateMachine.Push(std::make_unique<LevelCompleteState>(
+					context, levelPath, levelNumber,
+					deathCount, fruitsCollected, maxFruits, enemiesKilled, maxEnemies));
+			}
 		}
 
 		return;
@@ -431,6 +453,8 @@ void GameState::UpdateCheckpoints()
 			// Freeze the score and snapshot all alive collectibles and unbroken boxes
 			// so we can restore this exact state if the player dies here.
 			checkpointScore = score;
+			checkpointFruitsCollected = fruitsCollected;
+			checkpointEnemiesKilled = enemiesKilled;
 
 			ProgressSnapshot snap;
 			registry.ForEach<ECS::Collectible, ECS::Transform>(
@@ -583,22 +607,17 @@ void GameState::Update(float deltaTime)
 	if (deathFlashTimer > 0.0f)
 		deathFlashTimer -= deltaTime;
 
-	if (isCompleting)
-	{
-		if (transition.GetMode() == Transition::Mode::Done)
-		{
-			context.stateMachine.Clear();
-			context.stateMachine.Push(std::make_unique<MenuState>(context));
-		}
+	if (levelPhase == LevelPhase::Complete)
 		return;
-	}
 
 	if (isRestarting)
 	{
 		if (transition.GetMode() == Transition::Mode::Done)
 		{
 			context.stateMachine.Pop();
-			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath, levelNumber, respawnPoint, checkpointScore, checkpointSnapshot));
+			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath, levelNumber,
+				respawnPoint, checkpointScore, checkpointSnapshot,
+				deathCount, checkpointFruitsCollected, checkpointEnemiesKilled));
 		}
 		return;
 	}
@@ -710,6 +729,7 @@ void GameState::Update(float deltaTime)
 				context.audioMixer.PlaySound("player_death");
 				deathSoundPlayed = true;
 				deathFlashTimer = DEATH_FLASH_TIME;
+				deathCount++;
 			}
 
 			if (fellIntoPit)

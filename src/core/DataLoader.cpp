@@ -29,6 +29,7 @@
 #include "components/TrunkAI.h"
 #include "core/ecs/Registry.h"
 
+#include <functional>
 #include <fstream>
 #include <stdexcept>
 
@@ -392,44 +393,59 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 
 	std::vector<ECS::Entity> createdEntities;
 
-	for (const auto& layer : mapJson.at("layers"))
+	// Recursive lambda: handles both flat objectgroups and Tiled group layers.
+	std::function<void(const nlohmann::json&)> processLayers = [&](const nlohmann::json& layers)
 	{
-		if (layer.value("type", std::string()) != "objectgroup")
-			continue;
-
-		for (const auto& object : layer.at("objects"))
+		for (const auto& layer : layers)
 		{
-			const std::string className = object.value("type", std::string());
+			const std::string type = layer.value("type", std::string());
 
-			// Skip non-entity markers (e.g. the camera guide): no class, or not a point.
-			if (className.empty() || !object.value("point", false))
-				continue;
-
-			const float x = object.at("x");
-			const float y = object.at("y");
-
-			nlohmann::json entry;
-			entry["prefab"] = "data/prefabs/" + className + ".json";
-			entry["Transform"]["x"] = x;
-			entry["Transform"]["y"] = y;
-
-			// patrolRange custom property -> Patrol bounds. Axis and speed stay from the prefab.
-			if (object.contains("properties"))
+			if (type == "group")
 			{
-				for (const auto& property : object["properties"])
-				{
-					if (property.value("name", std::string()) == "patrolRange")
-					{
-						const float range = property.at("value");
-						entry["Patrol"]["min"] = x - range;
-						entry["Patrol"]["max"] = x + range;
-					}
-				}
+				if (layer.contains("layers"))
+					processLayers(layer.at("layers"));
+				continue;
 			}
 
-			createdEntities.push_back(LoadPrefabbedEntity(registry, entry));
+			if (type != "objectgroup")
+				continue;
+
+			for (const auto& object : layer.at("objects"))
+			{
+				const std::string className = object.value("type", std::string());
+
+				// Skip non-entity markers (e.g. the camera guide): no class, or not a point.
+				if (className.empty() || !object.value("point", false))
+					continue;
+
+				const float x = object.at("x");
+				const float y = object.at("y");
+
+				nlohmann::json entry;
+				entry["prefab"] = "data/prefabs/" + className + ".json";
+				entry["Transform"]["x"] = x;
+				entry["Transform"]["y"] = y;
+
+				// patrolRange custom property -> Patrol bounds. Axis and speed stay from the prefab.
+				if (object.contains("properties"))
+				{
+					for (const auto& property : object["properties"])
+					{
+						if (property.value("name", std::string()) == "patrolRange")
+						{
+							const float range = property.at("value");
+							entry["Patrol"]["min"] = x - range;
+							entry["Patrol"]["max"] = x + range;
+						}
+					}
+				}
+
+				createdEntities.push_back(LoadPrefabbedEntity(registry, entry));
+			}
 		}
-	}
+	};
+
+	processLayers(mapJson.at("layers"));
 
 	AddImpliedComponents(registry, createdEntities);
 

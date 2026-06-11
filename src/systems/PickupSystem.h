@@ -7,12 +7,13 @@ namespace ECS
 	class PickupSystem
 	{
 	public:
-		PickupSystem(Registry& registry, int& score);
+		PickupSystem(Registry& registry, int& score, int& fruitsCollected);
 
 		void Update(float deltaTime);
 
 	private:
 		Registry& registry;
 		int& score;
+		int& fruitsCollected;
 	};
 }
