@@ -15,9 +15,10 @@
 
 namespace ECS
 {
-	PickupSystem::PickupSystem(Registry& registry, int& score)
+	PickupSystem::PickupSystem(Registry& registry, int& score, int& fruitsCollected)
 		: registry(registry)
 		, score(score)
+		, fruitsCollected(fruitsCollected)
 	{}
 
 	void PickupSystem::Update(float deltaTime)
@@ -71,6 +72,7 @@ namespace ECS
 		for (const Entity entity : collected)
 		{
 			score += registry.Get<Collectible>(entity).points;
+			fruitsCollected++;
 
 			registry.RemoveFrom<Collectible>(entity);
 			if (registry.Has<Hitbox>(entity))

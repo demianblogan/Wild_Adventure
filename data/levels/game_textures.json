@@ -21,6 +21,7 @@
 	"collected": "assets/textures/items/fruits/Collected.png",
 
 	"heart": "assets/textures/ui/heart_32x32.png",
+	"star": "assets/textures/ui/star.png",
 
 	"box_wood_easy_idle": "assets/textures/items/boxes/Box1/Idle.png",
 	"box_wood_easy_hit": "assets/textures/items/boxes/Box1/Hit (28x24).png",

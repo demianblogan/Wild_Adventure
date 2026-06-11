@@ -14,10 +14,11 @@
 
 namespace ECS
 {
-	EnemySystem::EnemySystem(Registry& registry, int& score, Audio::Mixer& mixer)
+	EnemySystem::EnemySystem(Registry& registry, int& score, Audio::Mixer& mixer, int& enemiesKilled)
 		: registry(registry)
 		, score(score)
 		, mixer(mixer)
+		, enemiesKilled(enemiesKilled)
 	{}
 
 	void EnemySystem::Update()
@@ -74,6 +75,7 @@ namespace ECS
 					mixer.PlaySound("jump_on_enemy");
 					playerVelocity.y = -200.0f;
 					score += enemy.scoreValue;
+					enemiesKilled++;
 				}
 				else
 				{

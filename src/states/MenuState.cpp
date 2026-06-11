@@ -92,7 +92,7 @@ void MenuState::ApplyPendingNavigation()
 		break;
 
 	case NavRequest::StartGame:
-		context.stateMachine.Push(std::make_unique<GameState>(context, "data/levels/test_level.tmj", 1));
+		context.stateMachine.Push(std::make_unique<GameState>(context, "data/levels/level_1.tmj", 1));
 		break;
 
 	case NavRequest::Exit:

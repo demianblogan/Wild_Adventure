@@ -942,41 +942,6 @@
          "visible":true,
          "x":0,
          "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":3,
-         "name":"camera_view",
-         "objects":[
-                {
-                 "height":260,
-                 "id":1,
-                 "name":"",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":480,
-                 "x":0.484848484666686,
-                 "y":-0.666666666666686
-                }, 
-                {
-                 "height":0.666666666666629,
-                 "id":2,
-                 "name":"",
-                 "opacity":1,
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0.666666666666657,
-                 "x":216,
-                 "y":118
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":false,
-         "x":0,
-         "y":0
         }],
  "nextlayerid":7,
  "nextobjectid":82,
