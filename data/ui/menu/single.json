@@ -63,13 +63,14 @@
 						0,
 						18
 					],
+					"action": "menu_select_level",
 					"foregrounds":
 					{
 						"Normal":
 						{
 							"Label":
 							{
-								"text": "Level Select"
+								"text": "Select Level"
 							}
 						}
 					}

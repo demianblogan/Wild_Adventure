@@ -21,6 +21,8 @@
 	"slider_fill": "assets/textures/ui/slider_fill.png",
 	"slider_handle": "assets/textures/ui/slider_handle.png",
 	"container_background2": "assets/textures/ui/container_background2.png",
+	"lock": "assets/textures/ui/lock.png",
+	"mini_star": "assets/textures/ui/mini_star.png",
 	"arrow_left_normal": "assets/textures/ui/arrow_left_normal.png",
 	"arrow_left_pressed": "assets/textures/ui/arrow_left_pressed.png",
 	"arrow_right_normal": "assets/textures/ui/arrow_right_normal.png",
@@ -30,3 +32,4 @@
 	"xbox_controller_spritesheet": "assets/textures/ui/controls/xbox_controller_spritesheet.png",
 	"playstation_controller_spritesheet": "assets/textures/ui/controls/playstation_controller_spritesheet.png"
 }
+

@@ -25,6 +25,7 @@ MenuState::MenuState(Context& context)
 	, userInterface(context.virtualScreen)
 	, interfaceLoader(context.resources)
 	, settings(context)
+	, selectLevel(context)
 {
 	Resources& resources = context.resources;
 
@@ -52,6 +53,7 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_open_single", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "single"; });
 	interfaceLoader.RegisterAction("menu_open_author", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "author"; });
 	interfaceLoader.RegisterAction("menu_open_settings", [this] { inSettings = true; settings.Open(); });
+	interfaceLoader.RegisterAction("menu_select_level", [this] { inSelectLevel = true; selectLevel.Open(); });
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
 	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
@@ -92,12 +94,12 @@ void MenuState::DisableButton(const std::string& buttonName)
 
 void MenuState::SetupSinglePanel()
 {
-	// Continue unlocks once the first level is completed.
+	// Continue and Select Level unlock once the first level is completed.
 	if (context.campaign.GetHighestCompletedLevel() < 1)
+	{
 		DisableButton("continue_button");
-
-	// Level Select is not implemented yet.
-	DisableButton("select_level_button");
+		DisableButton("select_level_button");
+	}
 }
 
 void MenuState::SetupPlayPanel()
@@ -169,6 +171,12 @@ void MenuState::HandleEvent(const sf::Event& event)
 		return;
 	}
 
+	if (inSelectLevel)
+	{
+		selectLevel.HandleEvent(event);
+		return;
+	}
+
 	userInterface.HandleEvent(event);
 }
 
@@ -190,6 +198,19 @@ void MenuState::Update(float deltaTime)
 		if (settings.WantsClose())
 		{
 			inSettings = false;
+			userInterface.ResetFocus();
+		}
+
+		return;
+	}
+
+	if (inSelectLevel)
+	{
+		selectLevel.Update(deltaTime);
+
+		if (selectLevel.WantsClose())
+		{
+			inSelectLevel = false;
 			userInterface.ResetFocus();
 		}
 
@@ -237,6 +258,8 @@ void MenuState::Render(float interpolationFactor)
 
 	if (inSettings)
 		settings.Render(renderTarget);
+	else if (inSelectLevel)
+		selectLevel.Render(renderTarget);
 	else
 	{
 		context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);

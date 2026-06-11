@@ -4,6 +4,7 @@
 #include "core/State.h"
 #include "graphics/Transition.h"
 #include "states/MenuBackdrop.h"
+#include "states/SelectLevelController.h"
 #include "states/SettingsController.h"
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
@@ -40,6 +41,9 @@ private:
 
 	SettingsController settings;
 	bool inSettings = false;
+
+	SelectLevelController selectLevel;
+	bool inSelectLevel = false;
 
 	std::vector<std::string> panelStack;
 
