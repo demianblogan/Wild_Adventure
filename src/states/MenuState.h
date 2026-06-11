@@ -26,6 +26,8 @@ private:
 	void RegisterActions();
 	void ShowPanel(const std::string& panelId);
 	void SetupSinglePanel();
+	void SetupPlayPanel();
+	void DisableButton(const std::string& buttonName);
 	void GoBackPanel();
 	void ApplyPendingNavigation();
 

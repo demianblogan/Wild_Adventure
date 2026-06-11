@@ -1,0 +1,20 @@
+{
+	"default":
+	{
+		"texture": "blue",
+		"direction": "right",
+		"speed": 16
+	},
+	"1":
+	{
+		"texture": "blue",
+		"direction": "right",
+		"speed": 16
+	},
+	"2":
+	{
+		"texture": "pink",
+		"direction": "down",
+		"speed": 16
+	}
+}

@@ -50,6 +50,7 @@
 	"confetti": "assets/textures/other/confetti_(16x16).png",
 
 	"blue": "assets/textures/background/blue.png",
+	"pink": "assets/textures/background/pink.png",
 
 	"mushroom_idle": "assets/textures/enemies/mushroom/Idle (32x32).png",
 	"mushroom_run":  "assets/textures/enemies/mushroom/Run (32x32).png",

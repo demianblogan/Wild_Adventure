@@ -72,30 +72,38 @@ void MenuState::ShowPanel(const std::string& panelId)
 
 	if (panelId == "single")
 		SetupSinglePanel();
+	else if (panelId == "play")
+		SetupPlayPanel();
 
 	userInterface.ResetFocus();
 }
 
-void MenuState::SetupSinglePanel()
+void MenuState::DisableButton(const std::string& buttonName)
 {
 	const sf::Color disabledTint(110, 110, 110, 255);
 
-	auto disable = [&](const std::string& buttonName)
+	if (auto* button = dynamic_cast<UI::Button*>(userInterface.FindByName(buttonName)))
 	{
-		if (auto* button = dynamic_cast<UI::Button*>(userInterface.FindByName(buttonName)))
-		{
-			button->SetEnabled(false);
-			button->SetBackgroundTint(disabledTint);
-			button->SetForegroundColor(UI::InteractionState::Normal, disabledTint);
-		}
-	};
+		button->SetEnabled(false);
+		button->SetBackgroundTint(disabledTint);
+		button->SetForegroundColor(UI::InteractionState::Normal, disabledTint);
+	}
+}
 
+void MenuState::SetupSinglePanel()
+{
 	// Continue unlocks once the first level is completed.
 	if (context.campaign.GetHighestCompletedLevel() < 1)
-		disable("continue_button");
+		DisableButton("continue_button");
 
 	// Level Select is not implemented yet.
-	disable("select_level_button");
+	DisableButton("select_level_button");
+}
+
+void MenuState::SetupPlayPanel()
+{
+	// Two Players waits for the multiplayer implementation.
+	DisableButton("two_players_button");
 }
 
 void MenuState::GoBackPanel()

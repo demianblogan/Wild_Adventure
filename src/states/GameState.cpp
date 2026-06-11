@@ -40,10 +40,12 @@
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 #include <algorithm>
 #include <cstdint>
 #include <cmath>
+#include <fstream>
 #include <memory>
 #include <iostream> //DEBUG
 
@@ -68,6 +70,48 @@ namespace
 			index = 3;
 
 		return tracks[index];
+	}
+
+	// Per-level animated background: texture, scroll direction and speed come
+	// from data/levels/backgrounds.json, keyed by level number, with a
+	// "default" entry for levels that have no override.
+	void ApplyLevelBackground(AnimatedBackground& background, int levelNumber)
+	{
+		std::string texture = "blue";
+		std::string directionName = "right";
+		float speed = 16.0f;
+
+		std::ifstream file("data/levels/backgrounds.json");
+		if (file.is_open())
+		{
+			const nlohmann::json data = nlohmann::json::parse(file);
+			const std::string key = std::to_string(levelNumber);
+
+			const nlohmann::json* entry = nullptr;
+			if (data.contains(key))
+				entry = &data.at(key);
+			else if (data.contains("default"))
+				entry = &data.at("default");
+
+			if (entry != nullptr)
+			{
+				texture = entry->value("texture", texture);
+				directionName = entry->value("direction", directionName);
+				speed = entry->value("speed", speed);
+			}
+		}
+
+		AnimatedBackground::Direction direction = AnimatedBackground::Direction::Right;
+		if (directionName == "up")
+			direction = AnimatedBackground::Direction::Up;
+		else if (directionName == "down")
+			direction = AnimatedBackground::Direction::Down;
+		else if (directionName == "left")
+			direction = AnimatedBackground::Direction::Left;
+
+		background.SetTexture(texture);
+		background.SetDirection(direction);
+		background.SetSpeed(speed);
 	}
 }
 
@@ -118,9 +162,10 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	resources.LoadTexturesFromFile("data/levels/game_textures.json");
 	particles.LoadConfig("data/particles.json");
 
-	background.SetTexture("blue");
-	background.SetDirection(AnimatedBackground::Direction::Right);
-	background.SetSpeed(16.0f);
+	ApplyLevelBackground(background, levelNumber);
+
+	// The "Level X" banner greets a fresh level start, not a checkpoint respawn.
+	showLevelBanner = !respawnOverride.has_value();
 
 	// Parse the map once and reuse the parsed JSON for both the tilemap and the
 	// scene; the cache also makes level restarts skip the parse entirely.
@@ -296,6 +341,9 @@ void GameState::UpdateLevelFlow(float deltaTime)
 		animation.playingState = "appear";
 
 		context.audioMixer.PlaySound("player_appear");
+
+		if (showLevelBanner)
+			bannerPhase = BannerPhase::SlideIn;
 
 		levelPhase = LevelPhase::Appearing;
 		return;
@@ -517,6 +565,65 @@ bool GameState::IsPlayerOnFinish()
 	return horizontalOverlap && restingOnTop;
 }
 
+void GameState::UpdateLevelBanner(float deltaTime)
+{
+	if (bannerPhase == BannerPhase::Hidden || bannerPhase == BannerPhase::Done)
+		return;
+
+	bannerTimer += deltaTime;
+
+	if (bannerPhase == BannerPhase::SlideIn && bannerTimer >= BANNER_SLIDE_TIME)
+	{
+		bannerPhase = BannerPhase::Hold;
+		bannerTimer = 0.0f;
+	}
+	else if (bannerPhase == BannerPhase::Hold && bannerTimer >= BANNER_HOLD_TIME)
+	{
+		bannerPhase = BannerPhase::SlideOut;
+		bannerTimer = 0.0f;
+	}
+	else if (bannerPhase == BannerPhase::SlideOut && bannerTimer >= BANNER_SLIDE_TIME)
+	{
+		bannerPhase = BannerPhase::Done;
+	}
+}
+
+void GameState::DrawLevelBanner()
+{
+	if (bannerPhase == BannerPhase::Hidden || bannerPhase == BannerPhase::Done)
+		return;
+
+	float y = BANNER_TARGET_Y;
+
+	if (bannerPhase == BannerPhase::SlideIn)
+	{
+		// Ease out: fast entrance that settles softly.
+		const float t = std::min(bannerTimer / BANNER_SLIDE_TIME, 1.0f);
+		const float eased = 1.0f - (1.0f - t) * (1.0f - t);
+		y = BANNER_START_Y + (BANNER_TARGET_Y - BANNER_START_Y) * eased;
+	}
+	else if (bannerPhase == BannerPhase::SlideOut)
+	{
+		// Ease in: slow start, accelerating off the screen.
+		const float t = std::min(bannerTimer / BANNER_SLIDE_TIME, 1.0f);
+		const float eased = t * t;
+		y = BANNER_TARGET_Y + (BANNER_START_Y - BANNER_TARGET_Y) * eased;
+	}
+
+	sf::Text text(context.resources.fonts.Get("main"), "Level " + std::to_string(levelNumber), 24);
+	text.setFillColor(sf::Color(244, 199, 110));     // warm gold, as on the complete menu
+	text.setOutlineColor(sf::Color(58, 42, 77));     // deep purple outline
+	text.setOutlineThickness(2.0f);
+
+	const sf::FloatRect bounds = text.getLocalBounds();
+	text.setOrigin({
+		bounds.position.x + bounds.size.x / 2.0f,
+		bounds.position.y + bounds.size.y / 2.0f });
+	text.setPosition({ std::floor(VirtualScreen::WIDTH / 2.0f), std::floor(y) });
+
+	context.virtualScreen.GetRenderTarget().draw(text);
+}
+
 bool GameState::IsPlayerOnDeathTile()
 {
 	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
@@ -631,6 +738,7 @@ void GameState::UpdateHearts(int currentHealth, float deltaTime)
 void GameState::Update(float deltaTime)
 {
 	transition.Update(deltaTime);
+	UpdateLevelBanner(deltaTime);
 
 	// Decay the death flash here so it still fades while the restart wipe runs (the
 	// blocks below return early once a death/finish is in progress).
@@ -809,5 +917,6 @@ void GameState::Render(float interpolationFactor)
 
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
 	hudInterface.Draw(renderTarget);
+	DrawLevelBanner();
 	transition.Draw(renderTarget);
 }
