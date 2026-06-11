@@ -139,8 +139,10 @@ private:
 	bool wasOnGround = false;
 	bool deathSoundPlayed = false;
 	float deathFlashTimer = 0.0f; // white "lightning" flash over the background on death
+	float deathFallTimer = 0.0f;  // time spent tumbling after a damage death
 
 	static constexpr float DEATH_FLASH_TIME = 0.2f; // duration of the death "lightning" flash
+	static constexpr float DEATH_FALL_TIME = 0.5f;  // max tumble time before the restart kicks in
 
 	int previousPlayerHealth = -1;
 	int previousJumpsRemaining = 0;

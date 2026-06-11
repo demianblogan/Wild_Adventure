@@ -332,16 +332,24 @@ ECS::Entity DataLoader::LoadEntity(ECS::Registry& registry, const nlohmann::json
 	return entity;
 }
 
-ECS::Entity DataLoader::LoadEntityFromFile(ECS::Registry& registry, const std::string& path)
+const nlohmann::json& DataLoader::GetCachedJson(const std::string& path)
 {
+	const auto found = fileCache.find(path);
+
+	if (found != fileCache.end())
+		return found->second;
+
 	std::ifstream file(path);
 
 	if (!file.is_open())
 		throw std::runtime_error("Could not open data file: " + path);
 
-	const nlohmann::json entityJson = nlohmann::json::parse(file);
+	return fileCache.emplace(path, nlohmann::json::parse(file)).first->second;
+}
 
-	return LoadEntity(registry, entityJson);
+ECS::Entity DataLoader::LoadEntityFromFile(ECS::Registry& registry, const std::string& path)
+{
+	return LoadEntity(registry, GetCachedJson(path));
 }
 
 ECS::Entity DataLoader::SpawnFromPrefab(ECS::Registry& registry, const std::string& path)
@@ -358,12 +366,7 @@ ECS::Entity DataLoader::LoadPrefabbedEntity(ECS::Registry& registry, const nlohm
 	const std::string prefabPath = overrides.at("prefab");
 	overrides.erase("prefab");
 
-	std::ifstream prefabFile(prefabPath);
-
-	if (!prefabFile.is_open())
-		throw std::runtime_error("Could not open prefab file: " + prefabPath);
-
-	nlohmann::json merged = nlohmann::json::parse(prefabFile);
+	nlohmann::json merged = GetCachedJson(prefabPath);
 	merged.merge_patch(overrides);
 
 	return LoadEntity(registry, merged);
@@ -395,8 +398,11 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 	if (!mapFile.is_open())
 		throw std::runtime_error("Could not open map file: " + mapPath);
 
-	const nlohmann::json mapJson = nlohmann::json::parse(mapFile);
+	return LoadSceneFromMap(registry, nlohmann::json::parse(mapFile));
+}
 
+std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, const nlohmann::json& mapJson)
+{
 	std::vector<ECS::Entity> createdEntities;
 
 	// Recursive lambda: handles both flat objectgroups and Tiled group layers.

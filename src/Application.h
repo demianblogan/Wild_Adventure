@@ -50,6 +50,17 @@ private:
 	int fpsFrameCount = 0;
 	int fpsDisplayed = 0;
 
+	// Per-phase frame timing, accumulated between FPS overlay refreshes. Shown in
+	// the overlay to tell game cost (events/update/draw) from presentation waits.
+	float accumulatedEventsTime = 0.0f;
+	float accumulatedUpdateTime = 0.0f;
+	float accumulatedDrawTime = 0.0f;
+	float accumulatedDisplayTime = 0.0f;
+	float shownEventsMs = 0.0f;
+	float shownUpdateMs = 0.0f;
+	float shownDrawMs = 0.0f;
+	float shownDisplayMs = 0.0f;
+
 	int appliedWidth = 0;
 	int appliedHeight = 0;
 	ScreenMode appliedMode = ScreenMode::Borderless;

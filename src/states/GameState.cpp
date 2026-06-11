@@ -122,7 +122,11 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	background.SetDirection(AnimatedBackground::Direction::Right);
 	background.SetSpeed(16.0f);
 
-	tilemap = LoadTilemap(levelPath, "terrain", 22);
+	// Parse the map once and reuse the parsed JSON for both the tilemap and the
+	// scene; the cache also makes level restarts skip the parse entirely.
+	const nlohmann::json& mapJson = resources.GetMapJson(levelPath);
+
+	tilemap = LoadTilemap(mapJson, "terrain", 22);
 	particles.SetTilemap(tilemap);
 
 	const sf::Vector2f worldSize =
@@ -134,7 +138,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 
 	fallLimit = worldSize.y + 64.0f;
 
-	sceneLoader.LoadSceneFromMap(registry, levelPath);
+	sceneLoader.LoadSceneFromMap(registry, mapJson);
 
 	// Compute totals from the full scene before any checkpoint pruning.
 	registry.ForEach<ECS::Collectible>([&](ECS::Entity, ECS::Collectible&) { maxFruits++; });
@@ -761,7 +765,12 @@ void GameState::Update(float deltaTime)
 				deathCount++;
 			}
 
-			if (fellIntoPit)
+			// A hero killed by damage tumbles down with collisions off; cap that
+			// fall so the restart doesn't wait for the world's bottom on tall maps.
+			if (health.current <= 0)
+				deathFallTimer += deltaTime;
+
+			if (fellIntoPit || deathFallTimer >= DEATH_FALL_TIME)
 			{
 				transition.StartCover();
 				isRestarting = true;

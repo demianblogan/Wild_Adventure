@@ -54,15 +54,8 @@ static void BuildLayerVertices(Tilemap::Layer& layer, int tileSize, int atlasWid
 	}
 }
 
-Tilemap LoadTilemap(const std::string& path, const std::string& textureName, int atlasWidthInTiles)
+Tilemap LoadTilemap(const nlohmann::json& data, const std::string& textureName, int atlasWidthInTiles)
 {
-	std::ifstream file(path);
-	if (!file)
-		throw std::runtime_error("LoadTilemap: cannot open file '" + path + "'");
-
-	nlohmann::json data;
-	file >> data;
-
 	Tilemap tilemap;
 	tilemap.textureName = textureName;
 	tilemap.atlasWidthInTiles = atlasWidthInTiles;
@@ -135,4 +128,16 @@ Tilemap LoadTilemap(const std::string& path, const std::string& textureName, int
 		processLayers(data.at("layers"));
 
 	return tilemap;
+}
+
+Tilemap LoadTilemap(const std::string& path, const std::string& textureName, int atlasWidthInTiles)
+{
+	std::ifstream file(path);
+	if (!file)
+		throw std::runtime_error("LoadTilemap: cannot open file '" + path + "'");
+
+	nlohmann::json data;
+	file >> data;
+
+	return LoadTilemap(data, textureName, atlasWidthInTiles);
 }
