@@ -27,6 +27,11 @@ public:
 	// effect off. Silently ignored when shaders are unsupported.
 	void SetColorGrading(const ColorGrading& grading);
 
+	// Gaussian-blurs everything drawn so far; whatever is drawn afterwards
+	// (menu UI) stays sharp. More iterations widen the blur. Silently does
+	// nothing when shaders are unsupported.
+	void BlurContents(int iterations = 3);
+
 	void SetCameraCenter(float x, float y);
 
 	void UpdateMousePosition(sf::Vector2i windowPosition, sf::RenderWindow& window);
@@ -47,4 +52,8 @@ private:
 	bool gradingActive = false;    // current parameters differ from identity
 	bool heatActive = false;       // heat haze on: the time uniform ticks every frame
 	sf::Clock effectClock;         // drives the heat haze animation
+
+	sf::Shader blurShader;
+	bool blurSupported = false;
+	sf::RenderTexture blurTexture; // ping-pong partner for the blur passes
 };

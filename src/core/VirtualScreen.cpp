@@ -1,6 +1,7 @@
 #include "VirtualScreen.h"
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 
@@ -9,10 +10,12 @@
 
 VirtualScreen::VirtualScreen()
 	: renderTexture({ WIDTH, HEIGHT })
+	, blurTexture({ WIDTH, HEIGHT })
 	, camera(sf::FloatRect({ 0.0f, 0.0f }, { static_cast<float>(WIDTH), static_cast<float>(HEIGHT) }))
 {
 	renderTexture.setSmooth(false);
 	renderTexture.setView(camera);
+	blurTexture.setSmooth(false);
 
 	// Post effects degrade gracefully: without shader support the virtual
 	// screen is simply blitted as before.
@@ -21,6 +24,42 @@ VirtualScreen::VirtualScreen()
 
 	if (gradingSupported)
 		gradingShader.setUniform("texture", sf::Shader::CurrentTexture);
+
+	blurSupported = sf::Shader::isAvailable()
+		&& blurShader.loadFromFile("assets/shaders/blur.frag", sf::Shader::Type::Fragment);
+
+	if (blurSupported)
+		blurShader.setUniform("texture", sf::Shader::CurrentTexture);
+}
+
+void VirtualScreen::BlurContents(int iterations)
+{
+	if (!blurSupported)
+		return;
+
+	// The blur passes copy full screens; views must map 1:1, independent of
+	// whatever camera a state has set.
+	const sf::View previousView = renderTexture.getView();
+	renderTexture.setView(sf::View(sf::FloatRect(
+		{ 0.0f, 0.0f }, { static_cast<float>(WIDTH), static_cast<float>(HEIGHT) })));
+
+	sf::RenderStates states;
+	states.shader = &blurShader;
+	states.blendMode = sf::BlendNone;
+
+	for (int i = 0; i < iterations; i++)
+	{
+		renderTexture.display(); // make the content drawn so far samplable
+
+		blurShader.setUniform("direction", sf::Glsl::Vec2(1.0f / WIDTH, 0.0f));
+		blurTexture.draw(sf::Sprite(renderTexture.getTexture()), states);
+		blurTexture.display();
+
+		blurShader.setUniform("direction", sf::Glsl::Vec2(0.0f, 1.0f / HEIGHT));
+		renderTexture.draw(sf::Sprite(blurTexture.getTexture()), states);
+	}
+
+	renderTexture.setView(previousView);
 }
 
 void VirtualScreen::SetColorGrading(const ColorGrading& grading)

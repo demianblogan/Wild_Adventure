@@ -135,6 +135,9 @@ void PauseState::Render(float /*interpolationFactor*/)
 {
 	sf::RenderTarget& renderTarget = context.virtualScreen.GetRenderTarget();
 
+	// Frost the level rendered below; the pause menu stays sharp on top.
+	context.virtualScreen.BlurContents();
+
 	// Semi-transparent overlay to dim the level behind the pause menu.
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
 	sf::RectangleShape overlay({ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });

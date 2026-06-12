@@ -279,6 +279,9 @@ void MenuState::Render(float interpolationFactor)
 {
 	backdrop.Render(interpolationFactor);
 
+	// Frost the level backdrop; the menu UI drawn on top stays sharp.
+	context.virtualScreen.BlurContents();
+
 	sf::RenderTarget& renderTarget = context.virtualScreen.GetRenderTarget();
 
 	if (inSettings)
