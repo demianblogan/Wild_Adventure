@@ -64,5 +64,8 @@
 	"trunk_attack":        "assets/textures/enemies/trunk/Attack (64x32).png",
 	"trunk_hit":           "assets/textures/enemies/trunk/Hit (64x32).png",
 	"trunk_bullet":        "assets/textures/enemies/trunk/Bullet.png",
-	"trunk_bullet_pieces": "assets/textures/enemies/trunk/Bullet Pieces.png"
+	"trunk_bullet_pieces": "assets/textures/enemies/trunk/Bullet Pieces.png",
+
+	"blue_bird_fly": "assets/textures/enemies/blue_bird/Flying (32x32).png",
+	"blue_bird_hit": "assets/textures/enemies/blue_bird/Hit (32x32).png"
 }

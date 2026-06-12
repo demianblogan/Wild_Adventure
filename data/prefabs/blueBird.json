@@ -1,0 +1,58 @@
+{
+	"Sprite":
+	{
+		"textureName": "blue_bird_fly"
+	},
+	"AnimationSet":
+	{
+		"Fly":
+		{
+			"textureName": "blue_bird_fly",
+			"frameCount": 9,
+			"frameDuration": 0.06,
+			"isLooping": true
+		},
+		"Hit":
+		{
+			"textureName": "blue_bird_hit",
+			"frameCount": 5,
+			"frameDuration": 0.08,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Fly"
+	},
+	"Facing":
+	{
+		"isLookingRight": false,
+		"isTextureRight": false
+	},
+	"Gravity":
+	{
+		"acceleration": 0,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 24,
+		"height": 22
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	},
+	"Enemy": { "scoreValue": 20 },
+	"Patrol":
+	{
+		"axis": "Horizontal",
+		"min": 0,
+		"max": 0,
+		"speed": 45,
+		"direction": -1
+	}
+}

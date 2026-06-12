@@ -1,6 +1,7 @@
 #include "EnemyDeathSystem.h"
 
 #include "components/EnemyDeath.h"
+#include "components/Gravity.h"
 #include "components/Health.h"
 #include "components/Rotation.h"
 #include "components/Transform.h"
@@ -37,6 +38,14 @@ namespace ECS
 						// entity can pass through the ground after the bounce.
 						if (registry.Has<Health>(entity))
 							registry.Get<Health>(entity).current = 0;
+
+						// Flying enemies patrol with zero gravity; restore it so the
+						// corpse arcs and falls off-screen like grounded enemies do.
+						if (registry.Has<Gravity>(entity)
+							&& registry.Get<Gravity>(entity).acceleration <= 0.0f)
+						{
+							registry.Get<Gravity>(entity) = { EnemyDeath::FALL_GRAVITY, EnemyDeath::MAX_FALL_SPEED };
+						}
 
 						velocity.y = -EnemyDeath::DEATH_BOUNCE_SPEED;
 

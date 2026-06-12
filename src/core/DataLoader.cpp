@@ -127,6 +127,7 @@ void DataLoader::RegisterLoaders()
 			patrol.min = data.at("min");
 			patrol.max = data.at("max");
 			patrol.speed = data.at("speed");
+			patrol.direction = data.value("direction", 1);
 
 			registry.Add<ECS::Patrol>(entity, patrol);
 		};
@@ -460,17 +461,36 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 				entry["Transform"]["x"] = x;
 				entry["Transform"]["y"] = y;
 
-				// patrolRange custom property -> Patrol bounds. Axis and speed stay from the prefab.
+				// patrolRange custom property -> Patrol bounds centered on the spawn
+				// point. patrolDirection ("left"/"right"/"up"/"down") picks the patrol
+				// axis and the initial direction (air patrollers like the blue bird);
+				// without it the patrol stays horizontal, as before.
 				if (object.contains("properties"))
 				{
+					float range = 0.0f;
+					std::string direction;
+
 					for (const auto& property : object["properties"])
 					{
-						if (property.value("name", std::string()) == "patrolRange")
-						{
-							const float range = property.at("value");
-							entry["Patrol"]["min"] = x - range;
-							entry["Patrol"]["max"] = x + range;
-						}
+						const std::string name = property.value("name", std::string());
+
+						if (name == "patrolRange")
+							range = property.at("value");
+						else if (name == "patrolDirection")
+							direction = property.at("value");
+					}
+
+					if (range > 0.0f)
+					{
+						const bool  vertical = (direction == "up" || direction == "down");
+						const float center   = vertical ? y : x;
+
+						entry["Patrol"]["axis"] = vertical ? "Vertical" : "Horizontal";
+						entry["Patrol"]["min"]  = center - range;
+						entry["Patrol"]["max"]  = center + range;
+
+						if (!direction.empty())
+							entry["Patrol"]["direction"] = (direction == "left" || direction == "up") ? -1 : 1;
 					}
 				}
 

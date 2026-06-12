@@ -64,6 +64,7 @@ namespace ECS
 					velocity.y = gravity.maxFallSpeed;
 
 				collisionState.isOnGround = false;
+				collisionState.isOnCeiling = false;
 				collisionState.isOnWall = false;
 				collisionState.wallDirection = 0;
 
@@ -212,6 +213,7 @@ namespace ECS
 				{
 					transform.y = (row + 1) * tileSize + collider.height;
 					velocity.y = 0.0f;
+					collisionState.isOnCeiling = true;
 					break;
 				}
 			}

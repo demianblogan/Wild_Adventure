@@ -11,5 +11,7 @@ namespace ECS
 
 		static constexpr float DEATH_PAUSE_DURATION = 0.1f;
 		static constexpr float DEATH_BOUNCE_SPEED   = 150.0f;
+		static constexpr float FALL_GRAVITY         = 800.0f; // for flyers that patrol with zero gravity
+		static constexpr float MAX_FALL_SPEED       = 500.0f;
 	};
 }
