@@ -57,6 +57,9 @@ namespace
 	constexpr float SHAKE_HIT   = 0.75f;
 	constexpr float SHAKE_TOUCH = 0.45f;
 
+	// Confetti bursts this many pixels above the touched object's base.
+	constexpr float CONFETTI_RISE = 40.0f;
+
 	// Each block of five levels shares one music track. New tracks are registered in
 	// data/audio.json; the level-number ranges are wired here.
 	const std::string& LevelMusicTrack(int levelNumber)
@@ -456,7 +459,11 @@ void GameState::UpdateLevelFlow(float deltaTime)
 		{
 			registry.Get<ECS::AnimationState>(startPlatformEntity).current = "moving";
 			startMovingPlayed = true;
-			confetti.Emit(PlayerCenter());
+
+			// Confetti bursts above the platform itself, not wherever the player is.
+			const ECS::Transform& start = registry.Get<ECS::Transform>(startPlatformEntity);
+			confetti.Emit({ start.x, start.y - CONFETTI_RISE });
+
 			camera.Shake(SHAKE_TOUCH);
 		}
 		else if (startMovingPlayed)
@@ -474,7 +481,10 @@ void GameState::UpdateLevelFlow(float deltaTime)
 	{
 		registry.Get<ECS::AnimationState>(finishEntity).current = "pressed";
 		context.audioMixer.PlaySound("level_complete");
-		confetti.Emit(PlayerCenter());
+
+		const ECS::Transform& finish = registry.Get<ECS::Transform>(finishEntity);
+		confetti.Emit({ finish.x, finish.y - CONFETTI_RISE });
+
 		camera.Shake(SHAKE_TOUCH);
 
 		// The Solid's bounceSpeed already launched the hero upward this frame; he
@@ -520,7 +530,7 @@ void GameState::UpdateCheckpoints()
 			state.current = "flag_out";
 			respawnPoint = { transform.x, transform.y };
 			context.audioMixer.PlaySound("checkpoint");
-			confetti.Emit({ player.x, player.y - collider.height / 2.0f });
+			confetti.Emit({ transform.x, transform.y - CONFETTI_RISE });
 			camera.Shake(SHAKE_TOUCH);
 
 			// Freeze the score and snapshot all alive collectibles and unbroken boxes
@@ -974,9 +984,12 @@ void GameState::Render(float interpolationFactor)
 
 	renderTarget.clear(sf::Color::Black);
 
-	// Background in screen space.
+	const sf::Vector2f worldCenter = camera.GetRenderCenter(interpolationFactor);
+
+	// Background fills the screen but is anchored to the world, so running
+	// around never changes its apparent scroll speed.
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
-	background.Draw(renderTarget);
+	background.Draw(renderTarget, worldCenter);
 
 	// Death "lightning": briefly wash the background white, fading back to normal.
 	if (deathFlashTimer > 0.0f)
@@ -988,7 +1001,6 @@ void GameState::Render(float interpolationFactor)
 	}
 
 	// World in camera space.
-	const sf::Vector2f worldCenter = camera.GetRenderCenter(interpolationFactor);
 	context.virtualScreen.SetCameraCenter(worldCenter.x, worldCenter.y);
 
 	DrawTilemap(tilemap, renderTarget, context.resources);

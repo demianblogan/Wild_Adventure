@@ -51,7 +51,7 @@ void AnimatedBackground::Update(float deltaTime)
 	}
 }
 
-void AnimatedBackground::Draw(sf::RenderTarget& target)
+void AnimatedBackground::Draw(sf::RenderTarget& target, sf::Vector2f worldAnchor)
 {
 	if (textureName.empty())
 		return;
@@ -60,8 +60,10 @@ void AnimatedBackground::Draw(sf::RenderTarget& target)
 	const sf::Vector2u textureSize = texture.getSize();
 	const sf::Vector2u screenSize = target.getSize();
 
-	const int offsetX = static_cast<int>(std::fmod(scrollOffset.x, static_cast<float>(textureSize.x)));
-	const int offsetY = static_cast<int>(std::fmod(scrollOffset.y, static_cast<float>(textureSize.y)));
+	// Subtracting the anchor shifts the pattern opposite to the camera, so
+	// the background stays put in the world while only its own scroll moves.
+	const int offsetX = static_cast<int>(std::fmod(scrollOffset.x - worldAnchor.x, static_cast<float>(textureSize.x)));
+	const int offsetY = static_cast<int>(std::fmod(scrollOffset.y - worldAnchor.y, static_cast<float>(textureSize.y)));
 
 	sf::Sprite sprite(texture);
 	sprite.setTextureRect(sf::IntRect(
