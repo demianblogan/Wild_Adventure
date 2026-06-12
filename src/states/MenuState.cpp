@@ -124,6 +124,19 @@ void MenuState::GoBackPanel()
 		panelStack.pop_back();
 		ShowPanel(panelStack.back());
 	}
+	else
+	{
+		// Backing out of the root panel means leaving the game.
+		OpenQuitDialog();
+	}
+}
+
+void MenuState::OpenQuitDialog()
+{
+	context.stateMachine.Push(std::make_unique<ConfirmState>(context,
+		"Warning!", "Do you want to quit the game?",
+		[this] { context.stateMachine.Clear(); },
+		nullptr));
 }
 
 void MenuState::ApplyPendingNavigation()
@@ -175,7 +188,7 @@ void MenuState::ApplyPendingNavigation()
 		break;
 
 	case NavRequest::Exit:
-		context.stateMachine.Clear();
+		OpenQuitDialog();
 		break;
 
 	case NavRequest::None:

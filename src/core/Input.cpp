@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <algorithm>
 #include <fstream>
 #include <stdexcept>
 #include <unordered_map>
@@ -143,6 +144,21 @@ void Input::LoadBindingsFile(const std::string& path, BindingSet target, float* 
 			list.push_back(binding);
 		}
 	}
+
+	// Escape is reserved: it always pauses the game and backs out of menus,
+	// and is not rebindable. Normalize every loaded set (older saved configs
+	// may carry a different pause key).
+	Binding escape;
+	escape.type = BindingType::Key;
+	escape.key = sf::Keyboard::Key::Escape;
+
+	std::vector<Binding>& pause = target[static_cast<int>(Action::Pause)];
+	std::erase_if(pause, [](const Binding& binding) { return binding.type == BindingType::Key; });
+	pause.insert(pause.begin(), escape);
+
+	std::vector<Binding>& back = target[static_cast<int>(Action::MenuBack)];
+	if (std::find(back.begin(), back.end(), escape) == back.end())
+		back.push_back(escape);
 }
 
 void Input::LoadConfig(const std::string& path)

@@ -25,7 +25,7 @@
 					"offset":
 					[
 						0,
-						-58
+						-42
 					],
 					"size":
 					[
@@ -152,7 +152,7 @@
 					"offset":
 					[
 						0,
-						-26
+						-10
 					],
 					"size":
 					[
@@ -279,7 +279,7 @@
 					"offset":
 					[
 						0,
-						6
+						22
 					],
 					"size":
 					[
@@ -381,133 +381,6 @@
 										"Label":
 										{
 											"name": "jump_key"
-										}
-									}
-								}
-							}
-						}
-					]
-				}
-			},
-			{
-				"Element":
-				{
-					"row": true,
-					"anchor":
-					[
-						0.5,
-						0.5
-					],
-					"pivot":
-					[
-						0.5,
-						0.5
-					],
-					"offset":
-					[
-						0,
-						38
-					],
-					"size":
-					[
-						400,
-						28
-					],
-					"children":
-					[
-						{
-							"Image":
-							{
-								"anchor":
-								[
-									0.5,
-									0.5
-								],
-								"pivot":
-								[
-									0.5,
-									0.5
-								],
-								"offset":
-								[
-									0,
-									0
-								],
-								"size":
-								[
-									400,
-									28
-								],
-								"textureName": "container_background",
-								"border": 15
-							}
-						},
-						{
-							"Label":
-							{
-								"anchor":
-								[
-									0,
-									0.5
-								],
-								"pivot":
-								[
-									0,
-									0.5
-								],
-								"offset":
-								[
-									16,
-									0
-								],
-								"fontName": "main",
-								"characterSize": 16,
-								"color":
-								[
-									226,
-									210,
-									255,
-									255
-								],
-								"outlineColor":
-								[
-									45,
-									30,
-									60,
-									255
-								],
-								"outlineThickness": 1,
-								"text": "Pause"
-							}
-						},
-						{
-							"Button":
-							{
-								"prefab": "menu_keybutton",
-								"name": "pause_button",
-								"anchor":
-								[
-									1,
-									0.5
-								],
-								"pivot":
-								[
-									1,
-									0.5
-								],
-								"offset":
-								[
-									-16,
-									0
-								],
-								"action": "rebind_pause",
-								"foregrounds":
-								{
-									"Normal":
-									{
-										"Label":
-										{
-											"name": "pause_key"
 										}
 									}
 								}
