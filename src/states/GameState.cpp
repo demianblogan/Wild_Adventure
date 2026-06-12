@@ -779,12 +779,39 @@ void GameState::Update(float deltaTime)
 		return;
 	}
 
+	// Hit stop: hold the whole world still for a few steps. Sounds keep playing.
+	if (hitStopTimer > 0.0f)
+	{
+		if (!hitStopFrozen)
+		{
+			// Pin interpolation once so the frozen frames show one still picture.
+			camera.SnapTo(camera.GetRenderCenter(1.0f));
+			registry.ForEach<ECS::Transform, ECS::PreviousTransform>(
+				[](ECS::Entity, ECS::Transform& t, ECS::PreviousTransform& pt) { pt.x = t.x; pt.y = t.y; });
+			hitStopFrozen = true;
+		}
+
+		hitStopTimer -= deltaTime;
+
+		if (hitStopTimer <= 0.0f)
+			hitStopFrozen = false;
+
+		return;
+	}
+
 	inputSystem.Update(deltaTime);
 	jumpSystem.Update();
 	damageSystem.Update(deltaTime);
 	deathSystem.Update(deltaTime);
 	patrolSystem.Update();
+
+	// A successful stomp (the only way enemies die) triggers a brief hit stop;
+	// the freeze itself starts at the top of the next update step, so the bounce
+	// impulse from this step still gets applied first.
+	const int enemiesBeforeStomp = enemiesKilled;
 	enemySystem.Update();
+	if (enemiesKilled > enemiesBeforeStomp)
+		hitStopTimer = HIT_STOP_DURATION;
 	trunkSystem.Update(deltaTime);
 	groundPatrolSystem.Update(deltaTime);
 	enemyDeathSystem.Update(deltaTime, fallLimit);
