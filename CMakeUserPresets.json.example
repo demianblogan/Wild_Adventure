@@ -8,6 +8,14 @@
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "PATH/TO/YOUR/vcpkg/scripts/buildsystems/vcpkg.cmake"
       }
+    },
+    {
+      "name": "release",
+      "inherits": "default",
+      "displayName": "Release (vcpkg)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
     }
   ]
 }

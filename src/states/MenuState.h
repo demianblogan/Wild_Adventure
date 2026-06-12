@@ -3,6 +3,7 @@
 #include "core/Input.h"
 #include "core/State.h"
 #include "graphics/Transition.h"
+#include "states/CharacterSelectController.h"
 #include "states/MenuBackdrop.h"
 #include "states/SelectLevelController.h"
 #include "states/SettingsController.h"
@@ -32,6 +33,7 @@ private:
 	void GoBackPanel();
 	void OpenQuitDialog();
 	void ApplyPendingNavigation();
+	void OpenCharacterSelect(int levelNumber);
 
 	MenuBackdrop backdrop;
 
@@ -45,6 +47,9 @@ private:
 
 	SelectLevelController selectLevel;
 	bool inSelectLevel = false;
+
+	CharacterSelectController characterSelect;
+	bool inCharacterSelect = false;
 
 	std::vector<std::string> panelStack;
 

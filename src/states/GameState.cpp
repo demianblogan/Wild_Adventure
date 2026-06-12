@@ -164,6 +164,37 @@ namespace
 
 		return lighting;
 	}
+
+	// The player prefab is authored with the default ninja_frog_* textures;
+	// the other skins reuse identical sheets under their own prefix, so
+	// switching is a texture-name rewrite on the freshly spawned player.
+	void ApplySkinToPlayer(ECS::Registry& registry, ECS::Entity player, const std::string& skinId)
+	{
+		const std::string defaultPrefix = "ninja_frog";
+
+		if (skinId.empty() || skinId == defaultPrefix)
+			return;
+
+		const auto reskin = [&](std::string& textureName)
+		{
+			if (textureName.rfind(defaultPrefix, 0) == 0)
+				textureName = skinId + textureName.substr(defaultPrefix.size());
+		};
+
+		if (registry.Has<ECS::Sprite>(player))
+			reskin(registry.Get<ECS::Sprite>(player).textureName);
+
+		if (registry.Has<ECS::AnimationSet>(player))
+		{
+			for (auto& [state, animation] : registry.Get<ECS::AnimationSet>(player).animations)
+				reskin(animation.textureName);
+		}
+
+		// The Animation component already holds a copy of the current state's
+		// data, made when the prefab was loaded.
+		if (registry.Has<ECS::Animation>(player))
+			reskin(registry.Get<ECS::Animation>(player).data.textureName);
+	}
 }
 
 GameState::GameState(Context& context, const std::string& levelPath, int levelNumber,
@@ -312,6 +343,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	if (startPlatformEntity != ECS::INVALID_ENTITY || respawnOverride.has_value())
 	{
 		playerEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/player.json");
+		ApplySkinToPlayer(registry, playerEntity, context.campaign.GetSelectedSkin());
 
 		registry.Add<ECS::Transform>(playerEntity, {});
 		registry.Add<ECS::PreviousTransform>(playerEntity, {});
