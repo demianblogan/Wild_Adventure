@@ -5,6 +5,7 @@
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/View.hpp>
+#include <SFML/System/Clock.hpp>
 
 namespace sf
 {
@@ -44,4 +45,6 @@ private:
 	sf::Shader gradingShader;
 	bool gradingSupported = false; // shader compiled and usable on this machine
 	bool gradingActive = false;    // current parameters differ from identity
+	bool heatActive = false;       // heat haze on: the time uniform ticks every frame
+	sf::Clock effectClock;         // drives the heat haze animation
 };

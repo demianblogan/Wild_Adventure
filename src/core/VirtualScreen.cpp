@@ -26,6 +26,7 @@ VirtualScreen::VirtualScreen()
 void VirtualScreen::SetColorGrading(const ColorGrading& grading)
 {
 	gradingActive = gradingSupported && !grading.IsIdentity();
+	heatActive = gradingActive && grading.heat > 0.0f;
 
 	if (!gradingActive)
 		return;
@@ -34,6 +35,10 @@ void VirtualScreen::SetColorGrading(const ColorGrading& grading)
 	gradingShader.setUniform("brightness", grading.brightness);
 	gradingShader.setUniform("saturation", grading.saturation);
 	gradingShader.setUniform("contrast", grading.contrast);
+
+	// The shader works in UV space; the data file speaks virtual pixels.
+	gradingShader.setUniform("heatStrength", grading.heat / static_cast<float>(WIDTH));
+	gradingShader.setUniform("time", 0.0f);
 }
 
 void VirtualScreen::Clear()
@@ -82,6 +87,15 @@ void VirtualScreen::RenderToWindow(sf::RenderWindow& window)
 	screenSprite.setPosition({
 		(windowSize.x - scaledWidth) / 2.0f,
 		(windowSize.y - scaledHeight) / 2.0f });
+
+	if (heatActive)
+	{
+		// Wrap at 200*pi so the float stays precise over long sessions; the
+		// shader's wave speeds are multiples of 0.1, which keeps the wrap
+		// seamless (200*pi * 0.1 is a whole number of 2*pi periods).
+		const float time = std::fmod(effectClock.getElapsedTime().asSeconds(), 200.0f * 3.14159265f);
+		gradingShader.setUniform("time", time);
+	}
 
 	if (gradingActive)
 		window.draw(screenSprite, &gradingShader);

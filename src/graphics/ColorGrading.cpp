@@ -10,7 +10,8 @@ bool ColorGrading::IsIdentity() const
 	return tint == sf::Glsl::Vec3{ 1.0f, 1.0f, 1.0f }
 		&& brightness == 1.0f
 		&& saturation == 1.0f
-		&& contrast == 1.0f;
+		&& contrast == 1.0f
+		&& heat == 0.0f;
 }
 
 ColorGrading LoadColorGrading(const std::string& theme)
@@ -41,6 +42,7 @@ ColorGrading LoadColorGrading(const std::string& theme)
 	grading.brightness = entry->value("brightness", 1.0f);
 	grading.saturation = entry->value("saturation", 1.0f);
 	grading.contrast = entry->value("contrast", 1.0f);
+	grading.heat = entry->value("heat", 0.0f);
 
 	return grading;
 }

@@ -18,7 +18,8 @@
 		"tint": [ 1.14, 1.0, 0.78 ],
 		"brightness": 1.05,
 		"saturation": 1.12,
-		"contrast": 1.1
+		"contrast": 1.1,
+		"heat": 0.5
 	},
 	"sweet":
 	{
