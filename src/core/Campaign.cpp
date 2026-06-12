@@ -2,6 +2,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 
@@ -14,6 +15,7 @@ void Campaign::Load(const std::string& path)
 {
 	savePath = path;
 	bestStars.fill(-1);
+	victoryShown = false;
 
 	std::ifstream file(path);
 
@@ -22,6 +24,8 @@ void Campaign::Load(const std::string& path)
 		return;
 
 	const nlohmann::json data = nlohmann::json::parse(file);
+
+	victoryShown = data.value("victoryShown", false);
 
 	if (!data.contains("levels"))
 		return;
@@ -41,6 +45,7 @@ void Campaign::Save() const
 		return;
 
 	nlohmann::json data;
+	data["victoryShown"] = victoryShown;
 	data["levels"] = nlohmann::json::object();
 
 	for (int i = 0; i < LEVEL_COUNT; i++)
@@ -70,6 +75,23 @@ void Campaign::RecordCompletion(int levelNumber, int stars)
 	Save();
 }
 
+void Campaign::Reset()
+{
+	bestStars.fill(-1);
+	victoryShown = false;
+
+	if (savePath.empty())
+		return;
+
+	std::error_code error; // ignore: a missing file is already the desired result
+	std::filesystem::remove(savePath, error);
+}
+
+bool Campaign::HasProgress() const
+{
+	return GetHighestCompletedLevel() > 0;
+}
+
 bool Campaign::IsLevelCompleted(int levelNumber) const
 {
 	return levelNumber >= 1 && levelNumber <= LEVEL_COUNT && bestStars[levelNumber - 1] >= 0;
@@ -96,6 +118,20 @@ int Campaign::GetHighestCompletedLevel() const
 	return highest;
 }
 
+bool Campaign::WasVictoryShown() const
+{
+	return victoryShown;
+}
+
+void Campaign::MarkVictoryShown()
+{
+	if (victoryShown)
+		return;
+
+	victoryShown = true;
+	Save();
+}
+
 std::string Campaign::LevelPath(int levelNumber)
 {
 	return "data/levels/level_" + std::to_string(levelNumber) + ".tmj";
@@ -107,4 +143,9 @@ bool Campaign::LevelExists(int levelNumber)
 		return false;
 
 	return std::ifstream(LevelPath(levelNumber)).is_open();
+}
+
+bool Campaign::IsLastLevel(int levelNumber)
+{
+	return LevelExists(levelNumber) && !LevelExists(levelNumber + 1);
 }

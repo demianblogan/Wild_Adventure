@@ -22,7 +22,7 @@ public:
 	void Render(float interpolationFactor) override;
 
 private:
-	enum class NavRequest { None, OpenPanel, Back, StartGame, ContinueGame, Exit };
+	enum class NavRequest { None, OpenPanel, Back, StartGame, ContinueGame, DeleteSaves, Exit };
 
 	void RegisterActions();
 	void ShowPanel(const std::string& panelId);

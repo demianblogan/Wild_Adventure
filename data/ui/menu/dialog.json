@@ -61,7 +61,7 @@
 					"size":
 					[
 						340,
-						130
+						150
 					],
 					"children":
 					[
@@ -86,7 +86,7 @@
 								"size":
 								[
 									340,
-									130
+									150
 								],
 								"textureName": "container_background2",
 								"border": 15

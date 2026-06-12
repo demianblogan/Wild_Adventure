@@ -6,6 +6,7 @@
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "states/CampaignVictoryState.h"
 #include "states/GameState.h"
 #include "states/MenuState.h"
 
@@ -249,6 +250,10 @@ void LevelCompleteState::AdvancePhase()
 
 void LevelCompleteState::ApplyPendingNavigation()
 {
+	// Leaving the last campaign level forward shows the one-time victory screen.
+	const bool showVictory = Campaign::IsLastLevel(levelNumber)
+		&& !context.campaign.WasVictoryShown();
+
 	switch (pendingRequest)
 	{
 	case NavRequest::Continue:
@@ -260,6 +265,8 @@ void LevelCompleteState::ApplyPendingNavigation()
 
 		if (Campaign::LevelExists(nextLevel))
 			context.stateMachine.Push(std::make_unique<GameState>(context, Campaign::LevelPath(nextLevel), nextLevel));
+		else if (showVictory)
+			context.stateMachine.Push(std::make_unique<CampaignVictoryState>(context));
 		else
 			context.stateMachine.Push(std::make_unique<MenuState>(context));
 		break;
@@ -267,7 +274,11 @@ void LevelCompleteState::ApplyPendingNavigation()
 
 	case NavRequest::QuitToMenu:
 		context.stateMachine.Clear();
-		context.stateMachine.Push(std::make_unique<MenuState>(context));
+
+		if (showVictory)
+			context.stateMachine.Push(std::make_unique<CampaignVictoryState>(context));
+		else
+			context.stateMachine.Push(std::make_unique<MenuState>(context));
 		break;
 
 	case NavRequest::Restart:

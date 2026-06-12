@@ -41,6 +41,11 @@
 			"path": "assets/audio/sounds/player/level_complete.ogg",
 			"volume": 1.0
 		},
+		"campaign_victory":
+		{
+			"path": "assets/audio/sounds/campaign_victory.ogg",
+			"volume": 1.0
+		},
 		"fruit_collect":
 		{
 			"path": "assets/audio/sounds/fruits/collect.ogg",

@@ -17,16 +17,27 @@ public:
 	// Records a completion, keeps the best star count and saves to disk.
 	void RecordCompletion(int levelNumber, int stars);
 
+	// Wipes all progress and deletes the save file from disk.
+	void Reset();
+
+	bool HasProgress() const;
+
 	bool IsLevelCompleted(int levelNumber) const;
 	int GetStars(int levelNumber) const;          // -1 when not completed
 	int GetHighestCompletedLevel() const;         // 0 when nothing is completed
 
+	// The campaign victory screen is shown only once per campaign.
+	bool WasVictoryShown() const;
+	void MarkVictoryShown();
+
 	static std::string LevelPath(int levelNumber);
 	static bool LevelExists(int levelNumber);
+	static bool IsLastLevel(int levelNumber);     // exists and has no next level
 
 private:
 	void Save() const;
 
 	std::string savePath;
 	std::array<int, LEVEL_COUNT> bestStars; // -1 = not completed, 0..3 = best stars
+	bool victoryShown = false;
 };
