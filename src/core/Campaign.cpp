@@ -16,6 +16,7 @@ void Campaign::Load(const std::string& path)
 	savePath = path;
 	bestStars.fill(-1);
 	victoryShown = false;
+	selectedSkin = "ninja_frog";
 
 	std::ifstream file(path);
 
@@ -26,6 +27,7 @@ void Campaign::Load(const std::string& path)
 	const nlohmann::json data = nlohmann::json::parse(file);
 
 	victoryShown = data.value("victoryShown", false);
+	selectedSkin = data.value("selectedSkin", std::string("ninja_frog"));
 
 	if (!data.contains("levels"))
 		return;
@@ -46,6 +48,7 @@ void Campaign::Save() const
 
 	nlohmann::json data;
 	data["victoryShown"] = victoryShown;
+	data["selectedSkin"] = selectedSkin;
 	data["levels"] = nlohmann::json::object();
 
 	for (int i = 0; i < LEVEL_COUNT; i++)
@@ -79,6 +82,7 @@ void Campaign::Reset()
 {
 	bestStars.fill(-1);
 	victoryShown = false;
+	selectedSkin = "ninja_frog";
 
 	if (savePath.empty())
 		return;
@@ -116,6 +120,33 @@ int Campaign::GetHighestCompletedLevel() const
 	}
 
 	return highest;
+}
+
+int Campaign::CountThreeStarLevels() const
+{
+	int count = 0;
+
+	for (int i = 0; i < LEVEL_COUNT; i++)
+	{
+		if (bestStars[i] >= 3)
+			count++;
+	}
+
+	return count;
+}
+
+const std::string& Campaign::GetSelectedSkin() const
+{
+	return selectedSkin;
+}
+
+void Campaign::SetSelectedSkin(const std::string& skinId)
+{
+	if (selectedSkin == skinId)
+		return;
+
+	selectedSkin = skinId;
+	Save();
 }
 
 bool Campaign::WasVictoryShown() const

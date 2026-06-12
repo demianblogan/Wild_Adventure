@@ -8,7 +8,7 @@
 class Campaign
 {
 public:
-	static constexpr int LEVEL_COUNT = 20;
+	static constexpr int LEVEL_COUNT = 9;
 
 	Campaign();
 
@@ -25,6 +25,12 @@ public:
 	bool IsLevelCompleted(int levelNumber) const;
 	int GetStars(int levelNumber) const;          // -1 when not completed
 	int GetHighestCompletedLevel() const;         // 0 when nothing is completed
+	int CountThreeStarLevels() const;             // drives character skin unlocks
+
+	// The character skin chosen on the Select Character screen, persisted
+	// with the campaign progress.
+	const std::string& GetSelectedSkin() const;
+	void SetSelectedSkin(const std::string& skinId);
 
 	// The campaign victory screen is shown only once per campaign.
 	bool WasVictoryShown() const;
@@ -40,4 +46,5 @@ private:
 	std::string savePath;
 	std::array<int, LEVEL_COUNT> bestStars; // -1 = not completed, 0..3 = best stars
 	bool victoryShown = false;
+	std::string selectedSkin = "ninja_frog";
 };

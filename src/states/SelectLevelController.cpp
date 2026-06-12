@@ -27,7 +27,7 @@ namespace
 	constexpr float H = static_cast<float>(VirtualScreen::HEIGHT);
 
 	constexpr float TITLE_Y = 22.0f;
-	constexpr float GRID_TOP = 42.0f;
+	constexpr float GRID_TOP = 66.0f; // centers the 3x3 grid between the title and the hint
 	constexpr float HINT_Y = 252.0f;
 
 	// The star glyph sits in a 48x48 canvas with transparent padding; trim to its
@@ -139,7 +139,10 @@ void SelectLevelController::LaunchSelected()
 	context.audioMixer.PlaySound("ui_press");
 	wantsClose = true;
 
-	context.stateMachine.Push(std::make_unique<GameState>(context, Campaign::LevelPath(number), number));
+	if (launchHandler)
+		launchHandler(number);
+	else
+		context.stateMachine.Push(std::make_unique<GameState>(context, Campaign::LevelPath(number), number));
 }
 
 void SelectLevelController::CellTopLeft(int index, float& x, float& y) const

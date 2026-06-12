@@ -27,7 +27,16 @@ MenuState::MenuState(Context& context)
 	, interfaceLoader(context.resources)
 	, settings(context)
 	, selectLevel(context)
+	, characterSelect(context)
 {
+	// Picking a level routes through the character select screen instead of
+	// launching the level directly.
+	selectLevel.SetLaunchHandler([this](int level)
+	{
+		inSelectLevel = false;
+		OpenCharacterSelect(level);
+	});
+
 	Resources& resources = context.resources;
 
 	if (!resources.fonts.Has("main"))
@@ -117,6 +126,12 @@ void MenuState::SetupPlayPanel()
 		DisableButton("delete_saves_button");
 }
 
+void MenuState::OpenCharacterSelect(int levelNumber)
+{
+	inCharacterSelect = true;
+	characterSelect.Open(levelNumber);
+}
+
 void MenuState::GoBackPanel()
 {
 	if (panelStack.size() > 1)
@@ -153,7 +168,7 @@ void MenuState::ApplyPendingNavigation()
 		break;
 
 	case NavRequest::StartGame:
-		context.stateMachine.Push(std::make_unique<GameState>(context, Campaign::LevelPath(1), 1));
+		OpenCharacterSelect(1);
 		break;
 
 	case NavRequest::ContinueGame:
@@ -167,7 +182,7 @@ void MenuState::ApplyPendingNavigation()
 			nextLevel = highest;
 
 		if (Campaign::LevelExists(nextLevel))
-			context.stateMachine.Push(std::make_unique<GameState>(context, Campaign::LevelPath(nextLevel), nextLevel));
+			OpenCharacterSelect(nextLevel);
 		break;
 	}
 
@@ -209,6 +224,12 @@ void MenuState::HandleEvent(const sf::Event& event)
 		return;
 	}
 
+	if (inCharacterSelect)
+	{
+		characterSelect.HandleEvent(event);
+		return;
+	}
+
 	if (inSelectLevel)
 	{
 		selectLevel.HandleEvent(event);
@@ -236,6 +257,19 @@ void MenuState::Update(float deltaTime)
 		if (settings.WantsClose())
 		{
 			inSettings = false;
+			userInterface.ResetFocus();
+		}
+
+		return;
+	}
+
+	if (inCharacterSelect)
+	{
+		characterSelect.Update(deltaTime);
+
+		if (characterSelect.WantsClose())
+		{
+			inCharacterSelect = false;
 			userInterface.ResetFocus();
 		}
 
@@ -302,6 +336,8 @@ void MenuState::Render(float interpolationFactor)
 
 	if (inSettings)
 		settings.Render(renderTarget);
+	else if (inCharacterSelect)
+		characterSelect.Render(renderTarget);
 	else if (inSelectLevel)
 		selectLevel.Render(renderTarget);
 	else
