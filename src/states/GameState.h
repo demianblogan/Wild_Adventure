@@ -153,6 +153,12 @@ private:
 
 	static constexpr float RUN_DUST_INTERVAL = 0.12f;
 
+	// Hit stop: the world freezes for a moment after stomping an enemy.
+	float hitStopTimer = 0.0f;
+	bool hitStopFrozen = false; // interpolation already pinned for this freeze
+
+	static constexpr float HIT_STOP_DURATION = 0.06f;
+
 	// "Level X" banner: slides in from above the screen, holds, slides back out.
 	enum class BannerPhase
 	{
