@@ -30,6 +30,7 @@ private:
 	void SetupPlayPanel();
 	void DisableButton(const std::string& buttonName);
 	void GoBackPanel();
+	void OpenQuitDialog();
 	void ApplyPendingNavigation();
 
 	MenuBackdrop backdrop;

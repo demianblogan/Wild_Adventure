@@ -131,6 +131,9 @@
 		"MenuBack":
 		[
 			{
+				"key": "Escape"
+			},
+			{
 				"key": "Backspace"
 			},
 			{

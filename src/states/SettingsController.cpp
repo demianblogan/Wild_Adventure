@@ -64,7 +64,6 @@ void SettingsController::RegisterActions()
 	settingsLoader.RegisterAction("rebind_moveleft", [this] { BeginKeyCapture(Action::MoveLeft); });
 	settingsLoader.RegisterAction("rebind_moveright", [this] { BeginKeyCapture(Action::MoveRight); });
 	settingsLoader.RegisterAction("rebind_jump", [this] { BeginKeyCapture(Action::Jump); });
-	settingsLoader.RegisterAction("rebind_pause", [this] { BeginKeyCapture(Action::Pause); });
 
 	settingsLoader.RegisterFloatAction("set_sound_volume", [this](float value)
 		{
@@ -163,7 +162,7 @@ void SettingsController::SetVolumeDisplay(const std::string& sliderName, const s
 
 void SettingsController::SetupKeyboardPanel()
 {
-	const Action actions[] = { Action::MoveLeft, Action::MoveRight, Action::Jump, Action::Pause };
+	const Action actions[] = { Action::MoveLeft, Action::MoveRight, Action::Jump };
 
 	for (Action action : actions)
 	{
@@ -179,7 +178,6 @@ std::string SettingsController::KeyLabelName(Action action)
 	case Action::MoveLeft:  return "moveleft_key";
 	case Action::MoveRight: return "moveright_key";
 	case Action::Jump:      return "jump_key";
-	case Action::Pause:     return "pause_key";
 	default:                return "";
 	}
 }
@@ -195,8 +193,8 @@ void SettingsController::BeginKeyCapture(Action action)
 
 void SettingsController::ApplyKeyCapture(sf::Keyboard::Key key)
 {
-	// Escape cancels the capture; it is therefore reserved and cannot be bound
-	// here (Default restores the Escape binding for Pause).
+	// Escape cancels the capture; it is reserved as the fixed pause/back key
+	// and can never be bound to a game action.
 	if (key == sf::Keyboard::Key::Escape)
 	{
 		capturingKey = false;
@@ -206,7 +204,7 @@ void SettingsController::ApplyKeyCapture(sf::Keyboard::Key key)
 	}
 
 	// Keep keys unique among the rebindable game actions by swapping.
-	const Action editable[] = { Action::MoveLeft, Action::MoveRight, Action::Jump, Action::Pause };
+	const Action editable[] = { Action::MoveLeft, Action::MoveRight, Action::Jump };
 	const sf::Keyboard::Key previousKey = context.input.GetPrimaryKey(captureAction);
 
 	for (Action other : editable)
