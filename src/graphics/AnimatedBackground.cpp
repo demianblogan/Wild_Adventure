@@ -30,6 +30,11 @@ void AnimatedBackground::SetSpeed(float pixelsPerSecond)
 	speed = pixelsPerSecond;
 }
 
+void AnimatedBackground::SetTint(sf::Color color)
+{
+	tint = color;
+}
+
 void AnimatedBackground::Update(float deltaTime)
 {
 	const float delta = speed * deltaTime;
@@ -69,6 +74,7 @@ void AnimatedBackground::Draw(sf::RenderTarget& target, sf::Vector2f worldAnchor
 	sprite.setTextureRect(sf::IntRect(
 		{ -offsetX, -offsetY },
 		{ static_cast<int>(screenSize.x), static_cast<int>(screenSize.y) }));
+	sprite.setColor(tint);
 
 	target.draw(sprite);
 }

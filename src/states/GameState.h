@@ -8,6 +8,7 @@
 #include "graphics/ConfettiSystem.h"
 #include "graphics/Transition.h"
 #include "graphics/AnimatedBackground.h"
+#include "graphics/LightOverlay.h"
 #include "systems/AnimationSystem.h"
 #include "systems/BulletSystem.h"
 #include "systems/DamageSystem.h"
@@ -42,6 +43,15 @@ struct ProgressSnapshot
 	std::vector<sf::Vector2f> aliveCollectibles; // positions of uncollected fruits at checkpoint
 	std::vector<sf::Vector2f> aliveBoxes;        // positions of unbroken boxes at checkpoint
 	std::vector<sf::Vector2f> aliveEnemies;      // spawn positions of living enemies at checkpoint
+};
+
+// "Lamp" lighting of cave levels: the player sees a soft-edged circle around
+// himself, everything else is dark. Loaded from data/levels/lighting.json.
+struct LevelLighting
+{
+	bool enabled = false;
+	float radius = 90.0f;   // fully dark at this distance from the player, in pixels
+	float darkness = 0.95f; // shade outside the circle, 0..1 (1 = pure black)
 };
 
 class GameState : public State
@@ -92,6 +102,9 @@ private:
 
 	ParticleSystem particles;
 	ConfettiSystem confetti;
+
+	LightOverlay lightOverlay;
+	LevelLighting lighting;
 
 	int score = 0;
 	int previousScore = -1;

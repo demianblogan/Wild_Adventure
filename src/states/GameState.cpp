@@ -60,23 +60,24 @@ namespace
 	// Confetti bursts this many pixels above the touched object's base.
 	constexpr float CONFETTI_RISE = 40.0f;
 
-	// Each block of five levels shares one music track. New tracks are registered in
-	// data/audio.json; the level-number ranges are wired here.
+	// Each level has its own music track, registered in data/audio.json.
+	// Levels past the last track cycle through the list again.
 	const std::string& LevelMusicTrack(int levelNumber)
 	{
 		static const std::string tracks[] =
 		{
-			"level_music_1_5",
-			"level_music_6_10",
-			"level_music_11_15",
-			"level_music_16_20"
+			"background1",
+			"background2",
+			"background3",
+			"background4",
+			"background5"
 		};
 
-		int index = (levelNumber - 1) / 5;
+		constexpr int trackCount = 5;
+
+		int index = (levelNumber - 1) % trackCount;
 		if (index < 0)
 			index = 0;
-		if (index > 3)
-			index = 3;
 
 		return tracks[index];
 	}
@@ -116,6 +117,13 @@ namespace
 				texture = entry->value("texture", texture);
 				directionName = entry->value("direction", directionName);
 				speed = entry->value("speed", speed);
+
+				// Optional [r, g, b] multiplier, 0-255: darkens cave levels.
+				if (entry->contains("tint"))
+				{
+					const nlohmann::json& tint = entry->at("tint");
+					background.SetTint(sf::Color(tint.at(0), tint.at(1), tint.at(2)));
+				}
 			}
 		}
 
@@ -130,6 +138,31 @@ namespace
 		background.SetTexture(texture);
 		background.SetDirection(direction);
 		background.SetSpeed(speed);
+	}
+
+	// Per-level "lamp" lighting: outside a soft circle around the player the
+	// world is dark. Configured in data/levels/lighting.json by level number;
+	// levels without an entry stay fully lit.
+	LevelLighting LoadLevelLighting(int levelNumber)
+	{
+		LevelLighting lighting;
+
+		std::ifstream file("data/levels/lighting.json");
+		if (!file.is_open())
+			return lighting;
+
+		const nlohmann::json data = nlohmann::json::parse(file);
+		const std::string key = std::to_string(levelNumber);
+
+		if (!data.contains(key))
+			return lighting;
+
+		const nlohmann::json& entry = data.at(key);
+		lighting.enabled  = true;
+		lighting.radius   = entry.value("radius", lighting.radius);
+		lighting.darkness = entry.value("darkness", lighting.darkness);
+
+		return lighting;
 	}
 }
 
@@ -182,6 +215,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	particles.LoadConfig("data/particles.json");
 
 	ApplyLevelBackground(background, levelNumber);
+	lighting = LoadLevelLighting(levelNumber);
 
 	// The "Level X" banner greets a fresh level start, not a checkpoint respawn.
 	showLevelBanner = !respawnOverride.has_value();
@@ -1013,6 +1047,22 @@ void GameState::Render(float interpolationFactor)
 
 	// Bloom the glowing world objects (fruits, finish) before the HUD goes on.
 	context.virtualScreen.CompositeGlow();
+
+	// Cave levels: darkness outside the player's lamp circle, interpolated
+	// like the sprites so the light never lags behind the player.
+	if (lighting.enabled)
+	{
+		registry.ForEach<ECS::Player, ECS::Transform, ECS::PreviousTransform, ECS::Collider>(
+			[&](ECS::Entity, ECS::Player&, ECS::Transform& transform,
+				ECS::PreviousTransform& previous, ECS::Collider& collider)
+			{
+				const float x = previous.x + (transform.x - previous.x) * interpolationFactor;
+				const float y = previous.y + (transform.y - previous.y) * interpolationFactor;
+
+				lightOverlay.Draw(renderTarget, { x, y - collider.height / 2.0f },
+					lighting.radius, lighting.darkness);
+			});
+	}
 
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
 	hudInterface.Draw(renderTarget);

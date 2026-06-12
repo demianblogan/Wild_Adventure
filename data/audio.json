@@ -95,24 +95,29 @@
 			"path": "assets/audio/music/company_splash.ogg",
 			"loop": false
 		},
-		"level_music_1_5":
+		"background1":
 		{
-			"path": "assets/audio/music/levels_1-5.ogg",
+			"path": "assets/audio/music/background1.ogg",
 			"loop": true
 		},
-		"level_music_6_10":
+		"background2":
 		{
-			"path": "assets/audio/music/levels_6-10.ogg",
+			"path": "assets/audio/music/background2.ogg",
 			"loop": true
 		},
-		"level_music_11_15":
+		"background3":
 		{
-			"path": "assets/audio/music/levels_11-15.ogg",
+			"path": "assets/audio/music/background3.ogg",
 			"loop": true
 		},
-		"level_music_16_20":
+		"background4":
 		{
-			"path": "assets/audio/music/levels_16-20.ogg",
+			"path": "assets/audio/music/background4.ogg",
+			"loop": true
+		},
+		"background5":
+		{
+			"path": "assets/audio/music/background5.ogg",
 			"loop": true
 		}
 	}

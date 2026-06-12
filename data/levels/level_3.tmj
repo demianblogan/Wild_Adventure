@@ -77,6 +77,19 @@
                          "width":0,
                          "x":264,
                          "y":1528
+                        }, 
+                        {
+                         "height":0,
+                         "id":391,
+                         "name":"checkpoint",
+                         "opacity":1,
+                         "point":true,
+                         "rotation":0,
+                         "type":"checkpoint",
+                         "visible":true,
+                         "width":0,
+                         "x":368,
+                         "y":344
                         }],
                  "opacity":1,
                  "tintcolor":"#00aaff",
@@ -1393,19 +1406,6 @@
                         }, 
                         {
                          "height":0,
-                         "id":147,
-                         "name":"trunk",
-                         "opacity":1,
-                         "point":true,
-                         "rotation":0,
-                         "type":"trunk",
-                         "visible":true,
-                         "width":0,
-                         "x":196,
-                         "y":1512
-                        }, 
-                        {
-                         "height":0,
                          "id":148,
                          "name":"blueBird",
                          "opacity":1,
@@ -2326,7 +2326,7 @@
          "y":0
         }],
  "nextlayerid":17,
- "nextobjectid":391,
+ "nextobjectid":392,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

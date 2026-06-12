@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
 
 #include <string>
@@ -27,6 +28,7 @@ public:
 	void SetTexture(const std::string& textureName);
 	void SetDirection(Direction direction);
 	void SetSpeed(float pixelsPerSecond);
+	void SetTint(sf::Color color); // multiplies the texture; darkens cave levels
 
 	void Update(float deltaTime);
 
@@ -40,5 +42,6 @@ private:
 	std::string textureName;
 	Direction direction = Direction::Down;
 	float speed = 20.0f;
+	sf::Color tint = sf::Color::White;
 	sf::Vector2f scrollOffset = { 0.0f, 0.0f };
 };

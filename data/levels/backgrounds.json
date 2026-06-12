@@ -16,5 +16,12 @@
 		"texture": "pink",
 		"direction": "down",
 		"speed": 16
+	},
+	"3":
+	{
+		"texture": "gray",
+		"direction": "up",
+		"speed": 16,
+		"tint": [ 45, 45, 50 ]
 	}
 }
