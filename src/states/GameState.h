@@ -26,6 +26,7 @@
 #include "systems/BoxSystem.h"
 #include "systems/TrampolineSystem.h"
 #include "systems/TrunkSystem.h"
+#include "systems/ChickenSystem.h"
 #include "tilemap/Tilemap.h"
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
@@ -116,6 +117,7 @@ private:
 	ECS::PatrolSystem patrolSystem;
 	ECS::EnemySystem enemySystem;
 	ECS::TrunkSystem trunkSystem;
+	ECS::ChickenSystem chickenSystem;
 	ECS::GroundPatrolSystem groundPatrolSystem;
 	ECS::EnemyDeathSystem enemyDeathSystem;
 	ECS::PhysicsSystem physicsSystem;

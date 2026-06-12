@@ -26,6 +26,7 @@
 #include "components/Finish.h"
 #include "components/Checkpoint.h"
 #include "components/GroundPatrol.h"
+#include "components/ChickenAI.h"
 #include "components/TrunkAI.h"
 #include "components/Trampoline.h"
 #include "core/ecs/Registry.h"
@@ -252,6 +253,15 @@ void DataLoader::RegisterLoaders()
 	loaders["TrunkAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
 		{
 			registry.Add<ECS::TrunkAI>(entity, {});
+		};
+
+	loaders["ChickenAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::ChickenAI chicken;
+			chicken.visionWidth  = data.at("visionWidth");
+			chicken.visionHeight = data.at("visionHeight");
+			chicken.speed        = data.at("speed");
+			registry.Add<ECS::ChickenAI>(entity, chicken);
 		};
 
 	loaders["Trampoline"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)

@@ -67,5 +67,9 @@
 	"trunk_bullet_pieces": "assets/textures/enemies/trunk/Bullet Pieces.png",
 
 	"blue_bird_fly": "assets/textures/enemies/blue_bird/Flying (32x32).png",
-	"blue_bird_hit": "assets/textures/enemies/blue_bird/Hit (32x32).png"
+	"blue_bird_hit": "assets/textures/enemies/blue_bird/Hit (32x32).png",
+
+	"chicken_idle": "assets/textures/enemies/chicken/Idle (32x34).png",
+	"chicken_run":  "assets/textures/enemies/chicken/Run (32x34).png",
+	"chicken_hit":  "assets/textures/enemies/chicken/Hit (32x34).png"
 }

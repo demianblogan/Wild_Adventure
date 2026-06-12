@@ -198,7 +198,7 @@
                 {
                  "height":0,
                  "id":27,
-                 "name":"chicken",
+                 "name":"menuChicken",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -208,7 +208,7 @@
                          "value":30
                         }],
                  "rotation":0,
-                 "type":"chicken",
+                 "type":"menuChicken",
                  "visible":true,
                  "width":0,
                  "x":300,
@@ -217,7 +217,7 @@
                 {
                  "height":0,
                  "id":28,
-                 "name":"chicken",
+                 "name":"menuChicken",
                  "opacity":1,
                  "point":true,
                  "properties":[
@@ -227,7 +227,7 @@
                          "value":25
                         }],
                  "rotation":0,
-                 "type":"chicken",
+                 "type":"menuChicken",
                  "visible":true,
                  "width":0,
                  "x":592,

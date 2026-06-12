@@ -1,0 +1,32 @@
+{
+	"Sprite":
+	{
+		"textureName": "chicken_run"
+	},
+	"AnimationSet":
+	{
+		"Run":
+		{
+			"textureName": "chicken_run",
+			"frameCount": 14,
+			"frameDuration": 0.05,
+			"isLooping": true
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Run"
+	},
+	"Facing":
+	{
+		"isLookingRight": true,
+		"isTextureRight": false
+	},
+	"Patrol":
+	{
+		"axis": "Horizontal",
+		"min": 0,
+		"max": 0,
+		"speed": 55
+	}
+}

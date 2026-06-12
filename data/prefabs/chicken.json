@@ -1,32 +1,63 @@
 {
 	"Sprite":
 	{
-		"textureName": "chicken_run"
+		"textureName": "chicken_idle"
 	},
 	"AnimationSet":
 	{
+		"Idle":
+		{
+			"textureName": "chicken_idle",
+			"frameCount": 13,
+			"frameDuration": 0.06,
+			"isLooping": true
+		},
 		"Run":
 		{
 			"textureName": "chicken_run",
 			"frameCount": 14,
-			"frameDuration": 0.05,
+			"frameDuration": 0.04,
 			"isLooping": true
+		},
+		"Hit":
+		{
+			"textureName": "chicken_hit",
+			"frameCount": 5,
+			"frameDuration": 0.08,
+			"isLooping": false
 		}
 	},
 	"AnimationState":
 	{
-		"current": "Run"
+		"current": "Idle"
 	},
 	"Facing":
 	{
-		"isLookingRight": true,
+		"isLookingRight": false,
 		"isTextureRight": false
 	},
-	"Patrol":
+	"Gravity":
 	{
-		"axis": "Horizontal",
-		"min": 0,
-		"max": 0,
-		"speed": 55
+		"acceleration": 800,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 22,
+		"height": 30
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	},
+	"Enemy": { "scoreValue": 25 },
+	"ChickenAI":
+	{
+		"visionWidth": 400,
+		"visionHeight": 80,
+		"speed": 135
 	}
 }
