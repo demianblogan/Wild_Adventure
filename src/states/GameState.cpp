@@ -51,6 +51,11 @@
 
 namespace
 {
+	// Camera shake trauma: taking a hit rattles the screen, friendly touches
+	// (start platform, checkpoint, finish) just nudge it.
+	constexpr float SHAKE_HIT   = 0.75f;
+	constexpr float SHAKE_TOUCH = 0.45f;
+
 	// Each block of five levels shares one music track. New tracks are registered in
 	// data/audio.json; the level-number ranges are wired here.
 	const std::string& LevelMusicTrack(int levelNumber)
@@ -440,6 +445,7 @@ void GameState::UpdateLevelFlow(float deltaTime)
 			registry.Get<ECS::AnimationState>(startPlatformEntity).current = "moving";
 			startMovingPlayed = true;
 			confetti.Emit(PlayerCenter());
+			camera.Shake(SHAKE_TOUCH);
 		}
 		else if (startMovingPlayed)
 		{
@@ -457,6 +463,7 @@ void GameState::UpdateLevelFlow(float deltaTime)
 		registry.Get<ECS::AnimationState>(finishEntity).current = "pressed";
 		context.audioMixer.PlaySound("level_complete");
 		confetti.Emit(PlayerCenter());
+		camera.Shake(SHAKE_TOUCH);
 
 		// The Solid's bounceSpeed already launched the hero upward this frame; he
 		// rises for FINISH_RISE_TIME, then vanishes.
@@ -502,6 +509,7 @@ void GameState::UpdateCheckpoints()
 			respawnPoint = { transform.x, transform.y };
 			context.audioMixer.PlaySound("checkpoint");
 			confetti.Emit({ player.x, player.y - collider.height / 2.0f });
+			camera.Shake(SHAKE_TOUCH);
 
 			// Freeze the score and snapshot all alive collectibles and unbroken boxes
 			// so we can restore this exact state if the player dies here.
@@ -796,6 +804,8 @@ void GameState::Update(float deltaTime)
 
 	UpdateLevelFlow(deltaTime);
 
+	camera.Update(deltaTime);
+
 	particles.Update(deltaTime);
 	confetti.Update(deltaTime);
 	background.Update(deltaTime);
@@ -861,8 +871,13 @@ void GameState::Update(float deltaTime)
 			// instead of after a long drop to the world's bottom edge.
 			const bool fellIntoPit = transform.y > fallLimit || IsPlayerOnDeathTile();
 
-			if (health.current < previousPlayerHealth && health.current > 0)
-				context.audioMixer.PlaySound("player_hurt");
+			if (health.current < previousPlayerHealth)
+			{
+				camera.Shake(SHAKE_HIT);
+
+				if (health.current > 0)
+					context.audioMixer.PlaySound("player_hurt");
+			}
 			previousPlayerHealth = health.current;
 
 			if (!isRestarting && (health.current <= 0 || fellIntoPit) && !deathSoundPlayed)

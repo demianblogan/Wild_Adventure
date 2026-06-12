@@ -22,13 +22,34 @@ void Camera::SetWorldSize(sf::Vector2f size)
 	worldSize = size;
 }
 
+void Camera::Shake(float trauma)
+{
+	this->trauma = std::min(1.0f, this->trauma + trauma);
+}
+
+void Camera::Update(float deltaTime)
+{
+	if (trauma <= 0.0f)
+		return;
+
+	trauma = std::max(0.0f, trauma - TRAUMA_DECAY * deltaTime);
+
+	const float magnitude = MAX_SHAKE_OFFSET * trauma * trauma;
+	std::uniform_real_distribution<float> offset(-magnitude, magnitude);
+
+	shakeOffset = { offset(randomEngine), offset(randomEngine) };
+}
+
 sf::Vector2f Camera::GetRenderCenter(float interpolationFactor) const
 {
 	const sf::Vector2f interpolated =
 		previousCenter + (currentCenter - previousCenter) * interpolationFactor;
 
+	// Re-clamp so the shake never exposes the area beyond the level edges.
+	const sf::Vector2f shaken = Clamp(interpolated + shakeOffset);
+
 	// Floor to whole virtual pixels so tiles and sprites stay crisp.
-	return { std::floor(interpolated.x), std::floor(interpolated.y) };
+	return { std::floor(shaken.x), std::floor(shaken.y) };
 }
 
 sf::Vector2f Camera::Clamp(sf::Vector2f target) const
