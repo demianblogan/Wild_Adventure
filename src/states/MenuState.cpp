@@ -45,6 +45,9 @@ MenuState::MenuState(Context& context)
 
 	context.audioMixer.PlayMusic("menu_theme");
 
+	// Drop any per-level color grading carried over from gameplay.
+	context.virtualScreen.SetColorGrading({});
+
 	transition.StartReveal();
 }
 

@@ -1,0 +1,30 @@
+{
+	"default":
+	{
+		"tint": [ 1.0, 1.0, 1.0 ],
+		"brightness": 1.0,
+		"saturation": 1.0,
+		"contrast": 1.0
+	},
+	"green":
+	{
+		"tint": [ 0.97, 1.04, 0.97 ],
+		"brightness": 1.02,
+		"saturation": 1.25,
+		"contrast": 1.06
+	},
+	"hot":
+	{
+		"tint": [ 1.14, 1.0, 0.78 ],
+		"brightness": 1.05,
+		"saturation": 1.12,
+		"contrast": 1.1
+	},
+	"sweet":
+	{
+		"tint": [ 1.09, 0.94, 1.06 ],
+		"brightness": 1.06,
+		"saturation": 1.18,
+		"contrast": 0.95
+	}
+}

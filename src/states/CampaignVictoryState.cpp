@@ -52,6 +52,9 @@ CampaignVictoryState::CampaignVictoryState(Context& context)
 	context.audioMixer.StopMusic();
 	context.audioMixer.PlaySound("campaign_victory");
 
+	// Drop the last level's color grading so the black screen stays neutral.
+	context.virtualScreen.SetColorGrading({});
+
 	// Persist immediately so the screen appears only once per campaign.
 	context.campaign.MarkVictoryShown();
 }

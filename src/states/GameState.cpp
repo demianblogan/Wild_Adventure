@@ -78,6 +78,15 @@ namespace
 		return tracks[index];
 	}
 
+	// The level's visual theme ("green", "hot", "sweet", ...) is the map's
+	// Class field in Tiled; it picks the color grading palette. Tiled omits
+	// the key entirely while the class is unset.
+	std::string LevelTheme(const nlohmann::json& mapJson)
+	{
+		const std::string theme = mapJson.value("class", "");
+		return theme.empty() ? "default" : theme;
+	}
+
 	// Per-level animated background: texture, scroll direction and speed come
 	// from data/levels/backgrounds.json, keyed by level number, with a
 	// "default" entry for levels that have no override.
@@ -176,6 +185,8 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	// Parse the map once and reuse the parsed JSON for both the tilemap and the
 	// scene; the cache also makes level restarts skip the parse entirely.
 	const nlohmann::json& mapJson = resources.GetMapJson(levelPath);
+
+	context.virtualScreen.SetColorGrading(LoadColorGrading(LevelTheme(mapJson)));
 
 	tilemap = LoadTilemap(mapJson, "terrain", 22);
 	particles.SetTilemap(tilemap);

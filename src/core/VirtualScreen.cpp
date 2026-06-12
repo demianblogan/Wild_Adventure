@@ -13,6 +13,27 @@ VirtualScreen::VirtualScreen()
 {
 	renderTexture.setSmooth(false);
 	renderTexture.setView(camera);
+
+	// Post effects degrade gracefully: without shader support the virtual
+	// screen is simply blitted as before.
+	gradingSupported = sf::Shader::isAvailable()
+		&& gradingShader.loadFromFile("assets/shaders/color_grading.frag", sf::Shader::Type::Fragment);
+
+	if (gradingSupported)
+		gradingShader.setUniform("texture", sf::Shader::CurrentTexture);
+}
+
+void VirtualScreen::SetColorGrading(const ColorGrading& grading)
+{
+	gradingActive = gradingSupported && !grading.IsIdentity();
+
+	if (!gradingActive)
+		return;
+
+	gradingShader.setUniform("tint", grading.tint);
+	gradingShader.setUniform("brightness", grading.brightness);
+	gradingShader.setUniform("saturation", grading.saturation);
+	gradingShader.setUniform("contrast", grading.contrast);
 }
 
 void VirtualScreen::Clear()
@@ -62,7 +83,10 @@ void VirtualScreen::RenderToWindow(sf::RenderWindow& window)
 		(windowSize.x - scaledWidth) / 2.0f,
 		(windowSize.y - scaledHeight) / 2.0f });
 
-	window.draw(screenSprite);
+	if (gradingActive)
+		window.draw(screenSprite, &gradingShader);
+	else
+		window.draw(screenSprite);
 }
 
 sf::Vector2f VirtualScreen::MapWindowToVirtual(sf::Vector2i windowPosition, sf::RenderWindow& window) const
