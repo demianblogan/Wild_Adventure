@@ -159,6 +159,17 @@ private:
 
 	static constexpr float HIT_STOP_DURATION = 0.06f;
 
+	// Squash & stretch: the player's sprite briefly deforms on jump, land and
+	// hit, then springs back to normal. X/Y pairs roughly preserve volume.
+	float squashX = 1.0f;
+	float squashY = 1.0f;
+
+	static constexpr sf::Vector2f SQUASH_JUMP = { 0.80f, 1.25f }; // taking off: tall and thin
+	static constexpr sf::Vector2f SQUASH_LAND = { 1.25f, 0.80f }; // touchdown: wide and short
+	static constexpr sf::Vector2f SQUASH_HIT_SIDE     = { 0.75f, 1.20f }; // compressed along the blow
+	static constexpr sf::Vector2f SQUASH_HIT_VERTICAL = { 1.20f, 0.75f };
+	static constexpr float SQUASH_RETURN_SPEED = 10.0f; // exponential snap-back rate
+
 	// "Level X" banner: slides in from above the screen, holds, slides back out.
 	enum class BannerPhase
 	{

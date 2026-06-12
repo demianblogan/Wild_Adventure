@@ -76,12 +76,16 @@ namespace ECS
 
 				drawable.setOrigin({ frameWidth / 2.0f, static_cast<float>(frameHeight) });
 
+				sf::Vector2f scale = { sprite.scaleX, sprite.scaleY };
+
 				if (registry.Has<Facing>(entity))
 				{
 					const Facing& facing = registry.Get<Facing>(entity);
 					if (facing.isLookingRight != facing.isTextureRight)
-						drawable.setScale({ -1.0f, 1.0f });
+						scale.x = -scale.x;
 				}
+
+				drawable.setScale(scale);
 
 				if (registry.Has<Rotation>(entity))
 					drawable.setRotation(sf::degrees(registry.Get<Rotation>(entity).angle));

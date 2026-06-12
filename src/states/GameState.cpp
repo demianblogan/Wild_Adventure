@@ -18,6 +18,7 @@
 #include "components/Frozen.h"
 #include "components/PreviousTransform.h"
 #include "components/Solid.h"
+#include "components/Sprite.h"
 #include "components/AnimationSet.h"
 #include "components/StartPlatform.h"	
 #include "components/Finish.h"
@@ -851,6 +852,12 @@ void GameState::Update(float deltaTime)
 
 			camera.MoveTo(feet);
 
+			// Spring the squash scale back toward normal; the triggers below
+			// re-deform it with fresh full values.
+			const float squashReturn = std::min(1.0f, SQUASH_RETURN_SPEED * deltaTime);
+			squashX += (1.0f - squashX) * squashReturn;
+			squashY += (1.0f - squashY) * squashReturn;
+
 			if (onGround && std::abs(velocity.x) > 5.0f)
 			{
 				runDustTimer -= deltaTime;
@@ -879,16 +886,24 @@ void GameState::Update(float deltaTime)
 				const int pushDirection = (velocity.x > 0.0f) ? 1 : -1;
 				particles.Emit("wall_jump", feet, pushDirection);
 				context.audioMixer.PlaySound("player_jump");
+				squashX = SQUASH_JUMP.x;
+				squashY = SQUASH_JUMP.y;
 			}
 			else if (jump.jumpsRemaining < previousJumpsRemaining)
 			{
 				const bool isDoubleJump = (jump.jumpsRemaining == 0);
 				particles.Emit("jump", feet);
 				context.audioMixer.PlaySound(isDoubleJump ? "player_double_jump" : "player_jump");
+				squashX = SQUASH_JUMP.x;
+				squashY = SQUASH_JUMP.y;
 			}
 
 			if (!wasOnGround && onGround)
+			{
 				particles.Emit("land", feet);
+				squashX = SQUASH_LAND.x;
+				squashY = SQUASH_LAND.y;
+			}
 
 			wasOnGround = onGround;
 			previousJumpsRemaining = jump.jumpsRemaining;
@@ -901,6 +916,13 @@ void GameState::Update(float deltaTime)
 			if (health.current < previousPlayerHealth)
 			{
 				camera.Shake(SHAKE_HIT);
+
+				// Compress along the impact axis. The knockback applied by the
+				// damage systems reveals it: side hits launch diagonally
+				// (velocity.x != 0), hits from above/below push straight up or down.
+				const bool sideHit = std::abs(velocity.x) > 1.0f;
+				squashX = sideHit ? SQUASH_HIT_SIDE.x : SQUASH_HIT_VERTICAL.x;
+				squashY = sideHit ? SQUASH_HIT_SIDE.y : SQUASH_HIT_VERTICAL.y;
 
 				if (health.current > 0)
 					context.audioMixer.PlaySound("player_hurt");
@@ -924,6 +946,13 @@ void GameState::Update(float deltaTime)
 			{
 				transition.StartCover();
 				isRestarting = true;
+			}
+
+			if (registry.Has<ECS::Sprite>(playerEntity))
+			{
+				ECS::Sprite& sprite = registry.Get<ECS::Sprite>(playerEntity);
+				sprite.scaleX = squashX;
+				sprite.scaleY = squashY;
 			}
 		});
 }
