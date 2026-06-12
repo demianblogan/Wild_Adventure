@@ -1,0 +1,66 @@
+{
+	"Element":
+	{
+		"size": [ 480, 270 ],
+		"children":
+		[
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"anchor": [ 0.5, 0.5 ],
+					"pivot":  [ 0.5, 0.5 ],
+					"offset": [ 0, 78 ],
+					"size":   [ 220, 32 ],
+					"action": "cv_menu",
+					"backgrounds":
+					{
+						"Normal":
+						{
+							"Image":
+							{
+								"size":        [ 220, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color":       [ 210, 210, 210, 255 ]
+							}
+						},
+						"Highlighted":
+						{
+							"Image":
+							{
+								"size":        [ 230, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_normal",
+								"color":       [ 255, 255, 255, 255 ]
+							}
+						},
+						"Pressed":
+						{
+							"Image":
+							{
+								"size":        [ 230, 32 ],
+								"anchor":      [ 0.5, 0.5 ],
+								"pivot":       [ 0.5, 0.5 ],
+								"textureName": "button_pressed",
+								"color":       [ 255, 255, 255, 255 ]
+							}
+						}
+					},
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Back to Main Menu"
+							}
+						}
+					}
+				}
+			}
+		]
+	}
+}

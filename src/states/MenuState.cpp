@@ -7,6 +7,7 @@
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "states/ConfirmState.h"
 #include "states/GameState.h"
 #include "ui/Button.h"
 #include "ui/Element.h"
@@ -58,6 +59,7 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
 	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
 	interfaceLoader.RegisterAction("menu_continue_game", [this] { pendingRequest = NavRequest::ContinueGame; });
+	interfaceLoader.RegisterAction("menu_delete_saves", [this] { pendingRequest = NavRequest::DeleteSaves; });
 }
 
 void MenuState::ShowPanel(const std::string& panelId)
@@ -106,6 +108,10 @@ void MenuState::SetupPlayPanel()
 {
 	// Two Players waits for the multiplayer implementation.
 	DisableButton("two_players_button");
+
+	// Nothing to delete until at least one level is completed.
+	if (!context.campaign.HasProgress())
+		DisableButton("delete_saves_button");
 }
 
 void MenuState::GoBackPanel()
@@ -148,6 +154,22 @@ void MenuState::ApplyPendingNavigation()
 			context.stateMachine.Push(std::make_unique<GameState>(context, Campaign::LevelPath(nextLevel), nextLevel));
 		break;
 	}
+
+	case NavRequest::DeleteSaves:
+		context.stateMachine.Push(std::make_unique<ConfirmState>(context,
+			"Warning!",
+			"This will delete all your campaign\n"
+			"progress and you will have to\n"
+			"start over. Do you want this?",
+			[this]
+			{
+				context.campaign.Reset();
+
+				// Rebuild the panel so Delete Saves immediately turns grey.
+				ShowPanel(panelStack.back());
+			},
+			nullptr));
+		break;
 
 	case NavRequest::Exit:
 		context.stateMachine.Clear();

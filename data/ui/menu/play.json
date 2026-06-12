@@ -15,7 +15,7 @@
 					"offset":
 					[
 						0,
-						-36
+						-54
 					],
 					"action": "menu_open_single",
 					"foregrounds":
@@ -38,7 +38,7 @@
 					"offset":
 					[
 						0,
-						0
+						-18
 					],
 					"foregrounds":
 					{
@@ -56,10 +56,33 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "delete_saves_button",
 					"offset":
 					[
 						0,
-						36
+						18
+					],
+					"action": "menu_delete_saves",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"text": "Delete Saves"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"offset":
+					[
+						0,
+						54
 					],
 					"action": "menu_back",
 					"foregrounds":
