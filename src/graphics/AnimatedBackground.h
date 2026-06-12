@@ -29,7 +29,11 @@ public:
 	void SetSpeed(float pixelsPerSecond);
 
 	void Update(float deltaTime);
-	void Draw(sf::RenderTarget& target);
+
+	// worldAnchor pins the pattern to world coordinates (pass the camera
+	// center): camera movement then never changes the background's apparent
+	// scroll speed. With the default zero anchor it is fixed to the screen.
+	void Draw(sf::RenderTarget& target, sf::Vector2f worldAnchor = { 0.0f, 0.0f });
 
 private:
 	Resources& resources;
