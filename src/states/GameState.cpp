@@ -219,7 +219,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
 	, trampolineSystem(registry, context.audioMixer)
 	, movementSystem(registry)
-	, bulletSystem(registry, tilemap)
+	, bulletSystem(registry, tilemap, particles)
 	, pickupSystem(registry, score, fruitsCollected)
 	, animationSystem(registry, &particles)
 	, playerAnimationSystem(registry)

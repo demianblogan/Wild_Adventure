@@ -27,7 +27,7 @@ public:
 	void Draw(sf::RenderTarget& target);
 
 	void Emit(const std::string& presetName, sf::Vector2f position, int directionX = 0);
-	void EmitDebris(sf::Vector2f position, const std::string& textureName, int pieceCount);
+	void EmitDebris(sf::Vector2f position, const std::string& textureName, int pieceCount, int directionX = 0);
 
 	float GetRunBackOffset() const { return runBackOffset; }
 

@@ -1,37 +1,28 @@
 #include "BulletSystem.h"
 
-#include "components/Animation.h"
 #include "components/AnimationState.h"
 #include "components/Bullet.h"
-#include "components/BulletPiece.h"
 #include "components/Collider.h"
 #include "components/Health.h"
 #include "components/Player.h"
-#include "components/PreviousTransform.h"
-#include "components/Sprite.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
 #include "core/ecs/Registry.h"
+#include "graphics/ParticleSystem.h"
 
 #include <cmath>
 #include <vector>
 
 namespace ECS
 {
-	BulletSystem::BulletSystem(Registry& registry, const Tilemap& tilemap)
+	BulletSystem::BulletSystem(Registry& registry, const Tilemap& tilemap, ParticleSystem& particles)
 		: registry(registry)
 		, tilemap(tilemap)
+		, particles(particles)
 	{}
 
 	void BulletSystem::Update(float deltaTime)
 	{
-		// Apply gravity to all bullet pieces each frame.
-		registry.ForEach<BulletPiece, Velocity>(
-			[deltaTime](Entity, BulletPiece& piece, Velocity& velocity)
-			{
-				velocity.y += piece.gravityAccel * deltaTime;
-			});
-
 		// Locate the player for collision checks.
 		Entity playerEntity = INVALID_ENTITY;
 		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
@@ -112,56 +103,13 @@ namespace ECS
 				}
 			});
 
-		// Spawn pieces before destroying bullets so positions are still valid.
+		// Spawn debris before destroying bullets so positions are still valid.
+		// Pieces bounce back off the wall (opposite the bullet's travel direction) and
+		// then fall, rest, and blink out exactly like box debris.
 		for (const auto& req : pieceRequests)
-			SpawnPieces(req.x, req.y, req.direction);
+			particles.EmitDebris({req.x, req.y - 8.0f}, "trunk_bullet_pieces", 2, -req.direction);
 
 		for (const Entity e : toDestroy)
 			registry.DestroyEntity(e);
-
-		// Destroy pieces that have fallen off the bottom of the screen.
-		toDestroy.clear();
-		registry.ForEach<BulletPiece, Transform>(
-			[&](Entity entity, BulletPiece&, Transform& transform)
-			{
-				if (transform.y > 370.0f)
-					toDestroy.push_back(entity);
-			});
-
-		for (const Entity e : toDestroy)
-			registry.DestroyEntity(e);
-	}
-
-	void BulletSystem::SpawnPieces(float x, float y, int bulletDirection)
-	{
-		for (int i = 0; i < 2; i++)
-		{
-			const float offsetX = (i == 0) ? -3.0f : 3.0f;
-			const float offsetY = (i == 0) ? -6.0f : -2.0f;
-
-			// Pieces bounce in the opposite direction from the bullet's travel.
-			const float velX = static_cast<float>(-bulletDirection) * (25.0f + static_cast<float>(i) * 20.0f);
-			const float velY = -50.0f - static_cast<float>(i) * 30.0f;
-
-			Entity piece = registry.CreateEntity();
-			registry.Add<Transform>(piece, {x + offsetX, y + offsetY});
-			registry.Add<PreviousTransform>(piece, {x + offsetX, y + offsetY});
-			registry.Add<Velocity>(piece, {velX, velY});
-
-			Sprite sprite;
-			sprite.textureName = "trunk_bullet_pieces";
-			registry.Add<Sprite>(piece, sprite);
-
-			// No AnimationState — AnimationSystem will leave this alone.
-			// Set up Animation manually so the correct piece frame is shown.
-			Animation anim;
-			anim.data.textureName  = "trunk_bullet_pieces";
-			anim.data.frameCount   = 2;
-			anim.data.frameDuration = 1.0f;
-			anim.currentFrame      = i;
-			registry.Add<Animation>(piece, anim);
-
-			registry.Add<BulletPiece>(piece, {i, 400.0f});
-		}
 	}
 }

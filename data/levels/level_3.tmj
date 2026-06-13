@@ -1401,8 +1401,8 @@
                          "type":"trunk",
                          "visible":true,
                          "width":0,
-                         "x":120,
-                         "y":1496
+                         "x":184,
+                         "y":1512
                         }, 
                         {
                          "height":0,
@@ -1425,8 +1425,8 @@
                          "type":"blueBird",
                          "visible":true,
                          "width":0,
-                         "x":24,
-                         "y":1392
+                         "x":36,
+                         "y":1340
                         }, 
                         {
                          "height":0,
