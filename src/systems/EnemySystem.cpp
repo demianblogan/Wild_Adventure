@@ -5,6 +5,7 @@
 #include "components/Enemy.h"
 #include "components/EnemyDeath.h"
 #include "components/Health.h"
+#include "components/Hidden.h"
 #include "components/Jump.h"
 #include "components/Player.h"
 #include "components/StompCustomDeath.h"
@@ -49,7 +50,8 @@ namespace ECS
 			[&](Entity entity, Enemy& enemy, Transform& transform, Collider& collider, Health& health)
 			{
 				// Skip enemies that are already dying (or mid custom-death sequence).
-				if (health.current <= 0 || registry.Has<EnemyDeath>(entity) || registry.Has<Stomped>(entity))
+				if (health.current <= 0 || registry.Has<EnemyDeath>(entity)
+					|| registry.Has<Stomped>(entity) || registry.Has<Hidden>(entity))
 					return;
 
 				const float mHalfW = collider.width  / 2.0f;

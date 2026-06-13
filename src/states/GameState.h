@@ -32,6 +32,7 @@
 #include "systems/ChickenSystem.h"
 #include "systems/SnailSystem.h"
 #include "systems/ShellSystem.h"
+#include "systems/GhostSystem.h"
 #include "tilemap/Tilemap.h"
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
@@ -139,6 +140,7 @@ private:
 	ECS::ChickenSystem chickenSystem;
 	ECS::SnailSystem snailSystem;
 	ECS::ShellSystem shellSystem;
+	ECS::GhostSystem ghostSystem;
 	ECS::GroundPatrolSystem groundPatrolSystem;
 	ECS::EnemyDeathSystem enemyDeathSystem;
 	ECS::PhysicsSystem physicsSystem;

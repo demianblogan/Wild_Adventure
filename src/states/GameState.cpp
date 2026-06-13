@@ -217,6 +217,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, chickenSystem(registry, particles)
 	, snailSystem(registry, sceneLoader)
 	, shellSystem(registry, context.audioMixer)
+	, ghostSystem(registry, particles)
 	, groundPatrolSystem(registry, tilemap, particles)
 	, enemyDeathSystem(registry)
 	, physicsSystem(registry, tilemap)
@@ -911,6 +912,7 @@ void GameState::Update(float deltaTime)
 	chickenSystem.Update(deltaTime);
 	snailSystem.Update(deltaTime);
 	shellSystem.Update(deltaTime);
+	ghostSystem.Update(deltaTime);
 	groundPatrolSystem.Update(deltaTime);
 	enemyDeathSystem.Update(deltaTime, fallLimit);
 	physicsSystem.Update(deltaTime);

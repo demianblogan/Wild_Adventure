@@ -62,9 +62,10 @@ namespace ECS
 						patrol.state      = GroundPatrol::State::TurningIdle;
 						patrol.stateTimer = patrol.turnIdleDuration;
 						velocity.x        = 0.0f;
-						animState.current = patrol.idleAnim;
+						if (patrol.managesAnimation)
+							animState.current = patrol.idleAnim;
 					}
-					else if (patrol.speed > 0.0f)
+					else if (patrol.emitsDust && patrol.speed > 0.0f)
 					{
 						// Same run dust as the player's, spaced by distance traveled so
 						// slow walkers don't pile the puffs up.
@@ -87,7 +88,8 @@ namespace ECS
 					{
 						patrol.direction  = -patrol.direction;
 						patrol.state      = GroundPatrol::State::Patrolling;
-						animState.current = patrol.moveAnim;
+						if (patrol.managesAnimation)
+							animState.current = patrol.moveAnim;
 					}
 					break;
 				}

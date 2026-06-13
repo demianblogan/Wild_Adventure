@@ -29,6 +29,10 @@ public:
 	void Emit(const std::string& presetName, sf::Vector2f position, int directionX = 0);
 	void EmitDebris(sf::Vector2f position, const std::string& textureName, int pieceCount, int directionX = 0);
 
+	// One animated wisp trailing off the ghost's back (flies out the opposite way from
+	// facingDir and fades, cycling through its frames over its short life).
+	void EmitGhostTrail(sf::Vector2f position, int facingDir);
+
 	float GetRunBackOffset() const { return runBackOffset; }
 
 private:
@@ -54,6 +58,7 @@ private:
 		std::string texture;
 		int frameIndex = 0;
 		int frameCount = 1;
+		bool animated = false; // play through the frames over the lifetime instead of holding frameIndex
 		float startScale = 1.0f;
 
 		// Dust

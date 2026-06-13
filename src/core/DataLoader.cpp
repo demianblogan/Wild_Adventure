@@ -33,6 +33,7 @@
 #include "components/SnailAI.h"
 #include "components/StompCustomDeath.h"
 #include "components/Shell.h"
+#include "components/GhostAI.h"
 #include "components/Trampoline.h"
 #include "core/ecs/Registry.h"
 
@@ -291,6 +292,11 @@ void DataLoader::RegisterLoaders()
 			registry.Add<ECS::Shell>(entity, shell);
 		};
 
+	loaders["GhostAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::GhostAI>(entity, {});
+		};
+
 	loaders["ChickenAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
 			ECS::ChickenAI chicken;
@@ -313,6 +319,8 @@ void DataLoader::RegisterLoaders()
 			patrol.turnIdleDuration = data.value("turnIdleDuration", patrol.turnIdleDuration);
 			patrol.moveAnim         = data.value("moveAnim", patrol.moveAnim);
 			patrol.idleAnim         = data.value("idleAnim", patrol.idleAnim);
+			patrol.emitsDust        = data.value("emitsDust", patrol.emitsDust);
+			patrol.managesAnimation = data.value("managesAnimation", patrol.managesAnimation);
 			registry.Add<ECS::GroundPatrol>(entity, patrol);
 		};
 

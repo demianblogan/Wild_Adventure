@@ -117,5 +117,11 @@
 	"snail_without_shell": "assets/textures/enemies/snail/Snail without shell.png",
 	"shell_idle": "assets/textures/enemies/snail/Shell Idle (38x24).png",
 	"shell_wall_hit": "assets/textures/enemies/snail/Shell Wall Hit (38x24).png",
-	"shell_top_hit": "assets/textures/enemies/snail/Shell Top Hit (38x24).png"
+	"shell_top_hit": "assets/textures/enemies/snail/Shell Top Hit (38x24).png",
+
+	"ghost_idle": "assets/textures/enemies/ghost/Idle (44x30).png",
+	"ghost_hit": "assets/textures/enemies/ghost/Hit (44x30).png",
+	"ghost_appear": "assets/textures/enemies/ghost/Appear (44x30).png",
+	"ghost_disappear": "assets/textures/enemies/ghost/Desappear (44x30).png",
+	"ghost_particles": "assets/textures/enemies/ghost/Gost Particles (48x16).png"
 }

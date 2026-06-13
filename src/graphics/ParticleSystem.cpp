@@ -114,6 +114,24 @@ void ParticleSystem::EmitDebris(sf::Vector2f position, const std::string& textur
 	}
 }
 
+void ParticleSystem::EmitGhostTrail(sf::Vector2f position, int facingDir)
+{
+	Particle particle;
+	particle.kind = Kind::Dust;
+	particle.texture = "ghost_particles";
+	particle.frameCount = 4;
+	particle.animated = true;
+
+	// Spawn a touch off the back at a varied height, then drift straight out (no gravity).
+	particle.position = { position.x + RandomFloat(-2.0f, 2.0f), position.y + RandomFloat(-9.0f, 9.0f) };
+	particle.velocity = { static_cast<float>(-facingDir) * RandomFloat(10.0f, 28.0f), 0.0f };
+	particle.age = 0.0f;
+	particle.lifetime = RandomFloat(0.3f, 0.5f);
+	particle.startScale = RandomFloat(0.8f, 1.1f);
+
+	particles.push_back(particle);
+}
+
 void ParticleSystem::Update(float deltaTime)
 {
 	const float tileSize = (tilemap != nullptr) ? static_cast<float>(tilemap->tileSize) : 16.0f;
@@ -122,7 +140,9 @@ void ParticleSystem::Update(float deltaTime)
 	{
 		if (particle.kind == Kind::Dust)
 		{
-			particle.velocity.y += gravity * deltaTime;
+			// Animated wisps (the ghost's) drift straight; plain dust is pulled by gravity.
+			if (!particle.animated)
+				particle.velocity.y += gravity * deltaTime;
 			particle.position += particle.velocity * deltaTime;
 			particle.age += deltaTime;
 			continue;
@@ -207,17 +227,25 @@ void ParticleSystem::Draw(sf::RenderTarget& target)
 		const int pieceWidth = static_cast<int>(texture.getSize().x) / particle.frameCount;
 		const int pieceHeight = static_cast<int>(texture.getSize().y);
 
+		const float dustProgress = (particle.lifetime > 0.0f) ? (particle.age / particle.lifetime) : 1.0f;
+
+		// Animated particles cycle through their frames over their life; others hold one frame.
+		int displayedFrame = particle.frameIndex;
+		if (particle.animated)
+			displayedFrame = std::clamp(static_cast<int>(dustProgress * particle.frameCount), 0, particle.frameCount - 1);
+
 		sf::Sprite sprite(texture);
-		sprite.setTextureRect(sf::IntRect({ particle.frameIndex * pieceWidth, 0 }, { pieceWidth, pieceHeight }));
+		sprite.setTextureRect(sf::IntRect({ displayedFrame * pieceWidth, 0 }, { pieceWidth, pieceHeight }));
 		sprite.setOrigin({ pieceWidth / 2.0f, pieceHeight / 2.0f });
 
 		if (particle.kind == Kind::Dust)
 		{
-			const float progress = (particle.lifetime > 0.0f) ? (particle.age / particle.lifetime) : 1.0f;
-			const float remaining = std::clamp(1.0f - progress, 0.0f, 1.0f);
+			const float remaining = std::clamp(1.0f - dustProgress, 0.0f, 1.0f);
 			const auto alpha = static_cast<std::uint8_t>(remaining * 255.0f);
 
-			sprite.setScale({ particle.startScale * remaining, particle.startScale * remaining });
+			// Animated wisps keep their size and just fade; plain dust shrinks as it fades.
+			const float scale = particle.animated ? particle.startScale : particle.startScale * remaining;
+			sprite.setScale({ scale, scale });
 			sprite.setColor(sf::Color(255, 255, 255, alpha));
 		}
 		else
