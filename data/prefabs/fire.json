@@ -1,0 +1,45 @@
+{
+	"Sprite":
+	{
+		"textureName": "fire_off"
+	},
+	"AnimationSet":
+	{
+		"Off":
+		{
+			"textureName": "fire_off",
+			"frameCount": 1,
+			"frameDuration": 1.0,
+			"isLooping": true
+		},
+		"Hit":
+		{
+			"textureName": "fire_hit",
+			"frameCount": 4,
+			"frameDuration": 0.1,
+			"isLooping": false
+		},
+		"On":
+		{
+			"textureName": "fire_on",
+			"frameCount": 3,
+			"frameDuration": 0.1,
+			"isLooping": true
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Off"
+	},
+	"Solid":
+	{
+		"width": 14,
+		"height": 10
+	},
+	"Hitbox":
+	{
+		"width": 12,
+		"height": 24
+	},
+	"Fire": {}
+}

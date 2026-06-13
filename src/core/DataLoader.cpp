@@ -37,6 +37,7 @@
 #include "components/GhostAI.h"
 #include "components/Trampoline.h"
 #include "components/Arrow.h"
+#include "components/Fire.h"
 #include "core/ecs/Registry.h"
 
 #include <functional>
@@ -325,6 +326,11 @@ void DataLoader::RegisterLoaders()
 			registry.Add<ECS::Arrow>(entity, arrow);
 		};
 
+	loaders["Fire"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::Fire>(entity, {});
+		};
+
 	loaders["GroundPatrol"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
 			ECS::GroundPatrol patrol;
@@ -522,12 +528,26 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 			{
 				const std::string className = object.value("type", std::string());
 
-				// Skip non-entity markers (e.g. the camera guide): no class, or not a point.
-				if (className.empty() || !object.value("point", false))
+				// Skip non-entity markers (e.g. the camera guide): they carry no class.
+				if (className.empty())
 					continue;
 
-				const float x = offsetX + object.at("x").get<float>();
-				const float y = offsetY + object.at("y").get<float>();
+				float x = offsetX + object.at("x").get<float>();
+				float y = offsetY + object.at("y").get<float>();
+
+				// A point marks the spawn position directly. A rectangle (e.g. a 16x16
+				// floor plate, easier to place in Tiled) is anchored at its bottom-centre
+				// to match the sprites' bottom-centre origin.
+				if (!object.value("point", false))
+				{
+					const float width  = object.value("width", 0.0f);
+					const float height = object.value("height", 0.0f);
+					if (width <= 0.0f || height <= 0.0f)
+						continue; // ellipse / polygon / zero-size marker, not an entity
+
+					x += width / 2.0f;
+					y += height;
+				}
 
 				nlohmann::json entry;
 				entry["prefab"] = "data/prefabs/" + className + ".json";
