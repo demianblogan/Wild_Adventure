@@ -89,7 +89,7 @@ void ParticleSystem::Emit(const std::string& presetName, sf::Vector2f position, 
 	}
 }
 
-void ParticleSystem::EmitDebris(sf::Vector2f position, const std::string& textureName, int pieceCount)
+void ParticleSystem::EmitDebris(sf::Vector2f position, const std::string& textureName, int pieceCount, int directionX)
 {
 	for (int i = 0; i < pieceCount; i++)
 	{
@@ -99,7 +99,14 @@ void ParticleSystem::EmitDebris(sf::Vector2f position, const std::string& textur
 		particle.frameCount = pieceCount;
 		particle.frameIndex = i;
 		particle.position = position;
-		particle.velocity = { RandomFloat(-DEBRIS_SPREAD_X, DEBRIS_SPREAD_X), -RandomFloat(DEBRIS_UP_MIN, DEBRIS_UP_MAX) };
+
+		// directionX == 0 spreads pieces both ways (box debris); a non-zero value
+		// biases them to fly off in that direction (bullet pieces bouncing off a wall).
+		const float velocityX = (directionX == 0)
+			? RandomFloat(-DEBRIS_SPREAD_X, DEBRIS_SPREAD_X)
+			: directionX * RandomFloat(DEBRIS_SPREAD_X * 0.4f, DEBRIS_SPREAD_X);
+
+		particle.velocity = { velocityX, -RandomFloat(DEBRIS_UP_MIN, DEBRIS_UP_MAX) };
 		particle.startScale = 1.0f;
 		particle.phase = DebrisPhase::Flying;
 
