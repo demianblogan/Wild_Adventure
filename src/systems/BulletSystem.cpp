@@ -46,7 +46,7 @@ namespace ECS
 		const float tileSize   = static_cast<float>(tilemap.tileSize);
 		const float levelRight = static_cast<float>(tilemap.GetWidth() * tilemap.tileSize);
 
-		struct PieceRequest { float x, y; int direction; };
+		struct PieceRequest { float x, y; int direction; std::string piecesTexture; };
 		std::vector<PieceRequest> pieceRequests;
 		std::vector<Entity>       toDestroy;
 
@@ -61,7 +61,7 @@ namespace ECS
 
 				if (tilemap.IsSolid(col, row))
 				{
-					pieceRequests.push_back({transform.x, transform.y, bullet.direction});
+					pieceRequests.push_back({transform.x, transform.y, bullet.direction, bullet.piecesTexture});
 					toDestroy.push_back(entity);
 					return;
 				}
@@ -107,7 +107,7 @@ namespace ECS
 		// Pieces bounce back off the wall (opposite the bullet's travel direction) and
 		// then fall, rest, and blink out exactly like box debris.
 		for (const auto& req : pieceRequests)
-			particles.EmitDebris({req.x, req.y - 8.0f}, "trunk_bullet_pieces", 2, -req.direction);
+			particles.EmitDebris({req.x, req.y - 8.0f}, req.piecesTexture, 2, -req.direction);
 
 		for (const Entity e : toDestroy)
 			registry.DestroyEntity(e);

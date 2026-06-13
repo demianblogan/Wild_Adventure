@@ -76,25 +76,32 @@
 	"blue": "assets/textures/background/blue.png",
 	"pink": "assets/textures/background/pink.png",
 	"gray": "assets/textures/background/gray.png",
+	"yellow": "assets/textures/background/yellow.png",
 
 	"mushroom_idle": "assets/textures/enemies/mushroom/Idle (32x32).png",
-	"mushroom_run":  "assets/textures/enemies/mushroom/Run (32x32).png",
-	"mushroom_hit":  "assets/textures/enemies/mushroom/Hit.png",
+	"mushroom_run": "assets/textures/enemies/mushroom/Run (32x32).png",
+	"mushroom_hit": "assets/textures/enemies/mushroom/Hit.png",
 
 	"trampoline_idle": "assets/textures/traps/trampoline/Idle.png",
 	"trampoline_jump": "assets/textures/traps/trampoline/Jump (28x28).png",
 
-	"trunk_idle":          "assets/textures/enemies/trunk/Idle (64x32).png",
-	"trunk_run":           "assets/textures/enemies/trunk/Run (64x32).png",
-	"trunk_attack":        "assets/textures/enemies/trunk/Attack (64x32).png",
-	"trunk_hit":           "assets/textures/enemies/trunk/Hit (64x32).png",
-	"trunk_bullet":        "assets/textures/enemies/trunk/Bullet.png",
+	"trunk_idle": "assets/textures/enemies/trunk/Idle (64x32).png",
+	"trunk_run": "assets/textures/enemies/trunk/Run (64x32).png",
+	"trunk_attack": "assets/textures/enemies/trunk/Attack (64x32).png",
+	"trunk_hit": "assets/textures/enemies/trunk/Hit (64x32).png",
+	"trunk_bullet": "assets/textures/enemies/trunk/Bullet.png",
 	"trunk_bullet_pieces": "assets/textures/enemies/trunk/Bullet Pieces.png",
+
+	"plant_idle": "assets/textures/enemies/plant/Idle (44x42).png",
+	"plant_attack": "assets/textures/enemies/plant/Attack (44x42).png",
+	"plant_hit": "assets/textures/enemies/plant/Hit (44x42).png",
+	"plant_bullet": "assets/textures/enemies/plant/Bullet.png",
+	"plant_bullet_pieces": "assets/textures/enemies/plant/Bullet Pieces.png",
 
 	"blue_bird_fly": "assets/textures/enemies/blue_bird/Flying (32x32).png",
 	"blue_bird_hit": "assets/textures/enemies/blue_bird/Hit (32x32).png",
 
 	"chicken_idle": "assets/textures/enemies/chicken/Idle (32x34).png",
-	"chicken_run":  "assets/textures/enemies/chicken/Run (32x34).png",
-	"chicken_hit":  "assets/textures/enemies/chicken/Hit (32x34).png"
+	"chicken_run": "assets/textures/enemies/chicken/Run (32x34).png",
+	"chicken_hit": "assets/textures/enemies/chicken/Hit (32x34).png"
 }

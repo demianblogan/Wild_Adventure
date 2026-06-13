@@ -1,0 +1,58 @@
+{
+	"Sprite":
+	{
+		"textureName": "plant_idle"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "plant_idle",
+			"frameCount": 11,
+			"frameDuration": 0.06,
+			"isLooping": true
+		},
+		"Attack":
+		{
+			"textureName": "plant_attack",
+			"frameCount": 8,
+			"frameDuration": 0.05,
+			"isLooping": false
+		},
+		"Hit":
+		{
+			"textureName": "plant_hit",
+			"frameCount": 5,
+			"frameDuration": 0.08,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	},
+	"Facing":
+	{
+		"isLookingRight": false,
+		"isTextureRight": false
+	},
+	"Gravity":
+	{
+		"acceleration": 800,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 28,
+		"height": 30
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	},
+	"Enemy": { "scoreValue": 20 },
+	"PlantAI": {}
+}

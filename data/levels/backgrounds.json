@@ -22,6 +22,17 @@
 		"texture": "gray",
 		"direction": "up",
 		"speed": 16,
-		"tint": [ 45, 45, 50 ]
+		"tint":
+		[
+			45,
+			45,
+			50
+		]
+	},
+	"4":
+	{
+		"texture": "yellow",
+		"direction": "right",
+		"speed": 16
 	}
 }

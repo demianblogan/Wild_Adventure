@@ -28,6 +28,7 @@
 #include "components/GroundPatrol.h"
 #include "components/ChickenAI.h"
 #include "components/TrunkAI.h"
+#include "components/PlantAI.h"
 #include "components/Trampoline.h"
 #include "core/ecs/Registry.h"
 
@@ -253,6 +254,11 @@ void DataLoader::RegisterLoaders()
 	loaders["TrunkAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
 		{
 			registry.Add<ECS::TrunkAI>(entity, {});
+		};
+
+	loaders["PlantAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
+		{
+			registry.Add<ECS::PlantAI>(entity, {});
 		};
 
 	loaders["ChickenAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
@@ -481,6 +487,7 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 				{
 					float range = 0.0f;
 					std::string direction;
+					std::string facing;
 
 					for (const auto& property : object["properties"])
 					{
@@ -490,6 +497,8 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 							range = property.at("value");
 						else if (name == "patrolDirection")
 							direction = property.at("value");
+						else if (name == "direction")
+							facing = property.at("value");
 					}
 
 					if (range > 0.0f)
@@ -504,6 +513,12 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 						if (!direction.empty())
 							entry["Patrol"]["direction"] = (direction == "left" || direction == "up") ? -1 : 1;
 					}
+
+					// "direction" ("left"/"right") mirrors a fixed-facing enemy (e.g. the
+					// plant). isTextureRight stays from the prefab, so the texture is
+					// flipped only when the requested side differs from its default.
+					if (!facing.empty())
+						entry["Facing"]["isLookingRight"] = (facing == "right");
 				}
 
 				createdEntities.push_back(LoadPrefabbedEntity(registry, entry));
