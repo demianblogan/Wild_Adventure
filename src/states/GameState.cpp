@@ -224,6 +224,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, physicsSystem(registry, tilemap)
 	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
 	, trampolineSystem(registry, context.audioMixer)
+	, arrowSystem(registry, context.audioMixer)
 	, movementSystem(registry)
 	, bulletSystem(registry, tilemap, particles)
 	, pickupSystem(registry, score, fruitsCollected)
@@ -917,6 +918,7 @@ void GameState::Update(float deltaTime)
 	turtleSystem.Update(deltaTime);
 	groundPatrolSystem.Update(deltaTime);
 	enemyDeathSystem.Update(deltaTime, fallLimit);
+	arrowSystem.Update();
 	physicsSystem.Update(deltaTime);
 	boxSystem.Update();
 	trampolineSystem.Update();

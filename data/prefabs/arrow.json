@@ -1,0 +1,36 @@
+{
+	"Sprite":
+	{
+		"textureName": "arrow_idle"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "arrow_idle",
+			"frameCount": 10,
+			"frameDuration": 0.07,
+			"isLooping": true
+		},
+		"Hit":
+		{
+			"textureName": "arrow_hit",
+			"frameCount": 4,
+			"frameDuration": 0.05,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	},
+	"Hitbox":
+	{
+		"width": 16,
+		"height": 16
+	},
+	"Arrow":
+	{
+		"boostSpeed": 500
+	}
+}

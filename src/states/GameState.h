@@ -26,6 +26,7 @@
 #include "systems/RenderSystem.h"
 #include "systems/BoxSystem.h"
 #include "systems/TrampolineSystem.h"
+#include "systems/ArrowSystem.h"
 #include "systems/TrunkSystem.h"
 #include "systems/PlantSystem.h"
 #include "systems/BeeSystem.h"
@@ -148,6 +149,7 @@ private:
 	ECS::PhysicsSystem physicsSystem;
 	ECS::BoxSystem boxSystem;
 	ECS::TrampolineSystem trampolineSystem;
+	ECS::ArrowSystem arrowSystem;
 	ECS::MovementSystem movementSystem;
 	ECS::BulletSystem bulletSystem;
 	ECS::PickupSystem pickupSystem;

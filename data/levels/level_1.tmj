@@ -491,19 +491,6 @@
                          "width":0,
                          "x":1740,
                          "y":368
-                        }, 
-                        {
-                         "height":0,
-                         "id":53,
-                         "name":"turtle",
-                         "opacity":1,
-                         "point":true,
-                         "rotation":0,
-                         "type":"turtle",
-                         "visible":true,
-                         "width":0,
-                         "x":256,
-                         "y":464
                         }],
                  "opacity":1,
                  "tintcolor":"#ff0000",

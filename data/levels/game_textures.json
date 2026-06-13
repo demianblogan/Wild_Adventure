@@ -77,6 +77,7 @@
 	"pink": "assets/textures/background/pink.png",
 	"gray": "assets/textures/background/gray.png",
 	"yellow": "assets/textures/background/yellow.png",
+	"green": "assets/textures/background/green.png",
 
 	"mushroom_idle": "assets/textures/enemies/mushroom/Idle (32x32).png",
 	"mushroom_run": "assets/textures/enemies/mushroom/Run (32x32).png",
@@ -84,6 +85,12 @@
 
 	"trampoline_idle": "assets/textures/traps/trampoline/Idle.png",
 	"trampoline_jump": "assets/textures/traps/trampoline/Jump (28x28).png",
+
+	"arrow_idle": "assets/textures/traps/arrow/Idle (18x18).png",
+	"arrow_hit": "assets/textures/traps/arrow/Hit (18x18).png",
+
+	"spikes": "assets/textures/traps/spikes/Idle.png",
+	"saw_on": "assets/textures/traps/saw/On (38x38).png",
 
 	"trunk_idle": "assets/textures/enemies/trunk/Idle (64x32).png",
 	"trunk_run": "assets/textures/enemies/trunk/Run (64x32).png",
@@ -129,5 +136,24 @@
 	"turtle_idle2": "assets/textures/enemies/turtle/Idle 2 (44x26).png",
 	"turtle_spikes_out": "assets/textures/enemies/turtle/Spikes out (44x26).png",
 	"turtle_spikes_in": "assets/textures/enemies/turtle/Spikes in (44x26).png",
-	"turtle_hit": "assets/textures/enemies/turtle/Hit (44x26).png"
+	"turtle_hit": "assets/textures/enemies/turtle/Hit (44x26).png",
+
+	"button_normal": "assets/textures/ui/button_normal.png",
+	"button_pressed": "assets/textures/ui/button_pressed.png",
+	"label_background": "assets/textures/ui/label_background.png",
+	"container_background": "assets/textures/ui/container_background.png",
+	"container_background2": "assets/textures/ui/container_background2.png",
+	"slider_track": "assets/textures/ui/slider_track.png",
+	"slider_fill": "assets/textures/ui/slider_fill.png",
+	"slider_handle": "assets/textures/ui/slider_handle.png",
+	"lock": "assets/textures/ui/lock.png",
+	"mini_star": "assets/textures/ui/mini_star.png",
+	"arrow_left_normal": "assets/textures/ui/arrow_left_normal.png",
+	"arrow_left_pressed": "assets/textures/ui/arrow_left_pressed.png",
+	"arrow_right_normal": "assets/textures/ui/arrow_right_normal.png",
+	"arrow_right_pressed": "assets/textures/ui/arrow_right_pressed.png",
+	"checkbox_off": "assets/textures/ui/checkbox_off.png",
+	"checkbox_on": "assets/textures/ui/checkbox_on.png",
+	"xbox_controller_spritesheet": "assets/textures/ui/controls/xbox_controller_spritesheet.png",
+	"playstation_controller_spritesheet": "assets/textures/ui/controls/playstation_controller_spritesheet.png"
 }

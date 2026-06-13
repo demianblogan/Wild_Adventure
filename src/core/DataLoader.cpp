@@ -36,6 +36,7 @@
 #include "components/TurtleAI.h"
 #include "components/GhostAI.h"
 #include "components/Trampoline.h"
+#include "components/Arrow.h"
 #include "core/ecs/Registry.h"
 
 #include <functional>
@@ -315,6 +316,13 @@ void DataLoader::RegisterLoaders()
 	loaders["Trampoline"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
 		{
 			registry.Add<ECS::Trampoline>(entity, {});
+		};
+
+	loaders["Arrow"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::Arrow arrow;
+			arrow.boostSpeed = data.value("boostSpeed", arrow.boostSpeed);
+			registry.Add<ECS::Arrow>(entity, arrow);
 		};
 
 	loaders["GroundPatrol"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)

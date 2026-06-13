@@ -11,23 +11,31 @@
 
 MenuBackdrop::MenuBackdrop(Context& context)
 	: context(context)
+	, particles(context.resources)
 	, patrolSystem(registry)
+	, physicsSystem(registry, tilemap)
+	, groundPatrolSystem(registry, tilemap, particles)
+	, beeSystem(registry)
+	, ghostSystem(registry, particles)
+	, turtleSystem(registry)
 	, movementSystem(registry)
-	, animationSystem(registry)
+	, animationSystem(registry, &particles)
 	, renderSystem(registry, context.resources, context.virtualScreen)
 	, background(context.resources)
 {
 	Resources& resources = context.resources;
 
-	resources.LoadTexturesFromFile("data/levels/splash_textures.json");
+	resources.LoadTexturesFromFile("data/levels/game_textures.json");
+	particles.LoadConfig("data/particles.json");
 
 	background.SetTexture("green");
 	background.SetDirection(AnimatedBackground::Direction::Down);
 	background.SetSpeed(16.0f);
 
-	const nlohmann::json& mapJson = resources.GetMapJson("data/levels/splash_level_tilemap.tmj");
+	const nlohmann::json& mapJson = resources.GetMapJson("data/levels/menu_background_level.tmj");
 
 	tilemap = LoadTilemap(mapJson, "terrain", 22);
+	particles.SetTilemap(tilemap);
 
 	const sf::Vector2f worldSize =
 	{
@@ -65,9 +73,18 @@ void MenuBackdrop::Update(float deltaTime)
 
 	background.Update(deltaTime);
 
+	// The same gameplay systems a real level runs, minus everything that needs a
+	// player (input, combat, pickups). Enemies patrol/fly, the ghost fades, the
+	// turtle cycles its spikes, traps and props animate.
 	patrolSystem.Update();
+	beeSystem.Update(deltaTime);
+	ghostSystem.Update(deltaTime);
+	turtleSystem.Update(deltaTime);
+	groundPatrolSystem.Update(deltaTime);
+	physicsSystem.Update(deltaTime);
 	movementSystem.Update(deltaTime);
 	animationSystem.Update(deltaTime);
+	particles.Update(deltaTime);
 }
 
 void MenuBackdrop::Render(float interpolationFactor)
@@ -85,5 +102,9 @@ void MenuBackdrop::Render(float interpolationFactor)
 	context.virtualScreen.SetCameraCenter(worldCenter.x, worldCenter.y);
 
 	DrawTilemap(tilemap, renderTarget, context.resources);
+	particles.Draw(renderTarget);
 	renderSystem.Render(interpolationFactor);
+
+	// Bloom the glowing objects (e.g. the ghost); also clears the glow buffer.
+	context.virtualScreen.CompositeGlow();
 }
