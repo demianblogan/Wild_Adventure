@@ -1,0 +1,74 @@
+{
+	"Sprite":
+	{
+		"textureName": "ghost_idle",
+		"glow": [ 120, 190, 255 ]
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "ghost_idle",
+			"frameCount": 10,
+			"frameDuration": 0.07,
+			"isLooping": true
+		},
+		"Disappear":
+		{
+			"textureName": "ghost_disappear",
+			"frameCount": 4,
+			"frameDuration": 0.05,
+			"isLooping": false
+		},
+		"Appear":
+		{
+			"textureName": "ghost_appear",
+			"frameCount": 4,
+			"frameDuration": 0.05,
+			"isLooping": false
+		},
+		"Hit":
+		{
+			"textureName": "ghost_hit",
+			"frameCount": 5,
+			"frameDuration": 0.08,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	},
+	"Facing":
+	{
+		"isLookingRight": false,
+		"isTextureRight": false
+	},
+	"Gravity":
+	{
+		"acceleration": 800,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 28,
+		"height": 24
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	},
+	"Enemy": { "scoreValue": 20 },
+	"GroundPatrol":
+	{
+		"speed": 40,
+		"direction": -1,
+		"turnIdleDuration": 0,
+		"emitsDust": false,
+		"managesAnimation": false
+	},
+	"GhostAI": {}
+}

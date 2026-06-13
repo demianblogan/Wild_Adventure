@@ -8,6 +8,7 @@
 #include "components/Transform.h"
 #include "components/Rotation.h"
 #include "components/Frozen.h"
+#include "components/Hidden.h"
 #include "core/Resources.h"
 #include "core/VirtualScreen.h"
 #include "core/ecs/Registry.h"
@@ -35,6 +36,10 @@ namespace ECS
 			[this, interpolationFactor, &renderTarget](Entity entity, Transform& transform, Sprite& sprite)
 			{
 				if (registry.Has<Frozen>(entity))
+					return;
+
+				// An invisible ghost (and anything else flagged Hidden) is not drawn.
+				if (registry.Has<Hidden>(entity))
 					return;
 
 				// Blink while invulnerable: hide on alternate short windows.
