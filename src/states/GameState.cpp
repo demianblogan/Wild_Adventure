@@ -225,6 +225,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
 	, trampolineSystem(registry, context.audioMixer)
 	, arrowSystem(registry, context.audioMixer)
+	, fireSystem(registry)
 	, movementSystem(registry)
 	, bulletSystem(registry, tilemap, particles)
 	, pickupSystem(registry, score, fruitsCollected)
@@ -897,6 +898,7 @@ void GameState::Update(float deltaTime)
 
 	inputSystem.Update(deltaTime);
 	jumpSystem.Update();
+	fireSystem.Update(deltaTime); // toggles the burn Hazard that DamageSystem then applies
 	damageSystem.Update(deltaTime);
 	deathSystem.Update(deltaTime);
 	patrolSystem.Update();

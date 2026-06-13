@@ -89,6 +89,10 @@
 	"arrow_idle": "assets/textures/traps/arrow/Idle (18x18).png",
 	"arrow_hit": "assets/textures/traps/arrow/Hit (18x18).png",
 
+	"fire_off": "assets/textures/traps/fire/Off.png",
+	"fire_hit": "assets/textures/traps/fire/Hit (16x32).png",
+	"fire_on": "assets/textures/traps/fire/On (16x32).png",
+
 	"spikes": "assets/textures/traps/spikes/Idle.png",
 	"saw_on": "assets/textures/traps/saw/On (38x38).png",
 
