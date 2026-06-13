@@ -9,12 +9,50 @@
 		{
 			"textureName": "bee_idle",
 			"frameCount": 6,
-			"frameDuration": 0.12,
+			"frameDuration": 0.06,
 			"isLooping": true
+		},
+		"Attack":
+		{
+			"textureName": "bee_attack",
+			"frameCount": 8,
+			"frameDuration": 0.05,
+			"isLooping": false
+		},
+		"Hit":
+		{
+			"textureName": "bee_hit",
+			"frameCount": 5,
+			"frameDuration": 0.08,
+			"isLooping": false
 		}
 	},
 	"AnimationState":
 	{
 		"current": "Idle"
+	},
+	"Gravity":
+	{
+		"acceleration": 0,
+		"maxFallSpeed": 500
+	},
+	"Collider":
+	{
+		"width": 26,
+		"height": 24
+	},
+	"Health":
+	{
+		"maximum": 1,
+		"invulnerabilityDuration": 0.0,
+		"hitStunDuration": 0.0,
+		"knockbackSpeed": 0.0
+	},
+	"Enemy": { "scoreValue": 25 },
+	"BeeAI":
+	{
+		"width": 80,
+		"height": 40,
+		"speed": 2.0
 	}
 }

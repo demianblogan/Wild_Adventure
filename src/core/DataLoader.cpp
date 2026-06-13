@@ -29,6 +29,7 @@
 #include "components/ChickenAI.h"
 #include "components/TrunkAI.h"
 #include "components/PlantAI.h"
+#include "components/BeeAI.h"
 #include "components/Trampoline.h"
 #include "core/ecs/Registry.h"
 
@@ -259,6 +260,15 @@ void DataLoader::RegisterLoaders()
 	loaders["PlantAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json&)
 		{
 			registry.Add<ECS::PlantAI>(entity, {});
+		};
+
+	loaders["BeeAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::BeeAI bee;
+			bee.width  = data.at("width");
+			bee.height = data.at("height");
+			bee.speed  = data.value("speed", bee.speed);
+			registry.Add<ECS::BeeAI>(entity, bee);
 		};
 
 	loaders["ChickenAI"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)

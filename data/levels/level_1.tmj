@@ -491,6 +491,19 @@
                          "width":0,
                          "x":1740,
                          "y":368
+                        }, 
+                        {
+                         "height":0,
+                         "id":48,
+                         "name":"bee",
+                         "opacity":1,
+                         "point":true,
+                         "rotation":0,
+                         "type":"bee",
+                         "visible":true,
+                         "width":0,
+                         "x":260,
+                         "y":368
                         }],
                  "opacity":1,
                  "tintcolor":"#ff0000",
@@ -715,7 +728,7 @@
          "y":0
         }],
  "nextlayerid":12,
- "nextobjectid":47,
+ "nextobjectid":49,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

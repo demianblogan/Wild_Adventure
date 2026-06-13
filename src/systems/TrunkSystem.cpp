@@ -25,15 +25,22 @@ namespace ECS
 
 	void TrunkSystem::Update(float deltaTime)
 	{
-		Entity playerEntity = INVALID_ENTITY;
-		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
+		// Capture the player's position by value, not by reference: SpawnBullet adds
+		// components below, which can reallocate a component pool and dangle a held
+		// reference into it.
+		bool  playerFound = false;
+		float playerX     = 0.0f;
+		float playerCenterY = 0.0f;
+		registry.ForEach<Player, Transform, Collider>(
+			[&](Entity, Player&, Transform& transform, Collider& collider)
+			{
+				playerX       = transform.x;
+				playerCenterY = transform.y - collider.height * 0.5f;
+				playerFound   = true;
+			});
 
-		if (playerEntity == INVALID_ENTITY)
+		if (!playerFound)
 			return;
-
-		const Transform& playerTransform = registry.Get<Transform>(playerEntity);
-		const Collider&  playerCollider  = registry.Get<Collider>(playerEntity);
-		const float      playerCenterY   = playerTransform.y - playerCollider.height * 0.5f;
 
 		registry.ForEach<TrunkAI, GroundPatrol, Transform, Collider, Velocity, AnimationState, Facing>(
 			[&](Entity entity, TrunkAI& trunk, GroundPatrol& patrol,
@@ -44,7 +51,7 @@ namespace ECS
 					return;
 
 				const float trunkCenterY  = transform.y - collider.height * 0.5f;
-				const float dx            = playerTransform.x - transform.x;
+				const float dx            = playerX - transform.x;
 				const bool  sameLevel     = std::abs(playerCenterY - trunkCenterY) < TrunkAI::SIGHT_TOLERANCE;
 				const bool  inRange       = std::abs(dx) < TrunkAI::SIGHT_RANGE;
 				const bool  playerInFront = (dx * static_cast<float>(patrol.direction)) > 0.0f;
@@ -134,6 +141,6 @@ namespace ECS
 		sprite.textureName = "trunk_bullet";
 		registry.Add<Sprite>(bullet, sprite);
 
-		registry.Add<Bullet>(bullet, {direction});
+		registry.Add<Bullet>(bullet, {direction, 0});
 	}
 }

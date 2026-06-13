@@ -213,6 +213,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, enemySystem(registry, score, context.audioMixer, enemiesKilled)
 	, trunkSystem(registry)
 	, plantSystem(registry)
+	, beeSystem(registry)
 	, chickenSystem(registry, particles)
 	, groundPatrolSystem(registry, tilemap, particles)
 	, enemyDeathSystem(registry)
@@ -904,6 +905,7 @@ void GameState::Update(float deltaTime)
 		hitStopTimer = HIT_STOP_DURATION;
 	trunkSystem.Update(deltaTime);
 	plantSystem.Update(deltaTime);
+	beeSystem.Update(deltaTime);
 	chickenSystem.Update(deltaTime);
 	groundPatrolSystem.Update(deltaTime);
 	enemyDeathSystem.Update(deltaTime, fallLimit);

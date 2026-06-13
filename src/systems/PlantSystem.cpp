@@ -24,15 +24,22 @@ namespace ECS
 
 	void PlantSystem::Update(float deltaTime)
 	{
-		Entity playerEntity = INVALID_ENTITY;
-		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
+		// Capture the player's position by value, not by reference: SpawnBullet adds
+		// components below, which can reallocate a component pool and dangle a held
+		// reference into it.
+		bool  playerFound = false;
+		float playerX     = 0.0f;
+		float playerCenterY = 0.0f;
+		registry.ForEach<Player, Transform, Collider>(
+			[&](Entity, Player&, Transform& transform, Collider& collider)
+			{
+				playerX       = transform.x;
+				playerCenterY = transform.y - collider.height * 0.5f;
+				playerFound   = true;
+			});
 
-		if (playerEntity == INVALID_ENTITY)
+		if (!playerFound)
 			return;
-
-		const Transform& playerTransform = registry.Get<Transform>(playerEntity);
-		const Collider&  playerCollider  = registry.Get<Collider>(playerEntity);
-		const float      playerCenterY   = playerTransform.y - playerCollider.height * 0.5f;
 
 		registry.ForEach<PlantAI, Transform, Collider, AnimationState, Facing>(
 			[&](Entity entity, PlantAI& plant, Transform& transform, Collider& collider,
@@ -44,7 +51,7 @@ namespace ECS
 				// The plant cannot turn; it only sees the player on the side it faces.
 				const int   facingDir     = facing.isLookingRight ? 1 : -1;
 				const float plantCenterY   = transform.y - collider.height * 0.5f;
-				const float dx             = playerTransform.x - transform.x;
+				const float dx             = playerX - transform.x;
 				const bool  sameLevel      = std::abs(playerCenterY - plantCenterY) < PlantAI::SIGHT_TOLERANCE;
 				const bool  inRange        = std::abs(dx) < PlantAI::SIGHT_RANGE;
 				const bool  playerInFront  = (dx * static_cast<float>(facingDir)) > 0.0f;
@@ -124,7 +131,7 @@ namespace ECS
 		registry.Add<Sprite>(bullet, sprite);
 
 		Bullet data;
-		data.direction     = direction;
+		data.dirX          = direction;
 		data.piecesTexture = "plant_bullet_pieces";
 		registry.Add<Bullet>(bullet, data);
 	}

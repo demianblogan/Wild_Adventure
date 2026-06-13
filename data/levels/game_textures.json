@@ -98,6 +98,12 @@
 	"plant_bullet": "assets/textures/enemies/plant/Bullet.png",
 	"plant_bullet_pieces": "assets/textures/enemies/plant/Bullet Pieces.png",
 
+	"bee_idle": "assets/textures/enemies/bee/Idle (36x34).png",
+	"bee_attack": "assets/textures/enemies/bee/Attack (36x34).png",
+	"bee_hit": "assets/textures/enemies/bee/Hit (36x34).png",
+	"bee_bullet": "assets/textures/enemies/bee/Bullet.png",
+	"bee_bullet_pieces": "assets/textures/enemies/bee/Bullet Pieces.png",
+
 	"blue_bird_fly": "assets/textures/enemies/blue_bird/Flying (32x32).png",
 	"blue_bird_hit": "assets/textures/enemies/blue_bird/Hit (32x32).png",
 

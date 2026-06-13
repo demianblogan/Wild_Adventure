@@ -28,6 +28,7 @@
 #include "systems/TrampolineSystem.h"
 #include "systems/TrunkSystem.h"
 #include "systems/PlantSystem.h"
+#include "systems/BeeSystem.h"
 #include "systems/ChickenSystem.h"
 #include "tilemap/Tilemap.h"
 #include "ui/DataLoader.h"
@@ -132,6 +133,7 @@ private:
 	ECS::EnemySystem enemySystem;
 	ECS::TrunkSystem trunkSystem;
 	ECS::PlantSystem plantSystem;
+	ECS::BeeSystem beeSystem;
 	ECS::ChickenSystem chickenSystem;
 	ECS::GroundPatrolSystem groundPatrolSystem;
 	ECS::EnemyDeathSystem enemyDeathSystem;
