@@ -8,7 +8,7 @@
 class Campaign
 {
 public:
-	static constexpr int LEVEL_COUNT = 9;
+	static constexpr int LEVEL_COUNT = 7;
 
 	Campaign();
 

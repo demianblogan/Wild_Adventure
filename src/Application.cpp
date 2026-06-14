@@ -110,17 +110,13 @@ void Application::Run()
 
 		remainderTime += frameTime;
 
-		sf::Clock phaseClock;
-
 		ProcessEvents();
-		accumulatedEventsTime += phaseClock.restart().asSeconds();
 
 		while (remainderTime >= FIXED_DELTA_TIME)
 		{
 			Update(FIXED_DELTA_TIME);
 			remainderTime -= FIXED_DELTA_TIME;
 		}
-		accumulatedUpdateTime += phaseClock.restart().asSeconds();
 
 		if (!stateMachine.IsEmpty())
 			hasStateRun = true;
@@ -179,17 +175,6 @@ void Application::UpdateFps(float deltaTime)
 	{
 		fpsDisplayed = static_cast<int>(std::round(fpsFrameCount / fpsTimer));
 
-		const float toAverageMs = 1000.0f / static_cast<float>(fpsFrameCount);
-		shownEventsMs = accumulatedEventsTime * toAverageMs;
-		shownUpdateMs = accumulatedUpdateTime * toAverageMs;
-		shownDrawMs = accumulatedDrawTime * toAverageMs;
-		shownDisplayMs = accumulatedDisplayTime * toAverageMs;
-
-		accumulatedEventsTime = 0.0f;
-		accumulatedUpdateTime = 0.0f;
-		accumulatedDrawTime = 0.0f;
-		accumulatedDisplayTime = 0.0f;
-
 		fpsTimer = 0.0f;
 		fpsFrameCount = 0;
 	}
@@ -197,8 +182,6 @@ void Application::UpdateFps(float deltaTime)
 
 void Application::Render(float interpolationFactor)
 {
-	sf::Clock phaseClock;
-
 	virtualScreen.Clear();
 	stateMachine.Render(interpolationFactor);
 	DrawFps();
@@ -207,10 +190,8 @@ void Application::Render(float interpolationFactor)
 	window.clear(sf::Color::Black);
 	virtualScreen.RenderToWindow(window);
 	DrawCursor();
-	accumulatedDrawTime += phaseClock.restart().asSeconds();
 
 	window.display();
-	accumulatedDisplayTime += phaseClock.getElapsedTime().asSeconds();
 }
 
 void Application::DrawFps()
@@ -223,10 +204,7 @@ void Application::DrawFps()
 
 	virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
 
-	// Per-phase costs in ms: evt = window events, upd = game logic, draw = all
-	// drawing, sync = waiting inside window.display() (vsync/driver pacing).
-	const std::string overlay = std::format("FPS: {}  evt {:.1f} | upd {:.1f} | draw {:.1f} | sync {:.1f}",
-		fpsDisplayed, shownEventsMs, shownUpdateMs, shownDrawMs, shownDisplayMs);
+	const std::string overlay = std::format("FPS: {}", fpsDisplayed);
 
 	sf::Text text(resources.fonts.Get("main"), overlay, 16);
 	text.setFillColor(sf::Color::White);

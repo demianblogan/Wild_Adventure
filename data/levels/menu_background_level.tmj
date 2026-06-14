@@ -1041,32 +1041,6 @@
                 }, 
                 {
                  "height":0,
-                 "id":131,
-                 "name":"woodEasyBox",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"woodEasyBox",
-                 "visible":true,
-                 "width":0,
-                 "x":1924,
-                 "y":24
-                }, 
-                {
-                 "height":0,
-                 "id":132,
-                 "name":"woodEasyBox",
-                 "opacity":1,
-                 "point":true,
-                 "rotation":0,
-                 "type":"woodEasyBox",
-                 "visible":true,
-                 "width":0,
-                 "x":1960,
-                 "y":28
-                }, 
-                {
-                 "height":0,
                  "id":133,
                  "name":"woodEasyBox",
                  "opacity":1,

@@ -24,6 +24,7 @@
 #include "components/Finish.h"
 #include "components/Checkpoint.h"
 #include "components/Hitbox.h"
+#include "core/Random.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
@@ -70,10 +71,11 @@ namespace
 			"background2",
 			"background3",
 			"background4",
-			"background5"
+			"background5",
+			"background6"
 		};
 
-		constexpr int trackCount = 5;
+		constexpr int trackCount = 6;
 
 		int index = (levelNumber - 1) % trackCount;
 		if (index < 0)
@@ -264,7 +266,15 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	// scene; the cache also makes level restarts skip the parse entirely.
 	const nlohmann::json& mapJson = resources.GetMapJson(levelPath);
 
-	context.virtualScreen.SetColorGrading(LoadColorGrading(LevelTheme(mapJson)));
+	const std::string levelTheme = LevelTheme(mapJson);
+	context.virtualScreen.SetColorGrading(LoadColorGrading(levelTheme));
+
+	// A water level is floatier and trickles ambient bubbles.
+	if (levelTheme == "water")
+	{
+		waterLevel = true;
+		physicsSystem.SetGravityScale(WATER_GRAVITY_SCALE);
+	}
 
 	tilemap = LoadTilemap(mapJson, "terrain", 22);
 	particles.SetTilemap(tilemap);
@@ -605,6 +615,15 @@ void GameState::UpdateCheckpoints()
 			checkpoint.activated = true;
 			state.current = "flag_out";
 			respawnPoint = { transform.x, transform.y };
+
+			// Touching a checkpoint refills the hero's lives, so reaching one is a
+			// genuine reprieve rather than just a respawn marker.
+			if (registry.Has<ECS::Health>(playerEntity))
+			{
+				ECS::Health& health = registry.Get<ECS::Health>(playerEntity);
+				health.current = health.maximum;
+			}
+
 			context.audioMixer.PlaySound("checkpoint");
 			confetti.Emit({ transform.x, transform.y - CONFETTI_RISE });
 			camera.Shake(SHAKE_TOUCH);
@@ -815,6 +834,13 @@ void GameState::UpdateHearts(int currentHealth, float deltaTime)
 		blinkTimer = HEART_BLINK_DURATION;
 		displayedHealth = currentHealth;
 	}
+	// Health was restored (e.g. touching a checkpoint): refill the hearts at once
+	// and cancel any heart still blinking out.
+	else if (currentHealth > displayedHealth)
+	{
+		displayedHealth = currentHealth;
+		blinkingHeart = -1;
+	}
 
 	bool blinkOn = true;
 	if (blinkingHeart >= 0)
@@ -940,6 +966,21 @@ void GameState::Update(float deltaTime)
 	UpdateLevelFlow(deltaTime);
 
 	camera.Update(deltaTime);
+
+	// Ambient bubbles: spawn across the bottom of the view and let them rise.
+	if (waterLevel)
+	{
+		bubbleTimer -= deltaTime;
+		if (bubbleTimer <= 0.0f)
+		{
+			bubbleTimer = WATER_BUBBLE_INTERVAL;
+
+			const sf::Vector2f center = camera.GetRenderCenter(1.0f);
+			const float x = center.x + Random::Float(-0.5f, 0.5f) * VirtualScreen::WIDTH;
+			const float y = center.y + Random::Float(-0.5f, 0.5f) * VirtualScreen::HEIGHT;
+			particles.EmitBubble({ x, y });
+		}
+	}
 
 	particles.Update(deltaTime);
 	confetti.Update(deltaTime);

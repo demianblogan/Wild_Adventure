@@ -14,6 +14,7 @@ struct ColorGrading
 	float saturation = 1.0f;                    // 0 = grayscale, 1 = unchanged
 	float contrast = 1.0f;                      // pivot at mid-gray
 	float heat = 0.0f;                          // haze amplitude in virtual pixels, 0 = off
+	float water = 0.0f;                         // underwater post-effects (wobble, caustics, vignette), 0 = off
 
 	bool IsIdentity() const;
 };

@@ -176,8 +176,13 @@ private:
 	float deathFlashTimer = 0.0f; // white "lightning" flash over the background on death
 	float deathFallTimer = 0.0f;  // time spent tumbling after a damage death
 
+	bool  waterLevel = false;     // "water" theme: floaty gravity and ambient bubbles
+	float bubbleTimer = 0.0f;     // countdown to the next ambient bubble
+
 	static constexpr float DEATH_FLASH_TIME = 0.2f; // duration of the death "lightning" flash
 	static constexpr float DEATH_FALL_TIME = 0.5f;  // max tumble time before the restart kicks in
+	static constexpr float WATER_GRAVITY_SCALE = 0.55f;   // gravity multiplier in a water level
+	static constexpr float WATER_BUBBLE_INTERVAL = 0.15f; // seconds between ambient bubbles
 
 	int previousPlayerHealth = -1;
 	int previousJumpsRemaining = 0;

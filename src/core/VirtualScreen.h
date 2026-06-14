@@ -71,6 +71,7 @@ private:
 	bool gradingSupported = false; // shader compiled and usable on this machine
 	bool gradingActive = false;    // current parameters differ from identity
 	bool heatActive = false;       // heat haze on: the time uniform ticks every frame
+	bool waterActive = false;      // underwater effects on: the time uniform ticks every frame
 	sf::Clock effectClock;         // drives the heat haze animation
 
 	sf::Shader blurShader;

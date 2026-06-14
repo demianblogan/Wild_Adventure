@@ -99,6 +99,7 @@ void VirtualScreen::SetColorGrading(const ColorGrading& grading)
 {
 	gradingActive = gradingSupported && !grading.IsIdentity();
 	heatActive = gradingActive && grading.heat > 0.0f;
+	waterActive = gradingActive && grading.water > 0.0f;
 
 	if (!gradingActive)
 		return;
@@ -110,6 +111,7 @@ void VirtualScreen::SetColorGrading(const ColorGrading& grading)
 
 	// The shader works in UV space; the data file speaks virtual pixels.
 	gradingShader.setUniform("heatStrength", grading.heat / static_cast<float>(WIDTH));
+	gradingShader.setUniform("water", grading.water);
 	gradingShader.setUniform("time", 0.0f);
 }
 
@@ -243,7 +245,7 @@ void VirtualScreen::RenderToWindow(sf::RenderWindow& window)
 		(windowSize.x - scaledWidth) / 2.0f,
 		(windowSize.y - scaledHeight) / 2.0f });
 
-	if (heatActive)
+	if (heatActive || waterActive)
 	{
 		// Wrap at 200*pi so the float stays precise over long sessions; the
 		// shader's wave speeds are multiples of 0.1, which keeps the wrap

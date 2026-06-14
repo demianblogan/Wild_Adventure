@@ -2,7 +2,6 @@
 
 #include <SFML/System/Vector2.hpp>
 
-#include <random>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -33,10 +32,14 @@ public:
 	// facingDir and fades, cycling through its frames over its short life).
 	void EmitGhostTrail(sf::Vector2f position, int facingDir);
 
+	// One rising water bubble (drawn procedurally, no texture) that drifts upward,
+	// wobbling sideways, and fades out — ambient detail for a water level.
+	void EmitBubble(sf::Vector2f position);
+
 	float GetRunBackOffset() const { return runBackOffset; }
 
 private:
-	enum class Kind { Dust, Debris };
+	enum class Kind { Dust, Debris, Bubble };
 	enum class DebrisPhase { Flying, Resting, Blinking };
 
 	struct EmissionConfig
@@ -72,12 +75,9 @@ private:
 		bool dead = false;
 	};
 
-	float RandomFloat(float min, float max);
-
 	Resources& resources;
 	const Tilemap* tilemap = nullptr;
 	std::vector<Particle> particles;
-	std::mt19937 randomEngine;
 
 	std::unordered_map<std::string, EmissionConfig> presets;
 	std::string textureName;

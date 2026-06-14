@@ -27,5 +27,13 @@
 		"brightness": 1.06,
 		"saturation": 1.18,
 		"contrast": 0.95
+	},
+	"water":
+	{
+		"tint": [ 0.72, 0.92, 1.12 ],
+		"brightness": 0.86,
+		"saturation": 0.82,
+		"contrast": 0.94,
+		"water": 1.0
 	}
 }

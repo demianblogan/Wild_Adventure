@@ -21,6 +21,9 @@ namespace ECS
 
 		void Update(float deltaTime);
 
+		// Multiplies gravity for the whole level (e.g. a water level is floatier).
+		void SetGravityScale(float scale) { gravityScale = scale; }
+
 	private:
 		struct SolidBox
 		{
@@ -42,5 +45,6 @@ namespace ECS
 
 		Registry& registry;
 		const Tilemap& tilemap;
+		float gravityScale = 1.0f;
 	};
 }

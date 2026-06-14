@@ -102,7 +102,6 @@
 	"rock_head_right_hit": "assets/textures/traps/rock_head/Right Hit (42x42).png",
 
 	"spikes": "assets/textures/traps/spikes/Idle.png",
-	"saw_on": "assets/textures/traps/saw/On (38x38).png",
 
 	"trunk_idle": "assets/textures/enemies/trunk/Idle (64x32).png",
 	"trunk_run": "assets/textures/enemies/trunk/Run (64x32).png",

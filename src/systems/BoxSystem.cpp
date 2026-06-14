@@ -13,6 +13,7 @@
 #include "components/PickupDelay.h"
 #include "graphics/ParticleSystem.h"
 #include "core/DataLoader.h"
+#include "core/Random.h"
 #include "core/ecs/Registry.h"
 #include "audio/Mixer.h"
 
@@ -31,17 +32,13 @@ namespace ECS
 		, loader(loader)
 		, particles(particles)
 		, mixer(mixer)
-		, randomEngine(std::random_device{}())
 	{}
 
 	void BoxSystem::EjectFruit(const std::string& fruitName, float x, float y, float ejectSpeedX, float ejectSpeedUp)
 	{
-		std::uniform_int_distribution<int> sideDistribution(0, 1);
-		std::uniform_real_distribution<float> jitter(0.8f, 1.2f);
-
 		const Entity fruit = loader.SpawnFromPrefab(registry, "data/prefabs/" + fruitName + ".json");
 
-		const float sign = (sideDistribution(randomEngine) == 0) ? -1.0f : 1.0f;
+		const float sign = (Random::Int(0, 1) == 0) ? -1.0f : 1.0f;
 
 		Transform transform;
 		transform.x = x;
@@ -49,8 +46,8 @@ namespace ECS
 		registry.Add<Transform>(fruit, transform);
 
 		Velocity velocity;
-		velocity.x = sign * ejectSpeedX * jitter(randomEngine);
-		velocity.y = -ejectSpeedUp * jitter(randomEngine);
+		velocity.x = sign * ejectSpeedX * Random::Float(0.8f, 1.2f);
+		velocity.y = -ejectSpeedUp * Random::Float(0.8f, 1.2f);
 		registry.Add<Velocity>(fruit, velocity);
 
 		Gravity gravity;
