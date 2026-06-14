@@ -1,14 +1,14 @@
 #include "FireSystem.h"
 
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/Collider.h"
-#include "components/Fire.h"
-#include "components/Hazard.h"
-#include "components/Hitbox.h"
-#include "components/Player.h"
-#include "components/Transform.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/physics/Collider.h"
+#include "components/traps/Fire.h"
+#include "components/combat/Hazard.h"
+#include "components/physics/Hitbox.h"
+#include "components/physics/Transform.h"
 #include "core/ecs/Registry.h"
+#include "systems/core/PlayerQuery.h"
 
 namespace ECS
 {
@@ -19,8 +19,7 @@ namespace ECS
 	void FireSystem::Update(float deltaTime)
 	{
 		// The player only matters for activation; the burn is left to DamageSystem.
-		Entity playerEntity = INVALID_ENTITY;
-		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
+		const Entity playerEntity = FindPlayer(registry);
 
 		const Transform* playerTransform = nullptr;
 		const Collider*  playerCollider  = nullptr;

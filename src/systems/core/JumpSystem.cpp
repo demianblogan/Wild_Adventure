@@ -1,9 +1,9 @@
 #include "JumpSystem.h"
 
-#include "components/CollisionState.h"
-#include "components/Jump.h"
-#include "components/Player.h"
-#include "components/Velocity.h"
+#include "components/physics/CollisionState.h"
+#include "components/physics/Jump.h"
+#include "components/tags/Player.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
 
 #include <algorithm>

@@ -1,10 +1,10 @@
 #include "AnimationSystem.h"
 
-#include "components/Animation.h"
-#include "components/AnimationSet.h"
-#include "components/AnimationState.h"
-#include "components/Sprite.h"
-#include "components/Transform.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationSet.h"
+#include "components/render/AnimationState.h"
+#include "components/render/Sprite.h"
+#include "components/physics/Transform.h"
 #include "core/ecs/Registry.h"
 #include "graphics/ParticleSystem.h"
 

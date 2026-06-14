@@ -10,12 +10,12 @@ namespace ECS
 	{
 		enum class Phase { Visible, Disappearing, Invisible, Appearing };
 
-		Phase phase         = Phase::Visible;
-		float phaseTimer    = VISIBLE_DURATION;
+		Phase phase = Phase::Visible;
+		float phaseTimer = VISIBLE_DURATION;
 		float particleTimer = 0.0f;
 
-		static constexpr float VISIBLE_DURATION   = 1.0f;  // seconds shown before fading out
-		static constexpr float INVISIBLE_DURATION = 2.0f;  // seconds hidden before fading back in
-		static constexpr float PARTICLE_INTERVAL  = 0.12f; // gap between trailing wisps while visible
+		static constexpr float VISIBLE_DURATION = 1.0f;   // seconds shown before fading out
+		static constexpr float INVISIBLE_DURATION = 2.0f; // seconds hidden before fading back in
+		static constexpr float PARTICLE_INTERVAL = 0.12f; // gap between trailing wisps while visible
 	};
 }

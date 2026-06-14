@@ -835,19 +835,6 @@
                         }, 
                         {
                          "height":0,
-                         "id":231,
-                         "name":"woodHardBox",
-                         "opacity":1,
-                         "point":true,
-                         "rotation":0,
-                         "type":"woodHardBox",
-                         "visible":true,
-                         "width":0,
-                         "x":352,
-                         "y":156
-                        }, 
-                        {
-                         "height":0,
                          "id":232,
                          "name":"apple",
                          "opacity":1,
@@ -1601,19 +1588,6 @@
                         }, 
                         {
                          "height":0,
-                         "id":200,
-                         "name":"trunk",
-                         "opacity":1,
-                         "point":true,
-                         "rotation":0,
-                         "type":"trunk",
-                         "visible":true,
-                         "width":0,
-                         "x":236,
-                         "y":472
-                        }, 
-                        {
-                         "height":0,
                          "id":201,
                          "name":"trunk",
                          "opacity":1,
@@ -1622,7 +1596,7 @@
                          "type":"trunk",
                          "visible":true,
                          "width":0,
-                         "x":292,
+                         "x":252,
                          "y":472
                         }],
                  "opacity":1,

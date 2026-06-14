@@ -1,7 +1,7 @@
 #pragma once
 
-#include "components/Collider.h"
-#include "components/Transform.h"
+#include "components/physics/Collider.h"
+#include "components/physics/Transform.h"
 #include "core/ecs/Registry.h"
 #include "tilemap/Tilemap.h"
 

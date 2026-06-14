@@ -1,38 +1,39 @@
 #include "GameState.h"
 
 #include "Context.h"
-#include "components/Box.h"
-#include "components/Collectible.h"
-#include "components/Enemy.h"
-#include "components/EnemyDeath.h"
-#include "components/GroundPatrol.h"
-#include "components/CollisionState.h"
-#include "components/Health.h"
-#include "components/Jump.h"
-#include "components/Player.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/Collider.h"
-#include "components/Frozen.h"
-#include "components/PreviousTransform.h"
-#include "components/Solid.h"
-#include "components/Sprite.h"
-#include "components/AnimationSet.h"
-#include "components/StartPlatform.h"	
-#include "components/Finish.h"
-#include "components/Checkpoint.h"
-#include "components/Hitbox.h"
+#include "components/items/Box.h"
+#include "components/items/Collectible.h"
+#include "components/combat/Enemy.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/ai/GroundPatrol.h"
+#include "components/physics/CollisionState.h"
+#include "components/combat/Health.h"
+#include "components/physics/Jump.h"
+#include "components/tags/Player.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/physics/Collider.h"
+#include "components/tags/Frozen.h"
+#include "components/physics/PreviousTransform.h"
+#include "components/physics/Solid.h"
+#include "components/render/Sprite.h"
+#include "components/render/AnimationSet.h"
+#include "components/items/StartPlatform.h"	
+#include "components/items/Finish.h"
+#include "components/items/Checkpoint.h"
+#include "components/physics/Hitbox.h"
+#include "core/AABB.h"
 #include "core/Random.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
 #include "core/Input.h"
 #include "core/ecs/Registry.h"
+#include "level/LevelSetup.h"
 #include "tilemap/TilemapLoader.h"
 #include "tilemap/TilemapRenderer.h"
-#include "ui/Label.h"
 #include "audio/Mixer.h"
 #include "states/LevelCompleteState.h"
 #include "states/MenuState.h"
@@ -47,9 +48,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cmath>
-#include <fstream>
 #include <memory>
-#include <iostream> //DEBUG
 
 namespace
 {
@@ -60,143 +59,6 @@ namespace
 
 	// Confetti bursts this many pixels above the touched object's base.
 	constexpr float CONFETTI_RISE = 40.0f;
-
-	// Each level has its own music track, registered in data/audio.json.
-	// Levels past the last track cycle through the list again.
-	const std::string& LevelMusicTrack(int levelNumber)
-	{
-		static const std::string tracks[] =
-		{
-			"background1",
-			"background2",
-			"background3",
-			"background4",
-			"background5",
-			"background6"
-		};
-
-		constexpr int trackCount = 6;
-
-		int index = (levelNumber - 1) % trackCount;
-		if (index < 0)
-			index = 0;
-
-		return tracks[index];
-	}
-
-	// The level's visual theme ("green", "hot", "sweet", ...) is the map's
-	// Class field in Tiled; it picks the color grading palette. Tiled omits
-	// the key entirely while the class is unset.
-	std::string LevelTheme(const nlohmann::json& mapJson)
-	{
-		const std::string theme = mapJson.value("class", "");
-		return theme.empty() ? "default" : theme;
-	}
-
-	// Per-level animated background: texture, scroll direction and speed come
-	// from data/levels/backgrounds.json, keyed by level number, with a
-	// "default" entry for levels that have no override.
-	void ApplyLevelBackground(AnimatedBackground& background, int levelNumber)
-	{
-		std::string texture = "blue";
-		std::string directionName = "right";
-		float speed = 16.0f;
-
-		std::ifstream file("data/levels/backgrounds.json");
-		if (file.is_open())
-		{
-			const nlohmann::json data = nlohmann::json::parse(file);
-			const std::string key = std::to_string(levelNumber);
-
-			const nlohmann::json* entry = nullptr;
-			if (data.contains(key))
-				entry = &data.at(key);
-			else if (data.contains("default"))
-				entry = &data.at("default");
-
-			if (entry != nullptr)
-			{
-				texture = entry->value("texture", texture);
-				directionName = entry->value("direction", directionName);
-				speed = entry->value("speed", speed);
-
-				// Optional [r, g, b] multiplier, 0-255: darkens cave levels.
-				if (entry->contains("tint"))
-				{
-					const nlohmann::json& tint = entry->at("tint");
-					background.SetTint(sf::Color(tint.at(0), tint.at(1), tint.at(2)));
-				}
-			}
-		}
-
-		AnimatedBackground::Direction direction = AnimatedBackground::Direction::Right;
-		if (directionName == "up")
-			direction = AnimatedBackground::Direction::Up;
-		else if (directionName == "down")
-			direction = AnimatedBackground::Direction::Down;
-		else if (directionName == "left")
-			direction = AnimatedBackground::Direction::Left;
-
-		background.SetTexture(texture);
-		background.SetDirection(direction);
-		background.SetSpeed(speed);
-	}
-
-	// Per-level "lamp" lighting: outside a soft circle around the player the
-	// world is dark. Configured in data/levels/lighting.json by level number;
-	// levels without an entry stay fully lit.
-	LevelLighting LoadLevelLighting(int levelNumber)
-	{
-		LevelLighting lighting;
-
-		std::ifstream file("data/levels/lighting.json");
-		if (!file.is_open())
-			return lighting;
-
-		const nlohmann::json data = nlohmann::json::parse(file);
-		const std::string key = std::to_string(levelNumber);
-
-		if (!data.contains(key))
-			return lighting;
-
-		const nlohmann::json& entry = data.at(key);
-		lighting.enabled  = true;
-		lighting.radius   = entry.value("radius", lighting.radius);
-		lighting.darkness = entry.value("darkness", lighting.darkness);
-
-		return lighting;
-	}
-
-	// The player prefab is authored with the default ninja_frog_* textures;
-	// the other skins reuse identical sheets under their own prefix, so
-	// switching is a texture-name rewrite on the freshly spawned player.
-	void ApplySkinToPlayer(ECS::Registry& registry, ECS::Entity player, const std::string& skinId)
-	{
-		const std::string defaultPrefix = "ninja_frog";
-
-		if (skinId.empty() || skinId == defaultPrefix)
-			return;
-
-		const auto reskin = [&](std::string& textureName)
-		{
-			if (textureName.rfind(defaultPrefix, 0) == 0)
-				textureName = skinId + textureName.substr(defaultPrefix.size());
-		};
-
-		if (registry.Has<ECS::Sprite>(player))
-			reskin(registry.Get<ECS::Sprite>(player).textureName);
-
-		if (registry.Has<ECS::AnimationSet>(player))
-		{
-			for (auto& [state, animation] : registry.Get<ECS::AnimationSet>(player).animations)
-				reskin(animation.textureName);
-		}
-
-		// The Animation component already holds a copy of the current state's
-		// data, made when the prefab was loaded.
-		if (registry.Has<ECS::Animation>(player))
-			reskin(registry.Get<ECS::Animation>(player).data.textureName);
-	}
 }
 
 GameState::GameState(Context& context, const std::string& levelPath, int levelNumber,
@@ -235,8 +97,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, animationSystem(registry, &particles)
 	, playerAnimationSystem(registry)
 	, renderSystem(registry, context.resources, context.virtualScreen)
-	, hudInterface(context.virtualScreen)
-	, hudLoader(context.resources)
+	, hud(context)
 	, levelPath(levelPath)
 	, levelNumber(levelNumber)
 	, respawnOverride(respawnAt)
@@ -256,17 +117,17 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	resources.LoadTexturesFromFile("data/levels/game_textures.json");
 	particles.LoadConfig("data/particles.json");
 
-	ApplyLevelBackground(background, levelNumber);
-	lighting = LoadLevelLighting(levelNumber);
+	LevelSetup::ApplyBackground(resources, background, levelNumber);
+	lighting = LevelSetup::LoadLighting(resources, levelNumber);
 
 	// The "Level X" banner greets a fresh level start, not a checkpoint respawn.
-	showLevelBanner = !respawnOverride.has_value();
+	hud.Build(levelNumber, !respawnOverride.has_value());
+	hud.SetScore(score);
 
 	// Parse the map once and reuse the parsed JSON for both the tilemap and the
 	// scene; the cache also makes level restarts skip the parse entirely.
-	const nlohmann::json& mapJson = resources.GetMapJson(levelPath);
-
-	const std::string levelTheme = LevelTheme(mapJson);
+	const nlohmann::json& mapJSON = resources.GetMapJSON(levelPath);
+	const std::string levelTheme = LevelSetup::Theme(mapJSON);
 	context.virtualScreen.SetColorGrading(LoadColorGrading(levelTheme));
 
 	// A water level is floatier and trickles ambient bubbles.
@@ -276,7 +137,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 		physicsSystem.SetGravityScale(WATER_GRAVITY_SCALE);
 	}
 
-	tilemap = LoadTilemap(mapJson, "terrain", 22);
+	tilemap = LoadTilemap(mapJSON, "terrain", 22);
 	particles.SetTilemap(tilemap);
 
 	const sf::Vector2f worldSize =
@@ -285,10 +146,21 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 		static_cast<float>(tilemap.GetHeight() * tilemap.tileSize)
 	};
 	camera.SetWorldSize(worldSize);
-
 	fallLimit = worldSize.y + 64.0f;
 
-	sceneLoader.LoadSceneFromMap(registry, mapJson);
+	InitScene(mapJSON, std::move(progressSnapshot));
+	SpawnPlayer();
+
+	context.audioMixer.PlayMusic(LevelSetup::MusicTrack(resources, levelNumber));
+	transition.StartReveal();
+}
+
+void GameState::HandleEvent(const sf::Event& event)
+{}
+
+void GameState::InitScene(const nlohmann::json& mapJSON, std::optional<ProgressSnapshot> progressSnapshot)
+{
+	sceneLoader.LoadSceneFromMap(registry, mapJSON);
 
 	// Compute totals from the full scene before any checkpoint pruning.
 	registry.ForEach<ECS::Collectible>([&](ECS::Entity, ECS::Collectible&) { maxFruits++; });
@@ -296,8 +168,8 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 		{ maxFruits += static_cast<int>(box.fruits.size()); });
 	registry.ForEach<ECS::Enemy>([&](ECS::Entity, ECS::Enemy&) { maxEnemies++; });
 
-	// Record each mushroom's spawn position right after loading, before any movement occurs.
-	// This is used by checkpoint snapshots to identify which mushrooms were alive.
+	// Record each enemy's spawn position right after loading, before any movement occurs.
+	// This is used by checkpoint snapshots to identify which enemies were alive.
 	registry.ForEach<ECS::Enemy, ECS::Transform>(
 		[](ECS::Entity, ECS::Enemy& enemy, ECS::Transform& t)
 		{
@@ -358,63 +230,55 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 
 	registry.ForEach<ECS::Finish>(
 		[this](ECS::Entity entity, ECS::Finish&) { finishEntity = entity; });
-
-	if (startPlatformEntity != ECS::INVALID_ENTITY || respawnOverride.has_value())
-	{
-		playerEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/player.json");
-		ApplySkinToPlayer(registry, playerEntity, context.campaign.GetSelectedSkin());
-
-		registry.Add<ECS::Transform>(playerEntity, {});
-		registry.Add<ECS::PreviousTransform>(playerEntity, {});
-
-		float feetX = 0.0f;
-		float feetY = 0.0f;
-
-		if (respawnOverride.has_value())
-		{
-			feetX = respawnOverride->x;
-			feetY = respawnOverride->y;
-		}
-		else
-		{
-			const ECS::Transform startTransform = registry.Get<ECS::Transform>(startPlatformEntity);
-			const ECS::Solid startSolid = registry.Get<ECS::Solid>(startPlatformEntity);
-			feetX = startTransform.x + startSolid.offsetX;
-			feetY = startTransform.y + startSolid.offsetY - startSolid.height; // platform surface
-		}
-
-		respawnPoint = { feetX, feetY };
-
-		const float airX = feetX;
-		const float airY = feetY - APPEAR_HEIGHT;
-
-		ECS::Transform& playerTransform = registry.Get<ECS::Transform>(playerEntity);
-		playerTransform.x = airX;
-		playerTransform.y = airY;
-
-		ECS::PreviousTransform& previous = registry.Get<ECS::PreviousTransform>(playerEntity);
-		previous.x = airX;
-		previous.y = airY;
-
-		const ECS::Health& health = registry.Get<ECS::Health>(playerEntity);
-		maxHearts = health.maximum;
-		displayedHealth = health.maximum;
-		previousPlayerHealth = health.maximum;
-
-		registry.Add<ECS::Frozen>(playerEntity, {});
-		camera.SnapTo({ airX, airY });
-	}
-
-	hudInterface.SetContent(hudLoader.LoadFromFile("data/ui/hud.json"));
-	UpdateScoreLabel();
-
-	context.audioMixer.PlayMusic(LevelMusicTrack(levelNumber));
-
-	transition.StartReveal();
 }
 
-void GameState::HandleEvent(const sf::Event& event)
-{}
+void GameState::SpawnPlayer()
+{
+	if (startPlatformEntity == ECS::INVALID_ENTITY && !respawnOverride.has_value())
+		return;
+
+	playerEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/player.json");
+	LevelSetup::ApplySkin(registry, playerEntity, context.campaign.GetSelectedSkin());
+
+	registry.Add<ECS::Transform>(playerEntity, {});
+	registry.Add<ECS::PreviousTransform>(playerEntity, {});
+
+	float feetX = 0.0f;
+	float feetY = 0.0f;
+
+	if (respawnOverride.has_value())
+	{
+		feetX = respawnOverride->x;
+		feetY = respawnOverride->y;
+	}
+	else
+	{
+		const ECS::Transform startTransform = registry.Get<ECS::Transform>(startPlatformEntity);
+		const ECS::Solid startSolid = registry.Get<ECS::Solid>(startPlatformEntity);
+		feetX = startTransform.x + startSolid.offsetX;
+		feetY = startTransform.y + startSolid.offsetY - startSolid.height; // platform surface
+	}
+
+	respawnPoint = { feetX, feetY };
+
+	const float airX = feetX;
+	const float airY = feetY - APPEAR_HEIGHT;
+
+	ECS::Transform& playerTransform = registry.Get<ECS::Transform>(playerEntity);
+	playerTransform.x = airX;
+	playerTransform.y = airY;
+
+	ECS::PreviousTransform& previous = registry.Get<ECS::PreviousTransform>(playerEntity);
+	previous.x = airX;
+	previous.y = airY;
+
+	const ECS::Health& health = registry.Get<ECS::Health>(playerEntity);
+	hud.SetMaxHearts(health.maximum);
+	previousPlayerHealth = health.maximum;
+
+	registry.Add<ECS::Frozen>(playerEntity, {});
+	camera.SnapTo({ airX, airY });
+}
 
 void GameState::UpdateLevelFlow(float deltaTime)
 {
@@ -448,8 +312,7 @@ void GameState::UpdateLevelFlow(float deltaTime)
 
 		context.audioMixer.PlaySound("player_appear");
 
-		if (showLevelBanner)
-			bannerPhase = BannerPhase::SlideIn;
+		hud.StartBanner();
 
 		levelPhase = LevelPhase::Appearing;
 		return;
@@ -585,11 +448,7 @@ void GameState::UpdateCheckpoints()
 	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
 	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
 
-	const float playerHalf = collider.width / 2.0f;
-	const float playerLeft = player.x - playerHalf;
-	const float playerRight = player.x + playerHalf;
-	const float playerTop = player.y - collider.height;
-	const float playerBottom = player.y;
+	const AABB playerBox = FeetAABB(player.x, player.y, collider.width, collider.height);
 
 	// Touching an inactive checkpoint activates it: raise the flag, save the respawn
 	// point and play the sound. Already-active checkpoints can't be re-triggered.
@@ -600,16 +459,8 @@ void GameState::UpdateCheckpoints()
 			if (checkpoint.activated)
 				return;
 
-			const float halfWidth = hitbox.width / 2.0f;
-			const float left = transform.x - halfWidth;
-			const float right = transform.x + halfWidth;
-			const float top = transform.y - hitbox.height;
-			const float bottom = transform.y;
-
-			const bool overlap = playerLeft < right && playerRight > left
-				&& playerTop < bottom && playerBottom > top;
-
-			if (!overlap)
+			const AABB checkpointBox = FeetAABB(transform.x, transform.y, hitbox.width, hitbox.height);
+			if (!playerBox.Overlaps(checkpointBox))
 				return;
 
 			checkpoint.activated = true;
@@ -690,65 +541,6 @@ bool GameState::IsPlayerOnFinish()
 	return horizontalOverlap && restingOnTop;
 }
 
-void GameState::UpdateLevelBanner(float deltaTime)
-{
-	if (bannerPhase == BannerPhase::Hidden || bannerPhase == BannerPhase::Done)
-		return;
-
-	bannerTimer += deltaTime;
-
-	if (bannerPhase == BannerPhase::SlideIn && bannerTimer >= BANNER_SLIDE_TIME)
-	{
-		bannerPhase = BannerPhase::Hold;
-		bannerTimer = 0.0f;
-	}
-	else if (bannerPhase == BannerPhase::Hold && bannerTimer >= BANNER_HOLD_TIME)
-	{
-		bannerPhase = BannerPhase::SlideOut;
-		bannerTimer = 0.0f;
-	}
-	else if (bannerPhase == BannerPhase::SlideOut && bannerTimer >= BANNER_SLIDE_TIME)
-	{
-		bannerPhase = BannerPhase::Done;
-	}
-}
-
-void GameState::DrawLevelBanner()
-{
-	if (bannerPhase == BannerPhase::Hidden || bannerPhase == BannerPhase::Done)
-		return;
-
-	float y = BANNER_TARGET_Y;
-
-	if (bannerPhase == BannerPhase::SlideIn)
-	{
-		// Ease out: fast entrance that settles softly.
-		const float t = std::min(bannerTimer / BANNER_SLIDE_TIME, 1.0f);
-		const float eased = 1.0f - (1.0f - t) * (1.0f - t);
-		y = BANNER_START_Y + (BANNER_TARGET_Y - BANNER_START_Y) * eased;
-	}
-	else if (bannerPhase == BannerPhase::SlideOut)
-	{
-		// Ease in: slow start, accelerating off the screen.
-		const float t = std::min(bannerTimer / BANNER_SLIDE_TIME, 1.0f);
-		const float eased = t * t;
-		y = BANNER_TARGET_Y + (BANNER_START_Y - BANNER_TARGET_Y) * eased;
-	}
-
-	sf::Text text(context.resources.fonts.Get("main"), "Level " + std::to_string(levelNumber), 24);
-	text.setFillColor(sf::Color(244, 199, 110));     // warm gold, as on the complete menu
-	text.setOutlineColor(sf::Color(58, 42, 77));     // deep purple outline
-	text.setOutlineThickness(2.0f);
-
-	const sf::FloatRect bounds = text.getLocalBounds();
-	text.setOrigin({
-		bounds.position.x + bounds.size.x / 2.0f,
-		bounds.position.y + bounds.size.y / 2.0f });
-	text.setPosition({ std::floor(VirtualScreen::WIDTH / 2.0f), std::floor(y) });
-
-	context.virtualScreen.GetRenderTarget().draw(text);
-}
-
 bool GameState::IsPlayerOnDeathTile()
 {
 	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
@@ -772,14 +564,6 @@ bool GameState::IsPlayerOnDeathTile()
 	}
 
 	return false;
-}
-
-sf::Vector2f GameState::PlayerCenter()
-{
-	const ECS::Transform& transform = registry.Get<ECS::Transform>(playerEntity);
-	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
-
-	return { transform.x, transform.y - collider.height / 2.0f };
 }
 
 bool GameState::IsPlayerOnStartPlatform()
@@ -811,66 +595,10 @@ bool GameState::IsPlayerOnStartPlatform()
 	return horizontalOverlap && restingOnTop;
 }
 
-void GameState::UpdateScoreLabel()
-{
-	if (score == previousScore)
-		return;
-
-	if (UI::Element* element = hudInterface.FindByName("score"))
-	{
-		if (auto* label = dynamic_cast<UI::Label*>(element))
-			label->SetText("Score: " + std::to_string(score));
-	}
-
-	previousScore = score;
-}
-
-void GameState::UpdateHearts(int currentHealth, float deltaTime)
-{
-	// A point was just lost: start blinking the rightmost shown heart.
-	if (currentHealth < displayedHealth && blinkingHeart < 0)
-	{
-		blinkingHeart = currentHealth; // heart index that will disappear
-		blinkTimer = HEART_BLINK_DURATION;
-		displayedHealth = currentHealth;
-	}
-	// Health was restored (e.g. touching a checkpoint): refill the hearts at once
-	// and cancel any heart still blinking out.
-	else if (currentHealth > displayedHealth)
-	{
-		displayedHealth = currentHealth;
-		blinkingHeart = -1;
-	}
-
-	bool blinkOn = true;
-	if (blinkingHeart >= 0)
-	{
-		blinkTimer -= deltaTime;
-		blinkOn = std::fmod(blinkTimer, 0.12f) < 0.06f; // fast on/off
-
-		if (blinkTimer <= 0.0f)
-			blinkingHeart = -1; // fully gone now
-	}
-
-	for (int i = 0; i < maxHearts; i++)
-	{
-		UI::Element* heart = hudInterface.FindByName("heart" + std::to_string(i));
-		if (heart == nullptr)
-			continue;
-
-		if (i < displayedHealth)
-			heart->isVisible = true;       // settled, alive
-		else if (i == blinkingHeart)
-			heart->isVisible = blinkOn;    // blinking out
-		else
-			heart->isVisible = false;      // gone
-	}
-}
-
 void GameState::Update(float deltaTime)
 {
 	transition.Update(deltaTime);
-	UpdateLevelBanner(deltaTime);
+	hud.UpdateBanner(deltaTime);
 
 	// Decay the death flash here so it still fades while the restart wipe runs (the
 	// blocks below return early once a death/finish is in progress).
@@ -986,14 +714,19 @@ void GameState::Update(float deltaTime)
 	confetti.Update(deltaTime);
 	background.Update(deltaTime);
 
-	UpdateScoreLabel();
-	hudInterface.Update(deltaTime);
+	hud.SetScore(score);
+	hud.Update(deltaTime);
 
+	UpdatePlayer(deltaTime);
+}
+
+void GameState::UpdatePlayer(float deltaTime)
+{
 	registry.ForEach<ECS::Player, ECS::Transform, ECS::Velocity, ECS::CollisionState, ECS::Jump, ECS::Health>(
 		[this, deltaTime](ECS::Entity, ECS::Player&, ECS::Transform& transform, ECS::Velocity& velocity,
 			ECS::CollisionState& collisionState, ECS::Jump& jump, ECS::Health& health)
 		{
-			UpdateHearts(health.current, deltaTime);
+			hud.UpdateHearts(health.current, deltaTime);
 
 			const sf::Vector2f feet = { transform.x, transform.y };
 			const bool onGround = collisionState.isOnGround;
@@ -1012,8 +745,7 @@ void GameState::Update(float deltaTime)
 				if (runDustTimer <= 0.0f)
 				{
 					const int runDirection = (velocity.x > 0.0f) ? 1 : -1;
-					const sf::Vector2f runEmit = { feet.x - runDirection * particles.GetRunBackOffset(), feet.y };
-					particles.Emit("run", runEmit);
+					particles.EmitRunDust(feet, runDirection);
 					runDustTimer = RUN_DUST_INTERVAL;
 				}
 			}
@@ -1156,7 +888,6 @@ void GameState::Render(float interpolationFactor)
 	}
 
 	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
-	hudInterface.Draw(renderTarget);
-	DrawLevelBanner();
+	hud.Draw(renderTarget);
 	transition.Draw(renderTarget);
 }

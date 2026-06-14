@@ -1,19 +1,19 @@
 #include "ShellSystem.h"
 
 #include "audio/Mixer.h"
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/Collider.h"
-#include "components/CollisionState.h"
-#include "components/EnemyDeath.h"
-#include "components/Facing.h"
-#include "components/Health.h"
-#include "components/Jump.h"
-#include "components/Player.h"
-#include "components/Shell.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/physics/Collider.h"
+#include "components/physics/CollisionState.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/physics/Facing.h"
+#include "components/combat/Health.h"
+#include "components/physics/Jump.h"
+#include "components/ai/Shell.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
+#include "systems/core/PlayerQuery.h"
 
 namespace ECS
 {
@@ -24,8 +24,7 @@ namespace ECS
 
 	void ShellSystem::Update(float deltaTime)
 	{
-		Entity playerEntity = INVALID_ENTITY;
-		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
+		const Entity playerEntity = FindPlayer(registry);
 
 		Transform*      playerTransform = nullptr;
 		Collider*       playerCollider  = nullptr;

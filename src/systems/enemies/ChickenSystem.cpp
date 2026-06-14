@@ -1,17 +1,17 @@
 #include "ChickenSystem.h"
 
-#include "components/AnimationState.h"
-#include "components/ChickenAI.h"
-#include "components/Collider.h"
-#include "components/CollisionState.h"
-#include "components/EnemyDeath.h"
-#include "components/Facing.h"
-#include "components/Health.h"
-#include "components/Player.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/render/AnimationState.h"
+#include "components/ai/ChickenAI.h"
+#include "components/physics/Collider.h"
+#include "components/physics/CollisionState.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/physics/Facing.h"
+#include "components/combat/Health.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
 #include "graphics/ParticleSystem.h"
+#include "systems/core/PlayerQuery.h"
 
 #include <cmath>
 
@@ -24,9 +24,7 @@ namespace ECS
 
 	void ChickenSystem::Update(float deltaTime)
 	{
-		Entity playerEntity = INVALID_ENTITY;
-		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
-
+		const Entity playerEntity = FindPlayer(registry);
 		if (playerEntity == INVALID_ENTITY)
 			return;
 
@@ -97,9 +95,8 @@ namespace ECS
 					chicken.dustTimer -= deltaTime;
 					if (chicken.dustTimer <= 0.0f)
 					{
-						const float direction = (velocity.x > 0.0f) ? 1.0f : -1.0f;
-						const float backX     = transform.x - direction * particles.GetRunBackOffset();
-						particles.Emit("run", { backX, transform.y });
+						const int direction = (velocity.x > 0.0f) ? 1 : -1;
+						particles.EmitRunDust({ transform.x, transform.y }, direction);
 						chicken.dustTimer = ChickenAI::DUST_SPACING / chicken.speed;
 					}
 				}

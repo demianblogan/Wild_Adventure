@@ -2,7 +2,6 @@
 
 #include "core/Resources.h"
 
-#include <SFML/Audio/Listener.hpp>
 #include <nlohmann/json.hpp>
 
 #include <fstream>
@@ -35,19 +34,14 @@ namespace Audio
 		musicPlayer.SetVolume(volume);
 	}
 
-	void Mixer::RegisterSound(const std::string& name, const std::string& bufferName, float volume)
+	void Mixer::RegisterSound(const std::string& name, float volume)
 	{
-		soundPlayer.Register(name, bufferName, volume);
+		soundPlayer.Register(name, volume);
 	}
 
 	void Mixer::PlaySound(const std::string& name)
 	{
 		soundPlayer.Play(name);
-	}
-
-	void Mixer::PlaySoundAt(const std::string& name, sf::Vector2f position)
-	{
-		soundPlayer.PlayAt(name, position);
 	}
 
 	void Mixer::StartLoop(const std::string& name)
@@ -65,16 +59,6 @@ namespace Audio
 		soundPlayer.SetVolume(volume);
 	}
 
-	void Mixer::SetListenerPosition(sf::Vector2f position)
-	{
-		sf::Listener::setPosition({ position.x, position.y, 0.0f });
-	}
-
-	void Mixer::SetSpatialAttenuation(float minDistance, float attenuation)
-	{
-		soundPlayer.SetSpatialAttenuation(minDistance, attenuation);
-	}
-	
 	void Mixer::LoadFromFile(const std::string& path)
 	{
 		std::ifstream file(path);
@@ -92,7 +76,7 @@ namespace Audio
 				const float volume = soundData.value("volume", 1.0f);
 
 				resources.sounds.Load(name, soundPath);
-				RegisterSound(name, name, volume);
+				RegisterSound(name, volume);
 			}
 		}
 

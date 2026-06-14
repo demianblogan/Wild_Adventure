@@ -1,14 +1,14 @@
 #include "BulletSystem.h"
 
-#include "components/AnimationState.h"
-#include "components/Bullet.h"
-#include "components/Collider.h"
-#include "components/Health.h"
-#include "components/Player.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/render/AnimationState.h"
+#include "components/combat/Bullet.h"
+#include "components/physics/Collider.h"
+#include "components/combat/Health.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
 #include "graphics/ParticleSystem.h"
+#include "systems/core/PlayerQuery.h"
 
 #include <cmath>
 #include <vector>
@@ -24,8 +24,7 @@ namespace ECS
 	void BulletSystem::Update(float deltaTime)
 	{
 		// Locate the player for collision checks.
-		Entity playerEntity = INVALID_ENTITY;
-		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
+		const Entity playerEntity = FindPlayer(registry);
 
 		Transform*      playerTransform = nullptr;
 		Collider*       playerCollider  = nullptr;

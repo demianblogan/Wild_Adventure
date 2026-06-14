@@ -6,6 +6,5 @@ namespace ECS
 	// (EnemySystem, GroundPatrolSystem) skip a Stomped entity so the enemy's own
 	// system can run its bespoke death sequence undisturbed.
 	struct Stomped
-	{
-	};
+	{};
 }

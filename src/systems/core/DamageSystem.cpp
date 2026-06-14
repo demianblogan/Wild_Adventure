@@ -1,13 +1,13 @@
 #include "DamageSystem.h"
 
-#include "components/AnimationState.h"
-#include "components/Collider.h"
-#include "components/Hazard.h"
-#include "components/Health.h"
-#include "components/Hitbox.h"
-#include "components/Player.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/render/AnimationState.h"
+#include "components/physics/Collider.h"
+#include "components/combat/Hazard.h"
+#include "components/combat/Health.h"
+#include "components/physics/Hitbox.h"
+#include "components/tags/Player.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
 
 #include <cmath>

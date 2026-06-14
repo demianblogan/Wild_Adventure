@@ -2,7 +2,7 @@
 
 #include "core/ecs/Registry.h"
 
-class DataLoader;
+class SceneLoader;
 
 namespace ECS
 {
@@ -12,14 +12,14 @@ namespace ECS
 	class SnailSystem
 	{
 	public:
-		SnailSystem(Registry& registry, DataLoader& loader);
+		SnailSystem(Registry& registry, SceneLoader& loader);
 		void Update(float deltaTime);
 
 	private:
 		void SpawnShell(float x, float y, bool faceRight);
 		void SpawnBody(float x, float y);
 
-		Registry&   registry;
-		DataLoader& loader;
+		Registry&    registry;
+		SceneLoader& loader;
 	};
 }

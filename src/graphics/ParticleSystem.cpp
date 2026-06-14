@@ -84,6 +84,11 @@ void ParticleSystem::Emit(const std::string& presetName, sf::Vector2f position, 
 	}
 }
 
+void ParticleSystem::EmitRunDust(sf::Vector2f feet, int direction)
+{
+	Emit("run", { feet.x - direction * runBackOffset, feet.y });
+}
+
 void ParticleSystem::EmitDebris(sf::Vector2f position, const std::string& textureName, int pieceCount, int directionX)
 {
 	for (int i = 0; i < pieceCount; i++)

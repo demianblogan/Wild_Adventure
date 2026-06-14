@@ -1,10 +1,10 @@
 #include "InputSystem.h"
 
-#include "components/Health.h"
-#include "components/Jump.h"
-#include "components/Player.h"
-#include "components/Velocity.h"
-#include "components/Frozen.h"
+#include "components/combat/Health.h"
+#include "components/physics/Jump.h"
+#include "components/tags/Player.h"
+#include "components/physics/Velocity.h"
+#include "components/tags/Frozen.h"
 #include "core/Input.h"
 #include "core/ecs/Registry.h"
 

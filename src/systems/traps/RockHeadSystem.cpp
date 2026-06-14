@@ -1,17 +1,17 @@
 #include "RockHeadSystem.h"
 
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/Collider.h"
-#include "components/CollisionState.h"
-#include "components/Health.h"
-#include "components/Player.h"
-#include "components/PreviousTransform.h"
-#include "components/RockHead.h"
-#include "components/Solid.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/physics/Collider.h"
+#include "components/physics/CollisionState.h"
+#include "components/combat/Health.h"
+#include "components/physics/PreviousTransform.h"
+#include "components/traps/RockHead.h"
+#include "components/physics/Solid.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
+#include "systems/core/PlayerQuery.h"
 #include "tilemap/Tilemap.h"
 
 #include <algorithm>
@@ -36,8 +36,7 @@ namespace ECS
 
 	void RockHeadSystem::Update(float deltaTime)
 	{
-		Entity playerEntity = INVALID_ENTITY;
-		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
+		const Entity playerEntity = FindPlayer(registry);
 
 		Transform*      playerTransform = nullptr;
 		Collider*       playerCollider  = nullptr;

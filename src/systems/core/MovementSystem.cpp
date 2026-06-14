@@ -1,10 +1,10 @@
 #include "MovementSystem.h"
 
-#include "components/Collider.h"
-#include "components/Facing.h"
-#include "components/PreviousTransform.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/physics/Collider.h"
+#include "components/physics/Facing.h"
+#include "components/physics/PreviousTransform.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
 
 namespace ECS

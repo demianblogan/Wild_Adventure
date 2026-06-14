@@ -95,11 +95,6 @@ void SettingsController::RegisterActions()
 			context.settings.SetVsync(value);
 			context.graphics.ApplyVsync(); // vsync applies immediately
 		});
-
-	settingsLoader.RegisterBoolAction("set_showfps", [this](bool value)
-		{
-			context.settings.SetShowFps(value); // read by the app each frame
-		});
 }
 
 void SettingsController::ShowPanel(const std::string& panelId)
@@ -268,8 +263,6 @@ void SettingsController::SetupGraphicsPanel()
 
 	if (auto* vsync = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("vsync_checkbox")))
 		vsync->SetChecked(context.settings.GetVsync());
-	if (auto* showFps = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("showfps_checkbox")))
-		showFps->SetChecked(context.settings.GetShowFps());
 }
 
 void SettingsController::StepResolution(int direction)

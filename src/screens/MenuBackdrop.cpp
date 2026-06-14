@@ -32,9 +32,9 @@ MenuBackdrop::MenuBackdrop(Context& context)
 	background.SetDirection(AnimatedBackground::Direction::Down);
 	background.SetSpeed(16.0f);
 
-	const nlohmann::json& mapJson = resources.GetMapJson("data/levels/menu_background_level.tmj");
+	const nlohmann::json& mapJSON = resources.GetMapJSON("data/levels/menu_background_level.tmj");
 
-	tilemap = LoadTilemap(mapJson, "terrain", 22);
+	tilemap = LoadTilemap(mapJSON, "terrain", 22);
 	particles.SetTilemap(tilemap);
 
 	const sf::Vector2f worldSize =
@@ -51,7 +51,7 @@ MenuBackdrop::MenuBackdrop(Context& context)
 	panY = worldSize.y / 2.0f;
 	camera.SnapTo({ panX, panY });
 
-	sceneLoader.LoadSceneFromMap(registry, mapJson);
+	sceneLoader.LoadSceneFromMap(registry, mapJSON);
 }
 
 void MenuBackdrop::Update(float deltaTime)

@@ -17,7 +17,7 @@ namespace ECS
 		float scaleX = 1.0f;
 		float scaleY = 1.0f;
 
-		bool glow = false;                        // drawn into the bloom layer as well
-		sf::Color glowColor = sf::Color::White;   // aura color (flat silhouette)
+		bool glow = false;                      // drawn into the bloom layer as well
+		sf::Color glowColor = sf::Color::White; // aura color (flat silhouette)
 	};
 }

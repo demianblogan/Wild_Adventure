@@ -1,56 +1,56 @@
-#include "DataLoader.h"
+#include "SceneLoader.h"
 
-#include "components/Animation.h"
-#include "components/AnimationSet.h"
-#include "components/AnimationState.h"
-#include "components/Collider.h"
-#include "components/CollisionState.h"
-#include "components/Gravity.h"
-#include "components/Player.h"
-#include "components/Facing.h"
-#include "components/Patrol.h"
-#include "components/PreviousTransform.h"
-#include "components/Sprite.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
-#include "components/Jump.h"
-#include "components/WallSlide.h"
-#include "components/Hazard.h"
-#include "components/Health.h"
-#include "components/Hitbox.h"
-#include "components/Collectible.h"
-#include "components/Box.h"
-#include "components/Solid.h"
-#include "components/StartPlatform.h"
-#include "components/Enemy.h"
-#include "components/Finish.h"
-#include "components/Checkpoint.h"
-#include "components/GroundPatrol.h"
-#include "components/ChickenAI.h"
-#include "components/TrunkAI.h"
-#include "components/PlantAI.h"
-#include "components/BeeAI.h"
-#include "components/SnailAI.h"
-#include "components/StompCustomDeath.h"
-#include "components/Shell.h"
-#include "components/TurtleAI.h"
-#include "components/GhostAI.h"
-#include "components/Trampoline.h"
-#include "components/Arrow.h"
-#include "components/Fire.h"
-#include "components/RockHead.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationSet.h"
+#include "components/render/AnimationState.h"
+#include "components/physics/Collider.h"
+#include "components/physics/CollisionState.h"
+#include "components/physics/Gravity.h"
+#include "components/tags/Player.h"
+#include "components/physics/Facing.h"
+#include "components/ai/Patrol.h"
+#include "components/physics/PreviousTransform.h"
+#include "components/render/Sprite.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
+#include "components/physics/Jump.h"
+#include "components/physics/WallSlide.h"
+#include "components/combat/Hazard.h"
+#include "components/combat/Health.h"
+#include "components/physics/Hitbox.h"
+#include "components/items/Collectible.h"
+#include "components/items/Box.h"
+#include "components/physics/Solid.h"
+#include "components/items/StartPlatform.h"
+#include "components/combat/Enemy.h"
+#include "components/items/Finish.h"
+#include "components/items/Checkpoint.h"
+#include "components/ai/GroundPatrol.h"
+#include "components/ai/ChickenAI.h"
+#include "components/ai/TrunkAI.h"
+#include "components/ai/PlantAI.h"
+#include "components/ai/BeeAI.h"
+#include "components/ai/SnailAI.h"
+#include "components/combat/StompCustomDeath.h"
+#include "components/ai/Shell.h"
+#include "components/ai/TurtleAI.h"
+#include "components/ai/GhostAI.h"
+#include "components/traps/Trampoline.h"
+#include "components/traps/Arrow.h"
+#include "components/traps/Fire.h"
+#include "components/traps/RockHead.h"
 #include "core/ecs/Registry.h"
 
 #include <functional>
 #include <fstream>
 #include <stdexcept>
 
-DataLoader::DataLoader()
+SceneLoader::SceneLoader()
 {
 	RegisterLoaders();
 }
 
-void DataLoader::RegisterLoaders()
+void SceneLoader::RegisterLoaders()
 {
 	loaders["Transform"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
@@ -381,7 +381,7 @@ void DataLoader::RegisterLoaders()
 		};
 }
 
-void DataLoader::AddImpliedComponents(ECS::Registry& registry, const std::vector<ECS::Entity>& entities)
+void SceneLoader::AddImpliedComponents(ECS::Registry& registry, const std::vector<ECS::Entity>& entities)
 {
 	for (const ECS::Entity entity : entities)
 	{
@@ -428,11 +428,11 @@ void DataLoader::AddImpliedComponents(ECS::Registry& registry, const std::vector
 	}
 }
 
-ECS::Entity DataLoader::LoadEntity(ECS::Registry& registry, const nlohmann::json& entityJson)
+ECS::Entity SceneLoader::LoadEntity(ECS::Registry& registry, const nlohmann::json& entityJSON)
 {
 	const ECS::Entity entity = registry.CreateEntity();
 
-	for (const auto& [componentName, componentData] : entityJson.items())
+	for (const auto& [componentName, componentData] : entityJSON.items())
 	{
 		const auto found = loaders.find(componentName);
 
@@ -445,7 +445,7 @@ ECS::Entity DataLoader::LoadEntity(ECS::Registry& registry, const nlohmann::json
 	return entity;
 }
 
-const nlohmann::json& DataLoader::GetCachedJson(const std::string& path)
+const nlohmann::json& SceneLoader::GetCachedJSON(const std::string& path)
 {
 	const auto found = fileCache.find(path);
 
@@ -460,61 +460,32 @@ const nlohmann::json& DataLoader::GetCachedJson(const std::string& path)
 	return fileCache.emplace(path, nlohmann::json::parse(file)).first->second;
 }
 
-ECS::Entity DataLoader::LoadEntityFromFile(ECS::Registry& registry, const std::string& path)
+ECS::Entity SceneLoader::LoadEntityFromFile(ECS::Registry& registry, const std::string& path)
 {
-	return LoadEntity(registry, GetCachedJson(path));
+	return LoadEntity(registry, GetCachedJSON(path));
 }
 
-ECS::Entity DataLoader::SpawnFromPrefab(ECS::Registry& registry, const std::string& path)
+ECS::Entity SceneLoader::SpawnFromPrefab(ECS::Registry& registry, const std::string& path)
 {
 	const ECS::Entity entity = LoadEntityFromFile(registry, path);
 	AddImpliedComponents(registry, { entity });
 	return entity;
 }
 
-ECS::Entity DataLoader::LoadPrefabbedEntity(ECS::Registry& registry, const nlohmann::json& entry)
+ECS::Entity SceneLoader::LoadPrefabbedEntity(ECS::Registry& registry, const nlohmann::json& entry)
 {
 	nlohmann::json overrides = entry;
 
 	const std::string prefabPath = overrides.at("prefab");
 	overrides.erase("prefab");
 
-	nlohmann::json merged = GetCachedJson(prefabPath);
+	nlohmann::json merged = GetCachedJSON(prefabPath);
 	merged.merge_patch(overrides);
 
 	return LoadEntity(registry, merged);
 }
 
-std::vector<ECS::Entity> DataLoader::LoadScene(ECS::Registry& registry, const std::string& scenePath)
-{
-	std::ifstream sceneFile(scenePath);
-
-	if (!sceneFile.is_open())
-		throw std::runtime_error("Could not open scene file: " + scenePath);
-
-	const nlohmann::json sceneJson = nlohmann::json::parse(sceneFile);
-
-	std::vector<ECS::Entity> createdEntities;
-
-	for (const auto& entityJson : sceneJson.at("entities"))
-		createdEntities.push_back(LoadPrefabbedEntity(registry, entityJson));
-
-	AddImpliedComponents(registry, createdEntities);
-
-	return createdEntities;
-}
-
-std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, const std::string& mapPath)
-{
-	std::ifstream mapFile(mapPath);
-
-	if (!mapFile.is_open())
-		throw std::runtime_error("Could not open map file: " + mapPath);
-
-	return LoadSceneFromMap(registry, nlohmann::json::parse(mapFile));
-}
-
-std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, const nlohmann::json& mapJson)
+std::vector<ECS::Entity> SceneLoader::LoadSceneFromMap(ECS::Registry& registry, const nlohmann::json& mapJSON)
 {
 	std::vector<ECS::Entity> createdEntities;
 
@@ -596,7 +567,7 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 					// one (the air patrollers). A ground patroller (GroundPatrol, e.g. the
 					// snail) has no Patrol in its prefab, so the merged component would lack
 					// "speed" and throw; such enemies simply ignore patrolRange.
-					if (range > 0.0f && GetCachedJson(entry["prefab"].get<std::string>()).contains("Patrol"))
+					if (range > 0.0f && GetCachedJSON(entry["prefab"].get<std::string>()).contains("Patrol"))
 					{
 						const bool  vertical = (direction == "up" || direction == "down");
 						const float center   = vertical ? y : x;
@@ -615,10 +586,10 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 					// prefab actually has so a prefab without Facing isn't given a broken one.
 					if (!facing.empty())
 					{
-						const nlohmann::json& prefabJson = GetCachedJson(entry["prefab"].get<std::string>());
-						if (prefabJson.contains("Facing"))
+						const nlohmann::json& prefabJSON = GetCachedJSON(entry["prefab"].get<std::string>());
+						if (prefabJSON.contains("Facing"))
 							entry["Facing"]["isLookingRight"] = (facing == "right");
-						else if (prefabJson.contains("RockHead"))
+						else if (prefabJSON.contains("RockHead"))
 							entry["RockHead"]["direction"] = facing;
 					}
 				}
@@ -628,7 +599,7 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 		}
 	};
 
-	processLayers(mapJson.at("layers"), 0.0f, 0.0f);
+	processLayers(mapJSON.at("layers"), 0.0f, 0.0f);
 
 	AddImpliedComponents(registry, createdEntities);
 

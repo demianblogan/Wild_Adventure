@@ -1,11 +1,11 @@
 #include "PlayerAnimationSystem.h"
 
-#include "components/AnimationState.h"
-#include "components/CollisionState.h"
-#include "components/Health.h"
-#include "components/Jump.h"
-#include "components/Player.h"
-#include "components/Velocity.h"
+#include "components/render/AnimationState.h"
+#include "components/physics/CollisionState.h"
+#include "components/combat/Health.h"
+#include "components/physics/Jump.h"
+#include "components/tags/Player.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
 
 #include <string>

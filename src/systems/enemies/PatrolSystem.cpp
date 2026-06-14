@@ -1,11 +1,11 @@
 #include "PatrolSystem.h"
 
-#include "components/CollisionState.h"
-#include "components/EnemyDeath.h"
-#include "components/Facing.h"
-#include "components/Patrol.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/physics/CollisionState.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/physics/Facing.h"
+#include "components/ai/Patrol.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
 
 namespace ECS

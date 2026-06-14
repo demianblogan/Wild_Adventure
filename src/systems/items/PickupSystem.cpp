@@ -1,15 +1,16 @@
 #include "PickupSystem.h"
 
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/Collectible.h"
-#include "components/Collider.h"
-#include "components/Despawning.h"
-#include "components/Hitbox.h"
-#include "components/PickupDelay.h"
-#include "components/Player.h"
-#include "components/Transform.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/items/Collectible.h"
+#include "components/physics/Collider.h"
+#include "components/tags/Despawning.h"
+#include "components/physics/Hitbox.h"
+#include "components/items/PickupDelay.h"
+#include "components/physics/Transform.h"
+#include "core/AABB.h"
 #include "core/ecs/Registry.h"
+#include "systems/core/PlayerQuery.h"
 
 #include <vector>
 
@@ -23,22 +24,14 @@ namespace ECS
 
 	void PickupSystem::Update(float deltaTime)
 	{
-		bool hasPlayer = false;
-		float playerLeft = 0.0f, playerRight = 0.0f, playerTop = 0.0f, playerBottom = 0.0f;
-
-		registry.ForEach<Player, Transform, Collider>(
-			[&](Entity, Player&, Transform& transform, Collider& collider)
-			{
-				const float halfWidth = collider.width / 2.0f;
-				playerLeft = transform.x - halfWidth;
-				playerRight = transform.x + halfWidth;
-				playerTop = transform.y - collider.height;
-				playerBottom = transform.y;
-				hasPlayer = true;
-			});
-
-		if (!hasPlayer)
+		const Entity playerEntity = FindPlayer(registry);
+		if (playerEntity == INVALID_ENTITY)
 			return;
+
+		const Transform& playerTransform = registry.Get<Transform>(playerEntity);
+		const Collider&  playerCollider  = registry.Get<Collider>(playerEntity);
+		const AABB playerBox = FeetAABB(playerTransform.x, playerTransform.y,
+			playerCollider.width, playerCollider.height);
 
 		std::vector<Entity> collected;
 
@@ -56,16 +49,8 @@ namespace ECS
 					}
 				}
 
-				const float halfWidth = hitbox.width / 2.0f;
-				const float left = transform.x - halfWidth;
-				const float right = transform.x + halfWidth;
-				const float top = transform.y - hitbox.height;
-				const float bottom = transform.y;
-
-				const bool overlap = playerLeft < right && playerRight > left
-					&& playerTop < bottom && playerBottom > top;
-
-				if (overlap)
+				const AABB fruitBox = FeetAABB(transform.x, transform.y, hitbox.width, hitbox.height);
+				if (playerBox.Overlaps(fruitBox))
 					collected.push_back(entity);
 			});
 

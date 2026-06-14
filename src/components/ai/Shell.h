@@ -10,10 +10,10 @@ namespace ECS
 	{
 		enum class State { Resting, Rolling };
 
-		State state     = State::Resting;
-		int   direction = -1;     // roll direction once kicked: -1 left, +1 right
-		float speed     = 160.0f; // rolling speed, px/s
-		float kickGrace = 0.0f;   // seconds before it can be kicked (avoids an instant kick on spawn)
+		State state = State::Resting;
+		int   direction = -1;   // roll direction once kicked: -1 left, +1 right
+		float speed = 160.0f;   // rolling speed, px/s
+		float kickGrace = 0.0f; // seconds before it can be kicked (avoids an instant kick on spawn)
 
 		// Right after a kick the player still overlaps the shell; it must not hurt them
 		// until they have stepped clear, so pushing it never "rolls into" the kicker.

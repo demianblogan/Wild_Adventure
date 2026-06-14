@@ -4,7 +4,7 @@
 
 #include <string>
 
-class DataLoader;
+class SceneLoader;
 class ParticleSystem;
 
 namespace Audio
@@ -19,7 +19,7 @@ namespace ECS
 	class BoxSystem
 	{
 	public:
-		BoxSystem(Registry& registry, DataLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer);
+		BoxSystem(Registry& registry, SceneLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer);
 
 		void Update();
 
@@ -27,7 +27,7 @@ namespace ECS
 		void EjectFruit(const std::string& fruitName, float x, float y, float ejectSpeedX, float ejectSpeedUp);
 
 		Registry& registry;
-		DataLoader& loader;
+		SceneLoader& loader;
 		ParticleSystem& particles;
 		Audio::Mixer& mixer;
 	};

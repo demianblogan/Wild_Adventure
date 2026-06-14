@@ -1,19 +1,19 @@
 #include "BoxSystem.h"
 
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/Box.h"
-#include "components/BoxHit.h"
-#include "components/Collider.h"
-#include "components/CollisionState.h"
-#include "components/Gravity.h"
-#include "components/PreviousTransform.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
-#include "components/PickupDelay.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/items/Box.h"
+#include "components/items/BoxHit.h"
+#include "components/physics/Collider.h"
+#include "components/physics/CollisionState.h"
+#include "components/physics/Gravity.h"
+#include "components/physics/PreviousTransform.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
+#include "components/items/PickupDelay.h"
 #include "graphics/ParticleSystem.h"
-#include "core/DataLoader.h"
 #include "core/Random.h"
+#include "core/SceneLoader.h"
 #include "core/ecs/Registry.h"
 #include "audio/Mixer.h"
 
@@ -27,7 +27,7 @@ namespace ECS
 		constexpr float FRUIT_MAX_FALL_SPEED = 400.0f;
 	}
 
-	BoxSystem::BoxSystem(Registry& registry, DataLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer)
+	BoxSystem::BoxSystem(Registry& registry, SceneLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer)
 		: registry(registry)
 		, loader(loader)
 		, particles(particles)

@@ -1,10 +1,10 @@
 #include "TurtleSystem.h"
 
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/EnemyDeath.h"
-#include "components/Spiky.h"
-#include "components/TurtleAI.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/combat/Spiky.h"
+#include "components/ai/TurtleAI.h"
 #include "core/ecs/Registry.h"
 
 namespace ECS

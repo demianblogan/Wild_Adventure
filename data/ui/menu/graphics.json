@@ -121,7 +121,7 @@
 					"offset":
 					[
 						0,
-						-38
+						-26
 					],
 					"size":
 					[
@@ -238,7 +238,7 @@
 					"offset":
 					[
 						0,
-						-12
+						0
 					],
 					"size":
 					[
@@ -354,7 +354,7 @@
 					"offset":
 					[
 						0,
-						14
+						26
 					],
 					"size":
 					[
@@ -449,123 +449,6 @@
 									0
 								],
 								"action": "set_vsync"
-							}
-						}
-					],
-					"row": true
-				}
-			},
-			{
-				"Element":
-				{
-					"anchor":
-					[
-						0.5,
-						0.5
-					],
-					"pivot":
-					[
-						0.5,
-						0.5
-					],
-					"offset":
-					[
-						0,
-						40
-					],
-					"size":
-					[
-						400,
-						24
-					],
-					"children":
-					[
-						{
-							"Image":
-							{
-								"anchor":
-								[
-									0.5,
-									0.5
-								],
-								"pivot":
-								[
-									0.5,
-									0.5
-								],
-								"offset":
-								[
-									0,
-									0
-								],
-								"size":
-								[
-									400,
-									24
-								],
-								"textureName": "container_background",
-								"border": 15
-							}
-						},
-						{
-							"Label":
-							{
-								"anchor":
-								[
-									0,
-									0.5
-								],
-								"pivot":
-								[
-									0,
-									0.5
-								],
-								"offset":
-								[
-									16,
-									0
-								],
-								"fontName": "main",
-								"characterSize": 16,
-								"color":
-								[
-									226,
-									210,
-									255,
-									255
-								],
-								"outlineColor":
-								[
-									45,
-									30,
-									60,
-									255
-								],
-								"outlineThickness": 1,
-								"text": "Show FPS:"
-							}
-						},
-						{
-							"Checkbox":
-							{
-								"prefab": "menu_checkbox",
-								"name": "showfps_checkbox",
-								"anchor":
-								[
-									1,
-									0.5
-								],
-								"pivot":
-								[
-									1,
-									0.5
-								],
-								"offset":
-								[
-									-20,
-									0
-								],
-								"action": "set_showfps"
 							}
 						}
 					],

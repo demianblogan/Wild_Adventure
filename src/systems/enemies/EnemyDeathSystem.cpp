@@ -1,11 +1,11 @@
 #include "EnemyDeathSystem.h"
 
-#include "components/EnemyDeath.h"
-#include "components/Gravity.h"
-#include "components/Health.h"
-#include "components/Rotation.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/physics/Gravity.h"
+#include "components/combat/Health.h"
+#include "components/physics/Rotation.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/Random.h"
 #include "core/ecs/Registry.h"
 

@@ -117,6 +117,9 @@ void SelectLevelController::MoveSelection(int deltaColumn, int deltaRow)
 
 		const int index = row * COLUMNS + column;
 
+		if (index >= Campaign::LEVEL_COUNT)
+			return;
+
 		if (cells[index].selectable)
 		{
 			if (index != selected)

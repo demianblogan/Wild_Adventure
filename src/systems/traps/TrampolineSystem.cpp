@@ -1,8 +1,8 @@
 #include "TrampolineSystem.h"
 
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/Trampoline.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/traps/Trampoline.h"
 
 namespace ECS
 {

@@ -1,16 +1,16 @@
 #include "ArrowSystem.h"
 
 #include "audio/Mixer.h"
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/Arrow.h"
-#include "components/Collider.h"
-#include "components/Hitbox.h"
-#include "components/Jump.h"
-#include "components/Player.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/traps/Arrow.h"
+#include "components/physics/Collider.h"
+#include "components/physics/Hitbox.h"
+#include "components/physics/Jump.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
+#include "systems/core/PlayerQuery.h"
 
 #include <vector>
 
@@ -23,8 +23,7 @@ namespace ECS
 
 	void ArrowSystem::Update()
 	{
-		Entity playerEntity = INVALID_ENTITY;
-		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
+		const Entity playerEntity = FindPlayer(registry);
 		if (playerEntity == INVALID_ENTITY)
 			return;
 

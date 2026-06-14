@@ -1,15 +1,15 @@
 #include "SnailSystem.h"
 
-#include "components/Animation.h"
-#include "components/EnemyDeath.h"
-#include "components/Facing.h"
-#include "components/PreviousTransform.h"
-#include "components/Shell.h"
-#include "components/SnailAI.h"
-#include "components/Stomped.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
-#include "core/DataLoader.h"
+#include "components/render/Animation.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/physics/Facing.h"
+#include "components/physics/PreviousTransform.h"
+#include "components/ai/Shell.h"
+#include "components/ai/SnailAI.h"
+#include "components/combat/Stomped.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
+#include "core/SceneLoader.h"
 #include "core/ecs/Registry.h"
 
 #include <vector>
@@ -21,7 +21,7 @@ namespace ECS
 		constexpr float SHELL_KICK_GRACE = 0.3f; // keep the shell un-kickable just after it appears
 	}
 
-	SnailSystem::SnailSystem(Registry& registry, DataLoader& loader)
+	SnailSystem::SnailSystem(Registry& registry, SceneLoader& loader)
 		: registry(registry)
 		, loader(loader)
 	{}

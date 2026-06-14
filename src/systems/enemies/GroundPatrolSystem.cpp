@@ -1,14 +1,14 @@
 #include "GroundPatrolSystem.h"
 
-#include "components/AnimationState.h"
-#include "components/Collider.h"
-#include "components/CollisionState.h"
-#include "components/EnemyDeath.h"
-#include "components/Facing.h"
-#include "components/GroundPatrol.h"
-#include "components/Stomped.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/render/AnimationState.h"
+#include "components/physics/Collider.h"
+#include "components/physics/CollisionState.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/physics/Facing.h"
+#include "components/ai/GroundPatrol.h"
+#include "components/combat/Stomped.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
 #include "graphics/ParticleSystem.h"
 
@@ -72,9 +72,7 @@ namespace ECS
 						patrol.dustTimer -= deltaTime;
 						if (patrol.dustTimer <= 0.0f)
 						{
-							const float backX = transform.x
-								- static_cast<float>(patrol.direction) * particles.GetRunBackOffset();
-							particles.Emit("run", { backX, transform.y });
+							particles.EmitRunDust({ transform.x, transform.y }, patrol.direction);
 							patrol.dustTimer = GroundPatrol::DUST_SPACING / patrol.speed;
 						}
 					}

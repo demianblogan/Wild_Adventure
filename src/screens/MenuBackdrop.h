@@ -1,19 +1,19 @@
 #pragma once
 
 #include "core/Camera.h"
-#include "core/DataLoader.h"
+#include "core/SceneLoader.h"
 #include "core/ecs/Registry.h"
 #include "graphics/AnimatedBackground.h"
 #include "graphics/ParticleSystem.h"
-#include "systems/AnimationSystem.h"
-#include "systems/BeeSystem.h"
-#include "systems/GhostSystem.h"
-#include "systems/GroundPatrolSystem.h"
-#include "systems/MovementSystem.h"
-#include "systems/PatrolSystem.h"
-#include "systems/PhysicsSystem.h"
-#include "systems/RenderSystem.h"
-#include "systems/TurtleSystem.h"
+#include "systems/core/AnimationSystem.h"
+#include "systems/enemies/BeeSystem.h"
+#include "systems/enemies/GhostSystem.h"
+#include "systems/enemies/GroundPatrolSystem.h"
+#include "systems/core/MovementSystem.h"
+#include "systems/enemies/PatrolSystem.h"
+#include "systems/core/PhysicsSystem.h"
+#include "systems/core/RenderSystem.h"
+#include "systems/enemies/TurtleSystem.h"
 #include "tilemap/Tilemap.h"
 
 struct Context;
@@ -38,7 +38,7 @@ private:
 	Context& context;
 
 	ECS::Registry  registry;
-	DataLoader     sceneLoader;
+	SceneLoader    sceneLoader;
 	ParticleSystem particles;
 	Tilemap        tilemap;
 

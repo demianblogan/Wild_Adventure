@@ -5,19 +5,27 @@
 #include <fstream>
 #include <stdexcept>
 
-const nlohmann::json& Resources::GetMapJson(const std::string& path)
+const nlohmann::json& Resources::GetMapJSON(const std::string& path)
 {
-	const auto found = mapJsonCache.find(path);
+	if (const nlohmann::json* json = TryGetJSON(path))
+		return *json;
 
-	if (found != mapJsonCache.end())
-		return found->second;
+	throw std::runtime_error("Resources: cannot open map file: " + path);
+}
+
+const nlohmann::json* Resources::TryGetJSON(const std::string& path)
+{
+	const auto found = jsonCache.find(path);
+
+	if (found != jsonCache.end())
+		return &found->second;
 
 	std::ifstream file(path);
 
 	if (!file.is_open())
-		throw std::runtime_error("Resources: cannot open map file: " + path);
+		return nullptr;
 
-	return mapJsonCache.emplace(path, nlohmann::json::parse(file)).first->second;
+	return &jsonCache.emplace(path, nlohmann::json::parse(file)).first->second;
 }
 
 void Resources::LoadTexturesFromFile(const std::string& path)

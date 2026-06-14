@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/Camera.h"
-#include "core/DataLoader.h"
+#include "core/SceneLoader.h"
 #include "core/State.h"
 #include "core/ecs/Registry.h"
 #include "graphics/ParticleSystem.h"
@@ -9,37 +9,37 @@
 #include "graphics/Transition.h"
 #include "graphics/AnimatedBackground.h"
 #include "graphics/LightOverlay.h"
-#include "systems/AnimationSystem.h"
-#include "systems/BulletSystem.h"
-#include "systems/DamageSystem.h"
-#include "systems/DeathSystem.h"
-#include "systems/EnemyDeathSystem.h"
-#include "systems/EnemySystem.h"
-#include "systems/GroundPatrolSystem.h"
-#include "systems/InputSystem.h"
-#include "systems/JumpSystem.h"
-#include "systems/MovementSystem.h"
-#include "systems/PatrolSystem.h"
-#include "systems/PhysicsSystem.h"
-#include "systems/RockHeadSystem.h"
-#include "systems/PickupSystem.h"
-#include "systems/PlayerAnimationSystem.h"
-#include "systems/RenderSystem.h"
-#include "systems/BoxSystem.h"
-#include "systems/TrampolineSystem.h"
-#include "systems/ArrowSystem.h"
-#include "systems/FireSystem.h"
-#include "systems/TrunkSystem.h"
-#include "systems/PlantSystem.h"
-#include "systems/BeeSystem.h"
-#include "systems/ChickenSystem.h"
-#include "systems/SnailSystem.h"
-#include "systems/ShellSystem.h"
-#include "systems/GhostSystem.h"
-#include "systems/TurtleSystem.h"
+#include "systems/core/AnimationSystem.h"
+#include "systems/enemies/BulletSystem.h"
+#include "systems/core/DamageSystem.h"
+#include "systems/core/DeathSystem.h"
+#include "systems/enemies/EnemyDeathSystem.h"
+#include "systems/enemies/EnemySystem.h"
+#include "systems/enemies/GroundPatrolSystem.h"
+#include "systems/core/InputSystem.h"
+#include "systems/core/JumpSystem.h"
+#include "systems/core/MovementSystem.h"
+#include "systems/enemies/PatrolSystem.h"
+#include "systems/core/PhysicsSystem.h"
+#include "systems/traps/RockHeadSystem.h"
+#include "systems/items/PickupSystem.h"
+#include "systems/core/PlayerAnimationSystem.h"
+#include "systems/core/RenderSystem.h"
+#include "systems/items/BoxSystem.h"
+#include "systems/traps/TrampolineSystem.h"
+#include "systems/traps/ArrowSystem.h"
+#include "systems/traps/FireSystem.h"
+#include "systems/enemies/TrunkSystem.h"
+#include "systems/enemies/PlantSystem.h"
+#include "systems/enemies/BeeSystem.h"
+#include "systems/enemies/ChickenSystem.h"
+#include "systems/enemies/SnailSystem.h"
+#include "systems/enemies/ShellSystem.h"
+#include "systems/enemies/GhostSystem.h"
+#include "systems/enemies/TurtleSystem.h"
+#include "level/LevelSetup.h"
+#include "screens/HUD.h"
 #include "tilemap/Tilemap.h"
-#include "ui/DataLoader.h"
-#include "ui/Root.h"
 
 #include <SFML/System/Vector2.hpp>
 
@@ -52,15 +52,6 @@ struct ProgressSnapshot
 	std::vector<sf::Vector2f> aliveCollectibles; // positions of uncollected fruits at checkpoint
 	std::vector<sf::Vector2f> aliveBoxes;        // positions of unbroken boxes at checkpoint
 	std::vector<sf::Vector2f> aliveEnemies;      // spawn positions of living enemies at checkpoint
-};
-
-// "Lamp" lighting of cave levels: the player sees a soft-edged circle around
-// himself, everything else is dark. Loaded from data/levels/lighting.json.
-struct LevelLighting
-{
-	bool enabled = false;
-	float radius = 90.0f;   // fully dark at this distance from the player, in pixels
-	float darkness = 0.95f; // shade outside the circle, 0..1 (1 = pure black)
 };
 
 class GameState : public State
@@ -79,18 +70,16 @@ public:
 	void Render(float interpolationFactor) override;
 
 private:
-	void UpdateScoreLabel();
-	void UpdateHearts(int currentHealth, float deltaTime);
+	void InitScene(const nlohmann::json& mapJSON, std::optional<ProgressSnapshot> progressSnapshot);
+	void SpawnPlayer();
+	void UpdatePlayer(float deltaTime);
+
 	void UpdateLevelFlow(float deltaTime);
 	void UpdateCheckpoints();
-	void UpdateLevelBanner(float deltaTime);
-	void DrawLevelBanner();
 
 	bool IsPlayerOnStartPlatform();
 	bool IsPlayerOnFinish();
 	bool IsPlayerOnDeathTile();
-
-	sf::Vector2f PlayerCenter();
 
 	enum class LevelPhase
 	{
@@ -103,7 +92,7 @@ private:
 	};
 
 	ECS::Registry registry;
-	DataLoader sceneLoader;
+	SceneLoader sceneLoader;
 
 	Camera camera;
 	Tilemap tilemap;
@@ -116,8 +105,6 @@ private:
 	LevelLighting lighting;
 
 	int score = 0;
-	int previousScore = -1;
-	int maxHearts = 3;
 
 	int deathCount = 0;
 	int fruitsCollected = 0;
@@ -126,11 +113,6 @@ private:
 	int maxEnemies = 0;
 	int checkpointFruitsCollected = 0;
 	int checkpointEnemiesKilled = 0;
-	int displayedHealth = 3;
-	int blinkingHeart = -1;
-	float blinkTimer = 0.0f;
-
-	static constexpr float HEART_BLINK_DURATION = 0.5f;
 
 	ECS::InputSystem inputSystem;
 	ECS::JumpSystem jumpSystem;
@@ -161,8 +143,7 @@ private:
 	ECS::PlayerAnimationSystem playerAnimationSystem;
 	ECS::RenderSystem renderSystem;
 
-	UI::Root hudInterface;
-	UI::DataLoader hudLoader;
+	HUD hud;
 
 	Transition transition;
 
@@ -207,25 +188,6 @@ private:
 	static constexpr sf::Vector2f SQUASH_HIT_SIDE     = { 0.75f, 1.20f }; // compressed along the blow
 	static constexpr sf::Vector2f SQUASH_HIT_VERTICAL = { 1.20f, 0.75f };
 	static constexpr float SQUASH_RETURN_SPEED = 10.0f; // exponential snap-back rate
-
-	// "Level X" banner: slides in from above the screen, holds, slides back out.
-	enum class BannerPhase
-	{
-		Hidden,
-		SlideIn,
-		Hold,
-		SlideOut,
-		Done
-	};
-
-	BannerPhase bannerPhase = BannerPhase::Hidden;
-	float bannerTimer = 0.0f;
-	bool showLevelBanner = true; // false on checkpoint respawns
-
-	static constexpr float BANNER_SLIDE_TIME = 0.45f; // slide in/out duration
-	static constexpr float BANNER_HOLD_TIME = 2.0f;   // time fully visible
-	static constexpr float BANNER_START_Y = -40.0f;   // off-screen above
-	static constexpr float BANNER_TARGET_Y = 90.0f;   // about a third of the screen
 
 	LevelPhase levelPhase = LevelPhase::Revealing;
 	ECS::Entity playerEntity = ECS::INVALID_ENTITY;

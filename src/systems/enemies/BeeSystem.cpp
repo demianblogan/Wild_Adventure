@@ -1,17 +1,17 @@
 #include "BeeSystem.h"
 
-#include "components/Animation.h"
-#include "components/AnimationState.h"
-#include "components/BeeAI.h"
-#include "components/Bullet.h"
-#include "components/Collider.h"
-#include "components/EnemyDeath.h"
-#include "components/Player.h"
-#include "components/PreviousTransform.h"
-#include "components/Sprite.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/render/Animation.h"
+#include "components/render/AnimationState.h"
+#include "components/ai/BeeAI.h"
+#include "components/combat/Bullet.h"
+#include "components/physics/Collider.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/physics/PreviousTransform.h"
+#include "components/render/Sprite.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
+#include "systems/core/PlayerQuery.h"
 
 #include <cmath>
 
@@ -25,10 +25,9 @@ namespace ECS
 	{
 		// Capture the player's X by value, not by reference: SpawnBullet adds components
 		// below, which can reallocate the Transform pool and dangle a held pointer.
-		bool  playerFound = false;
-		float playerX     = 0.0f;
-		registry.ForEach<Player, Transform>(
-			[&](Entity, Player&, Transform& transform) { playerX = transform.x; playerFound = true; });
+		const Entity player      = FindPlayer(registry);
+		const bool   playerFound = player != INVALID_ENTITY;
+		const float  playerX     = playerFound ? registry.Get<Transform>(player).x : 0.0f;
 
 		registry.ForEach<BeeAI, Transform, Collider, Velocity, AnimationState>(
 			[&](Entity entity, BeeAI& bee, Transform& transform, Collider& collider,

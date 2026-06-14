@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/State.h"
-#include "states/SettingsController.h"
+#include "screens/SettingsController.h"
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
 

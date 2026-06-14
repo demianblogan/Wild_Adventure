@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/Transform.h"
+#include "components/physics/Transform.h"
 #include "core/ecs/Registry.h"
 
 namespace ECS

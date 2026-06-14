@@ -1,19 +1,19 @@
 #include "EnemySystem.h"
 
-#include "components/AnimationState.h"
-#include "components/Collider.h"
-#include "components/Enemy.h"
-#include "components/EnemyDeath.h"
-#include "components/Health.h"
-#include "components/Hidden.h"
-#include "components/Jump.h"
-#include "components/Player.h"
-#include "components/Spiky.h"
-#include "components/StompCustomDeath.h"
-#include "components/Stomped.h"
-#include "components/Transform.h"
-#include "components/Velocity.h"
+#include "components/render/AnimationState.h"
+#include "components/physics/Collider.h"
+#include "components/combat/Enemy.h"
+#include "components/combat/EnemyDeath.h"
+#include "components/combat/Health.h"
+#include "components/render/Hidden.h"
+#include "components/physics/Jump.h"
+#include "components/combat/Spiky.h"
+#include "components/combat/StompCustomDeath.h"
+#include "components/combat/Stomped.h"
+#include "components/physics/Transform.h"
+#include "components/physics/Velocity.h"
 #include "core/ecs/Registry.h"
+#include "systems/core/PlayerQuery.h"
 
 #include <cmath>
 
@@ -28,9 +28,7 @@ namespace ECS
 
 	void EnemySystem::Update()
 	{
-		Entity playerEntity = INVALID_ENTITY;
-		registry.ForEach<Player>([&](Entity entity, Player&) { playerEntity = entity; });
-
+		const Entity playerEntity = FindPlayer(registry);
 		if (playerEntity == INVALID_ENTITY)
 			return;
 

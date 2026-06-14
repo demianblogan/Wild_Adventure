@@ -1,8 +1,8 @@
 #include "DeathSystem.h"
 
-#include "components/Health.h"
-#include "components/Player.h"
-#include "components/Rotation.h"
+#include "components/combat/Health.h"
+#include "components/tags/Player.h"
+#include "components/physics/Rotation.h"
 #include "core/Random.h"
 #include "core/ecs/Registry.h"
 
