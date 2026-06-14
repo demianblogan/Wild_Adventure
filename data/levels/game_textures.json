@@ -78,6 +78,7 @@
 	"gray": "assets/textures/background/gray.png",
 	"yellow": "assets/textures/background/yellow.png",
 	"green": "assets/textures/background/green.png",
+	"brown": "assets/textures/background/brown.png",
 
 	"mushroom_idle": "assets/textures/enemies/mushroom/Idle (32x32).png",
 	"mushroom_run": "assets/textures/enemies/mushroom/Run (32x32).png",
@@ -92,6 +93,13 @@
 	"fire_off": "assets/textures/traps/fire/Off.png",
 	"fire_hit": "assets/textures/traps/fire/Hit (16x32).png",
 	"fire_on": "assets/textures/traps/fire/On (16x32).png",
+
+	"rock_head_idle": "assets/textures/traps/rock_head/Idle.png",
+	"rock_head_blink": "assets/textures/traps/rock_head/Blink (42x42).png",
+	"rock_head_bottom_hit": "assets/textures/traps/rock_head/Bottom Hit (42x42).png",
+	"rock_head_top_hit": "assets/textures/traps/rock_head/Top Hit (42x42).png",
+	"rock_head_left_hit": "assets/textures/traps/rock_head/Left Hit (42x42).png",
+	"rock_head_right_hit": "assets/textures/traps/rock_head/Right Hit (42x42).png",
 
 	"spikes": "assets/textures/traps/spikes/Idle.png",
 	"saw_on": "assets/textures/traps/saw/On (38x38).png",

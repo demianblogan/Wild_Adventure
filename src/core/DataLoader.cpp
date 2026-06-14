@@ -38,6 +38,7 @@
 #include "components/Trampoline.h"
 #include "components/Arrow.h"
 #include "components/Fire.h"
+#include "components/RockHead.h"
 #include "core/ecs/Registry.h"
 
 #include <functional>
@@ -331,6 +332,21 @@ void DataLoader::RegisterLoaders()
 			registry.Add<ECS::Fire>(entity, {});
 		};
 
+	loaders["RockHead"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
+		{
+			ECS::RockHead rock;
+			rock.maxSpeed     = data.value("speed", rock.maxSpeed);
+			rock.acceleration = data.value("acceleration", rock.acceleration);
+
+			const std::string direction = data.value("direction", std::string("right"));
+			if (direction == "up")        { rock.axis = ECS::RockHead::Axis::Vertical;   rock.direction = -1; }
+			else if (direction == "down") { rock.axis = ECS::RockHead::Axis::Vertical;   rock.direction =  1; }
+			else if (direction == "left") { rock.axis = ECS::RockHead::Axis::Horizontal; rock.direction = -1; }
+			else                          { rock.axis = ECS::RockHead::Axis::Horizontal; rock.direction =  1; }
+
+			registry.Add<ECS::RockHead>(entity, rock);
+		};
+
 	loaders["GroundPatrol"] = [](ECS::Registry& registry, ECS::Entity entity, const nlohmann::json& data)
 		{
 			ECS::GroundPatrol patrol;
@@ -593,11 +609,18 @@ std::vector<ECS::Entity> DataLoader::LoadSceneFromMap(ECS::Registry& registry, c
 							entry["Patrol"]["direction"] = (direction == "left" || direction == "up") ? -1 : 1;
 					}
 
-					// "direction" ("left"/"right") mirrors a fixed-facing enemy (e.g. the
-					// plant). isTextureRight stays from the prefab, so the texture is
-					// flipped only when the requested side differs from its default.
+					// The "direction" property means different things per prefab: it mirrors a
+					// fixed-facing enemy (the plant: "left"/"right") or it sets a rock head's
+					// travel direction ("up"/"down"/"left"/"right"). Route it by what the
+					// prefab actually has so a prefab without Facing isn't given a broken one.
 					if (!facing.empty())
-						entry["Facing"]["isLookingRight"] = (facing == "right");
+					{
+						const nlohmann::json& prefabJson = GetCachedJson(entry["prefab"].get<std::string>());
+						if (prefabJson.contains("Facing"))
+							entry["Facing"]["isLookingRight"] = (facing == "right");
+						else if (prefabJson.contains("RockHead"))
+							entry["RockHead"]["direction"] = facing;
+					}
 				}
 
 				createdEntities.push_back(LoadPrefabbedEntity(registry, entry));

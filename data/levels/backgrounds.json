@@ -34,5 +34,11 @@
 		"texture": "yellow",
 		"direction": "right",
 		"speed": 16
+	},
+	"5":
+	{
+		"texture": "brown",
+		"direction": "up",
+		"speed": 16
 	}
 }

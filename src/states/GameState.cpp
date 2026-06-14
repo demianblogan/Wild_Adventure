@@ -222,6 +222,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, groundPatrolSystem(registry, tilemap, particles)
 	, enemyDeathSystem(registry)
 	, physicsSystem(registry, tilemap)
+	, rockHeadSystem(registry, tilemap)
 	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
 	, trampolineSystem(registry, context.audioMixer)
 	, arrowSystem(registry, context.audioMixer)
@@ -922,6 +923,7 @@ void GameState::Update(float deltaTime)
 	enemyDeathSystem.Update(deltaTime, fallLimit);
 	arrowSystem.Update();
 	physicsSystem.Update(deltaTime);
+	rockHeadSystem.Update(deltaTime);
 	boxSystem.Update();
 	trampolineSystem.Update();
 	movementSystem.Update(deltaTime);
