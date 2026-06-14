@@ -21,6 +21,7 @@
 #include "systems/MovementSystem.h"
 #include "systems/PatrolSystem.h"
 #include "systems/PhysicsSystem.h"
+#include "systems/RockHeadSystem.h"
 #include "systems/PickupSystem.h"
 #include "systems/PlayerAnimationSystem.h"
 #include "systems/RenderSystem.h"
@@ -148,6 +149,7 @@ private:
 	ECS::GroundPatrolSystem groundPatrolSystem;
 	ECS::EnemyDeathSystem enemyDeathSystem;
 	ECS::PhysicsSystem physicsSystem;
+	ECS::RockHeadSystem rockHeadSystem;
 	ECS::BoxSystem boxSystem;
 	ECS::TrampolineSystem trampolineSystem;
 	ECS::ArrowSystem arrowSystem;

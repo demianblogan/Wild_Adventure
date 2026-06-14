@@ -1,0 +1,75 @@
+{
+	"Sprite":
+	{
+		"textureName": "rock_head_idle"
+	},
+	"AnimationSet":
+	{
+		"Idle":
+		{
+			"textureName": "rock_head_idle",
+			"frameCount": 1,
+			"frameDuration": 1.0,
+			"isLooping": true
+		},
+		"Blink":
+		{
+			"textureName": "rock_head_blink",
+			"frameCount": 4,
+			"frameDuration": 0.06,
+			"isLooping": false
+		},
+		"BottomHit":
+		{
+			"textureName": "rock_head_bottom_hit",
+			"frameCount": 4,
+			"frameDuration": 0.06,
+			"isLooping": false
+		},
+		"TopHit":
+		{
+			"textureName": "rock_head_top_hit",
+			"frameCount": 4,
+			"frameDuration": 0.06,
+			"isLooping": false
+		},
+		"LeftHit":
+		{
+			"textureName": "rock_head_left_hit",
+			"frameCount": 4,
+			"frameDuration": 0.06,
+			"isLooping": false
+		},
+		"RightHit":
+		{
+			"textureName": "rock_head_right_hit",
+			"frameCount": 4,
+			"frameDuration": 0.06,
+			"isLooping": false
+		}
+	},
+	"AnimationState":
+	{
+		"current": "Idle"
+	},
+	"Gravity":
+	{
+		"acceleration": 0,
+		"maxFallSpeed": 1000
+	},
+	"Collider":
+	{
+		"width": 36,
+		"height": 36
+	},
+	"Solid":
+	{
+		"width": 36,
+		"height": 36
+	},
+	"RockHead":
+	{
+		"speed": 300,
+		"acceleration": 350
+	}
+}
