@@ -119,6 +119,11 @@
 		{
 			"path": "assets/audio/music/background5.ogg",
 			"loop": true
+		},
+		"background6":
+		{
+			"path": "assets/audio/music/background6.ogg",
+			"loop": true
 		}
 	}
 }

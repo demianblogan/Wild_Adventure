@@ -1,10 +1,12 @@
 #include "ParticleSystem.h"
 
+#include "core/Random.h"
 #include "core/Resources.h"
 #include "tilemap/Tilemap.h"
 
 #include <nlohmann/json.hpp>
 
+#include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Sprite.hpp>
@@ -18,7 +20,6 @@
 
 ParticleSystem::ParticleSystem(Resources& resources)
 	: resources(resources)
-	, randomEngine(std::random_device{}())
 {}
 
 void ParticleSystem::SetTilemap(const Tilemap& tilemap)
@@ -52,12 +53,6 @@ void ParticleSystem::LoadConfig(const std::string& path)
 	}
 }
 
-float ParticleSystem::RandomFloat(float min, float max)
-{
-	std::uniform_real_distribution<float> distribution(min, max);
-	return distribution(randomEngine);
-}
-
 void ParticleSystem::Emit(const std::string& presetName, sf::Vector2f position, int directionX)
 {
 	const auto found = presets.find(presetName);
@@ -76,14 +71,14 @@ void ParticleSystem::Emit(const std::string& presetName, sf::Vector2f position, 
 		particle.position = position;
 
 		if (directionX == 0)
-			particle.velocity.x = RandomFloat(-config.speedX, config.speedX);
+			particle.velocity.x = Random::Float(-config.speedX, config.speedX);
 		else
-			particle.velocity.x = directionX * RandomFloat(config.speedX * 0.4f, config.speedX);
+			particle.velocity.x = directionX * Random::Float(config.speedX * 0.4f, config.speedX);
 
-		particle.velocity.y = RandomFloat(config.speedYMin, config.speedYMax);
+		particle.velocity.y = Random::Float(config.speedYMin, config.speedYMax);
 		particle.age = 0.0f;
-		particle.lifetime = config.lifetime * RandomFloat(0.8f, 1.2f);
-		particle.startScale = config.scale * RandomFloat(0.7f, 1.1f);
+		particle.lifetime = config.lifetime * Random::Float(0.8f, 1.2f);
+		particle.startScale = config.scale * Random::Float(0.7f, 1.1f);
 
 		particles.push_back(particle);
 	}
@@ -103,10 +98,10 @@ void ParticleSystem::EmitDebris(sf::Vector2f position, const std::string& textur
 		// directionX == 0 spreads pieces both ways (box debris); a non-zero value
 		// biases them to fly off in that direction (bullet pieces bouncing off a wall).
 		const float velocityX = (directionX == 0)
-			? RandomFloat(-DEBRIS_SPREAD_X, DEBRIS_SPREAD_X)
-			: directionX * RandomFloat(DEBRIS_SPREAD_X * 0.4f, DEBRIS_SPREAD_X);
+			? Random::Float(-DEBRIS_SPREAD_X, DEBRIS_SPREAD_X)
+			: directionX * Random::Float(DEBRIS_SPREAD_X * 0.4f, DEBRIS_SPREAD_X);
 
-		particle.velocity = { velocityX, -RandomFloat(DEBRIS_UP_MIN, DEBRIS_UP_MAX) };
+		particle.velocity = { velocityX, -Random::Float(DEBRIS_UP_MIN, DEBRIS_UP_MAX) };
 		particle.startScale = 1.0f;
 		particle.phase = DebrisPhase::Flying;
 
@@ -123,12 +118,24 @@ void ParticleSystem::EmitGhostTrail(sf::Vector2f position, int facingDir)
 	particle.animated = true;
 
 	// Spawn a touch off the back at a varied height, then drift straight out (no gravity).
-	particle.position = { position.x + RandomFloat(-2.0f, 2.0f), position.y + RandomFloat(-9.0f, 9.0f) };
-	particle.velocity = { static_cast<float>(-facingDir) * RandomFloat(10.0f, 28.0f), 0.0f };
+	particle.position = { position.x + Random::Float(-2.0f, 2.0f), position.y + Random::Float(-9.0f, 9.0f) };
+	particle.velocity = { static_cast<float>(-facingDir) * Random::Float(10.0f, 28.0f), 0.0f };
 	particle.age = 0.0f;
-	particle.lifetime = RandomFloat(0.3f, 0.5f);
-	particle.startScale = RandomFloat(0.8f, 1.1f);
+	particle.lifetime = Random::Float(0.3f, 0.5f);
+	particle.startScale = Random::Float(0.8f, 1.1f);
 
+	particles.push_back(particle);
+}
+
+void ParticleSystem::EmitBubble(sf::Vector2f position)
+{
+	Particle particle;
+	particle.kind = Kind::Bubble;
+	particle.position = position;
+	particle.velocity = { Random::Float(-5.0f, 5.0f), -Random::Float(25.0f, 55.0f) };
+	particle.age = 0.0f;
+	particle.lifetime = Random::Float(2.5f, 4.5f);
+	particle.startScale = Random::Float(0.9f, 2.0f); // radius in virtual pixels
 	particles.push_back(particle);
 }
 
@@ -144,6 +151,15 @@ void ParticleSystem::Update(float deltaTime)
 			if (!particle.animated)
 				particle.velocity.y += gravity * deltaTime;
 			particle.position += particle.velocity * deltaTime;
+			particle.age += deltaTime;
+			continue;
+		}
+
+		if (particle.kind == Kind::Bubble)
+		{
+			// Rises (no gravity), wobbling sideways as it goes.
+			particle.position.x += (particle.velocity.x + std::sin(particle.age * 3.5f) * 10.0f) * deltaTime;
+			particle.position.y += particle.velocity.y * deltaTime;
 			particle.age += deltaTime;
 			continue;
 		}
@@ -207,9 +223,9 @@ void ParticleSystem::Update(float deltaTime)
 
 	std::erase_if(particles, [](const Particle& particle)
 		{
-			if (particle.kind == Kind::Dust)
-				return particle.age >= particle.lifetime;
-			return particle.dead;
+			if (particle.kind == Kind::Debris)
+				return particle.dead;
+			return particle.age >= particle.lifetime; // Dust and Bubble
 		});
 }
 
@@ -217,6 +233,24 @@ void ParticleSystem::Draw(sf::RenderTarget& target)
 {
 	for (const Particle& particle : particles)
 	{
+		// Bubbles are drawn procedurally (a faint ring), not from a texture.
+		if (particle.kind == Kind::Bubble)
+		{
+			const float progress  = (particle.lifetime > 0.0f) ? (particle.age / particle.lifetime) : 1.0f;
+			const float remaining = std::clamp(1.0f - progress, 0.0f, 1.0f);
+			const float radius    = particle.startScale;
+			const auto  alpha     = static_cast<std::uint8_t>(remaining * 150.0f);
+
+			sf::CircleShape bubble(radius);
+			bubble.setOrigin({ radius, radius });
+			bubble.setPosition({ std::floor(particle.position.x), std::floor(particle.position.y) });
+			bubble.setFillColor(sf::Color(180, 220, 255, static_cast<std::uint8_t>(alpha / 3)));
+			bubble.setOutlineThickness(0.5f);
+			bubble.setOutlineColor(sf::Color(215, 238, 255, alpha));
+			target.draw(bubble);
+			continue;
+		}
+
 		if (particle.kind == Kind::Debris && particle.phase == DebrisPhase::Blinking)
 		{
 			if (std::fmod(particle.phaseTimer, 0.16f) < 0.08f) // blink off

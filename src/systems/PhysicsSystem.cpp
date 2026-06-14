@@ -59,7 +59,7 @@ namespace ECS
 				const bool dead = registry.Has<Health>(entity) && registry.Get<Health>(entity).current <= 0;
 				const bool collidesWithBoxes = registry.Has<Player>(entity);
 
-				velocity.y += gravity.acceleration * deltaTime;
+				velocity.y += gravity.acceleration * gravityScale * deltaTime;
 				if (velocity.y > gravity.maxFallSpeed)
 					velocity.y = gravity.maxFallSpeed;
 

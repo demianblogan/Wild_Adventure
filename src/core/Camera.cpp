@@ -1,5 +1,6 @@
 #include "Camera.h"
 
+#include "core/Random.h"
 #include "core/VirtualScreen.h"
 
 #include <algorithm>
@@ -35,9 +36,8 @@ void Camera::Update(float deltaTime)
 	trauma = std::max(0.0f, trauma - TRAUMA_DECAY * deltaTime);
 
 	const float magnitude = MAX_SHAKE_OFFSET * trauma * trauma;
-	std::uniform_real_distribution<float> offset(-magnitude, magnitude);
 
-	shakeOffset = { offset(randomEngine), offset(randomEngine) };
+	shakeOffset = { Random::Float(-magnitude, magnitude), Random::Float(-magnitude, magnitude) };
 }
 
 sf::Vector2f Camera::GetRenderCenter(float interpolationFactor) const

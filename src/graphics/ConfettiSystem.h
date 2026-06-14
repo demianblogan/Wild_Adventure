@@ -2,7 +2,6 @@
 
 #include <SFML/System/Vector2.hpp>
 
-#include <random>
 #include <vector>
 
 struct Resources;
@@ -47,12 +46,8 @@ private:
 		float lifetime = 0.0f;
 	};
 
-	float RandomFloat(float min, float max);
-	int RandomInt(int min, int max);
-
 	Resources& resources;
 	std::vector<Confetto> confetti;
-	std::mt19937 randomEngine{ std::random_device{}() };
 
 	static constexpr int FRAME_SIZE = 16;
 	static constexpr float SCALE = 0.3f;       // visual size of each piece (1.0 = native 16px)

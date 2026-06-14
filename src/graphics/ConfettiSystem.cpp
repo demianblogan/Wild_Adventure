@@ -1,5 +1,6 @@
 #include "ConfettiSystem.h"
 
+#include "core/Random.h"
 #include "core/Resources.h"
 
 #include <SFML/Graphics/RenderTarget.hpp>
@@ -22,39 +23,27 @@ ConfettiSystem::ConfettiSystem(Resources& resources)
 	: resources(resources)
 {}
 
-float ConfettiSystem::RandomFloat(float min, float max)
-{
-	std::uniform_real_distribution<float> distribution(min, max);
-	return distribution(randomEngine);
-}
-
-int ConfettiSystem::RandomInt(int min, int max)
-{
-	std::uniform_int_distribution<int> distribution(min, max);
-	return distribution(randomEngine);
-}
-
 void ConfettiSystem::Emit(sf::Vector2f center)
 {
 	for (int i = 0; i < PIECES_PER_BURST; i++)
 	{
 		Confetto piece;
-		piece.baseX = center.x + RandomFloat(-SPAWN_WIDTH, SPAWN_WIDTH);
-		piece.y = center.y - SPAWN_RISE + RandomFloat(-SPAWN_BAND, SPAWN_BAND);
+		piece.baseX = center.x + Random::Float(-SPAWN_WIDTH, SPAWN_WIDTH);
+		piece.y = center.y - SPAWN_RISE + Random::Float(-SPAWN_BAND, SPAWN_BAND);
 
-		piece.fallSpeed = RandomFloat(18.0f, 38.0f);
+		piece.fallSpeed = Random::Float(18.0f, 38.0f);
 
-		piece.swayAmplitude = RandomFloat(5.0f, 14.0f);
-		piece.swayFrequency = RandomFloat(1.5f, 3.0f);
-		piece.swayPhase = RandomFloat(0.0f, TWO_PI);
+		piece.swayAmplitude = Random::Float(5.0f, 14.0f);
+		piece.swayFrequency = Random::Float(1.5f, 3.0f);
+		piece.swayPhase = Random::Float(0.0f, TWO_PI);
 
-		piece.angle = RandomFloat(0.0f, 360.0f);
-		piece.angularSpeed = RandomFloat(80.0f, 200.0f) * (RandomInt(0, 1) == 0 ? -1.0f : 1.0f);
+		piece.angle = Random::Float(0.0f, 360.0f);
+		piece.angularSpeed = Random::Float(80.0f, 200.0f) * (Random::Int(0, 1) == 0 ? -1.0f : 1.0f);
 
-		piece.flipFrequency = RandomFloat(2.0f, 4.0f);
-		piece.flipPhase = RandomFloat(0.0f, TWO_PI);
+		piece.flipFrequency = Random::Float(2.0f, 4.0f);
+		piece.flipPhase = Random::Float(0.0f, TWO_PI);
 
-		piece.frame = RandomInt(0, FRAME_COUNT - 1);
+		piece.frame = Random::Int(0, FRAME_COUNT - 1);
 		piece.lifetime = LIFETIME;
 
 		confetti.push_back(piece);

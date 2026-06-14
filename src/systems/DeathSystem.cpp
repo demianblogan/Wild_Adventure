@@ -3,13 +3,13 @@
 #include "components/Health.h"
 #include "components/Player.h"
 #include "components/Rotation.h"
+#include "core/Random.h"
 #include "core/ecs/Registry.h"
 
 namespace ECS
 {
 	DeathSystem::DeathSystem(Registry& registry)
 		: registry(registry)
-		, randomEngine(std::random_device{}())
 	{}
 
 	void DeathSystem::Update(float deltaTime)
@@ -23,13 +23,10 @@ namespace ECS
 				// First frame of death: start a tumble in a random direction.
 				if (!registry.Has<Rotation>(entity))
 				{
-					std::uniform_int_distribution<int> sideDistribution(0, 1);
-					std::uniform_real_distribution<float> speedDistribution(360.0f, 540.0f);
-
-					const float sign = (sideDistribution(randomEngine) == 0) ? -1.0f : 1.0f;
+					const float sign = (Random::Int(0, 1) == 0) ? -1.0f : 1.0f;
 
 					Rotation rotation;
-					rotation.spinSpeed = sign * speedDistribution(randomEngine);
+					rotation.spinSpeed = sign * Random::Float(360.0f, 540.0f);
 					registry.Add<Rotation>(entity, rotation);
 				}
 

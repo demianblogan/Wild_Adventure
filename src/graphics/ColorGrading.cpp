@@ -11,7 +11,8 @@ bool ColorGrading::IsIdentity() const
 		&& brightness == 1.0f
 		&& saturation == 1.0f
 		&& contrast == 1.0f
-		&& heat == 0.0f;
+		&& heat == 0.0f
+		&& water == 0.0f;
 }
 
 ColorGrading LoadColorGrading(const std::string& theme)
@@ -43,6 +44,7 @@ ColorGrading LoadColorGrading(const std::string& theme)
 	grading.saturation = entry->value("saturation", 1.0f);
 	grading.contrast = entry->value("contrast", 1.0f);
 	grading.heat = entry->value("heat", 0.0f);
+	grading.water = entry->value("water", 0.0f);
 
 	return grading;
 }

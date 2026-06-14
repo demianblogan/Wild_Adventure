@@ -2,7 +2,6 @@
 
 #include "core/ecs/Entity.h"
 
-#include <random>
 #include <string>
 
 class DataLoader;
@@ -31,7 +30,5 @@ namespace ECS
 		DataLoader& loader;
 		ParticleSystem& particles;
 		Audio::Mixer& mixer;
-
-		std::mt19937 randomEngine;
 	};
 }

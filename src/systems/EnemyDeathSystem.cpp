@@ -6,9 +6,9 @@
 #include "components/Rotation.h"
 #include "components/Transform.h"
 #include "components/Velocity.h"
+#include "core/Random.h"
 #include "core/ecs/Registry.h"
 
-#include <cstdlib>
 #include <vector>
 
 namespace ECS
@@ -49,8 +49,8 @@ namespace ECS
 
 						velocity.y = -EnemyDeath::DEATH_BOUNCE_SPEED;
 
-						const int   spinDir   = (std::rand() % 2 == 0) ? 1 : -1;
-						const float spinSpeed = 270.0f + static_cast<float>(std::rand() % 90);
+						const int   spinDir   = (Random::Int(0, 1) == 0) ? 1 : -1;
+						const float spinSpeed = 270.0f + Random::Float(0.0f, 90.0f);
 						registry.Add<Rotation>(entity, { 0.0f, static_cast<float>(spinDir) * spinSpeed });
 					}
 					break;
