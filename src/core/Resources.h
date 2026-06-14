@@ -19,7 +19,13 @@ struct Resources
 
 	// Parsed .tmj maps, cached for the whole session: parsing a big level is the
 	// slowest part of a level load, and restarts reload the same unchanged file.
-	const nlohmann::json& GetMapJson(const std::string& path);
+	// Throws when the file is missing — a level can't load without its map.
+	const nlohmann::json& GetMapJSON(const std::string& path);
+
+	// Parses and caches any JSON file. Returns nullptr when the file is absent, so
+	// optional config files (per-level backgrounds, lighting, music) fall back to
+	// defaults instead of throwing. Restarts reuse the cached parse.
+	const nlohmann::json* TryGetJSON(const std::string& path);
 
 	ResourceManager<sf::Texture> textures;
 	ResourceManager<sf::Font> fonts;
@@ -27,5 +33,5 @@ struct Resources
 	ResourceManager<sf::Music> music;
 	ResourceManager<sf::Shader> shaders;
 
-	std::unordered_map<std::string, nlohmann::json> mapJsonCache;
+	std::unordered_map<std::string, nlohmann::json> jsonCache;
 };

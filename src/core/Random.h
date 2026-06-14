@@ -9,7 +9,6 @@ public:
 
 	[[nodiscard]] static int Int(int min, int max);
 	[[nodiscard]] static float Float(float min, float max);
-	[[nodiscard]] static double Double(double min, double max);
 
 	static std::mt19937_64& Engine();
 };

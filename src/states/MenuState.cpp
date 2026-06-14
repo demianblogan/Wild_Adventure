@@ -118,9 +118,6 @@ void MenuState::SetupSinglePanel()
 
 void MenuState::SetupPlayPanel()
 {
-	// Two Players waits for the multiplayer implementation.
-	DisableButton("two_players_button");
-
 	// Nothing to delete until at least one level is completed.
 	if (!context.campaign.HasProgress())
 		DisableButton("delete_saves_button");

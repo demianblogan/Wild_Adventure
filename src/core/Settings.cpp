@@ -53,11 +53,6 @@ void Settings::SetVsync(bool value)
 	current.vsync = value;
 }
 
-void Settings::SetShowFps(bool value)
-{
-	current.showFps = value;
-}
-
 void Settings::Load(const std::string& path)
 {
 	std::ifstream file(path);
@@ -84,7 +79,6 @@ void Settings::Load(const std::string& path)
 		current.resolutionHeight = graphics.value("height", current.resolutionHeight);
 		current.screenMode = ScreenModeFromString(graphics.value("screenMode", ScreenModeToString(current.screenMode)));
 		current.vsync = graphics.value("vsync", current.vsync);
-		current.showFps = graphics.value("showFps", current.showFps);
 	}
 
 	saved = current;
@@ -100,7 +94,6 @@ void Settings::Save(const std::string& path)
 	data["graphics"]["height"] = current.resolutionHeight;
 	data["graphics"]["screenMode"] = ScreenModeToString(current.screenMode);
 	data["graphics"]["vsync"] = current.vsync;
-	data["graphics"]["showFps"] = current.showFps;
 
 	std::ofstream file(path);
 	if (!file.is_open())
@@ -125,5 +118,4 @@ void Settings::ResetGraphicsToDefaults()
 	current.resolutionHeight = defaults.resolutionHeight;
 	current.screenMode = defaults.screenMode;
 	current.vsync = defaults.vsync;
-	current.showFps = defaults.showFps;
 }

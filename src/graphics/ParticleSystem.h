@@ -28,6 +28,10 @@ public:
 	void Emit(const std::string& presetName, sf::Vector2f position, int directionX = 0);
 	void EmitDebris(sf::Vector2f position, const std::string& textureName, int pieceCount, int directionX = 0);
 
+	// Run dust kicked up behind a mover, spawned at the back of its feet (the side
+	// opposite travel). direction is the horizontal sign: +1 right, -1 left.
+	void EmitRunDust(sf::Vector2f feet, int direction);
+
 	// One animated wisp trailing off the ghost's back (flies out the opposite way from
 	// facingDir and fades, cycling through its frames over its short life).
 	void EmitGhostTrail(sf::Vector2f position, int facingDir);
@@ -35,8 +39,6 @@ public:
 	// One rising water bubble (drawn procedurally, no texture) that drifts upward,
 	// wobbling sideways, and fades out — ambient detail for a water level.
 	void EmitBubble(sf::Vector2f position);
-
-	float GetRunBackOffset() const { return runBackOffset; }
 
 private:
 	enum class Kind { Dust, Debris, Bubble };

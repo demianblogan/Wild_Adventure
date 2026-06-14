@@ -4,7 +4,6 @@
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Sprite.hpp>
-#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
@@ -13,7 +12,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <format>
 #include <memory>
 #include <string>
 
@@ -126,8 +124,6 @@ void Application::Run()
 			break;
 		}
 
-		UpdateFps(frameTime);
-
 		const float interpolationFactor = remainderTime / FIXED_DELTA_TIME;
 		Render(interpolationFactor);
 	}
@@ -166,25 +162,10 @@ void Application::Update(float deltaTime)
 	stateMachine.Update(deltaTime);
 }
 
-void Application::UpdateFps(float deltaTime)
-{
-	fpsTimer += deltaTime;
-	fpsFrameCount++;
-
-	if (fpsTimer >= 0.5f)
-	{
-		fpsDisplayed = static_cast<int>(std::round(fpsFrameCount / fpsTimer));
-
-		fpsTimer = 0.0f;
-		fpsFrameCount = 0;
-	}
-}
-
 void Application::Render(float interpolationFactor)
 {
 	virtualScreen.Clear();
 	stateMachine.Render(interpolationFactor);
-	DrawFps();
 	virtualScreen.Display();
 
 	window.clear(sf::Color::Black);
@@ -192,29 +173,6 @@ void Application::Render(float interpolationFactor)
 	DrawCursor();
 
 	window.display();
-}
-
-void Application::DrawFps()
-{
-	if (!settings.GetShowFps())
-		return;
-
-	if (!resources.fonts.Has("main"))
-		return;
-
-	virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
-
-	const std::string overlay = std::format("FPS: {}", fpsDisplayed);
-
-	sf::Text text(resources.fonts.Get("main"), overlay, 16);
-	text.setFillColor(sf::Color::White);
-	text.setOutlineColor(sf::Color(40, 40, 40));
-	text.setOutlineThickness(1.0f);
-
-	const sf::FloatRect bounds = text.getLocalBounds();
-	text.setPosition({ std::floor(VirtualScreen::WIDTH - bounds.size.x - 6.0f), std::floor(VirtualScreen::HEIGHT - 20.0f) });
-
-	virtualScreen.GetRenderTarget().draw(text);
 }
 
 void Application::DrawCursor()

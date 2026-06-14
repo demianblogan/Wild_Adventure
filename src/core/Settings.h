@@ -18,7 +18,6 @@ struct SettingsData
 	int resolutionHeight = 1080;
 	ScreenMode screenMode = ScreenMode::Borderless;
 	bool vsync = true;
-	bool showFps = false;
 
 	bool operator==(const SettingsData& other) const = default;
 };
@@ -44,12 +43,10 @@ public:
 	int GetResolutionHeight() const { return current.resolutionHeight; }
 	ScreenMode GetScreenMode() const { return current.screenMode; }
 	bool GetVsync() const { return current.vsync; }
-	bool GetShowFps() const { return current.showFps; }
 
 	void SetResolution(int width, int height);
 	void SetScreenMode(ScreenMode mode);
 	void SetVsync(bool value);
-	void SetShowFps(bool value);
 
 private:
 	SettingsData current;

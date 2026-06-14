@@ -32,8 +32,6 @@ namespace UI
 		virtual void HandleEvent(const sf::Event& event);
 
 		Element& AddChild(std::unique_ptr<Element> child);
-		Element& AddChildBehind(std::unique_ptr<Element> child);
-		void ClearChildren();
 
 		std::vector<Element*> GetChildren() const;
 
@@ -43,7 +41,6 @@ namespace UI
 		sf::Vector2f GetAbsolutePosition() const { return absolutePosition; }
 
 		Animation& AddAnimation(std::unique_ptr<Animation> animation);
-		void ClearAnimations();
 
 		virtual void SetColor(sf::Color color) {}
 

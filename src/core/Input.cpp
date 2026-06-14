@@ -200,7 +200,7 @@ void Input::SaveConfig(const std::string& path)
 	nlohmann::json data;
 	data["axisThreshold"] = axisThreshold;
 
-	nlohmann::json bindingsJson = nlohmann::json::object();
+	nlohmann::json bindingsJSON = nlohmann::json::object();
 
 	for (int i = 0; i < ACTION_COUNT; i++)
 	{
@@ -227,10 +227,10 @@ void Input::SaveConfig(const std::string& path)
 			list.push_back(entry);
 		}
 
-		bindingsJson[ActionToString(static_cast<Action>(i))] = list;
+		bindingsJSON[ActionToString(static_cast<Action>(i))] = list;
 	}
 
-	data["bindings"] = bindingsJson;
+	data["bindings"] = bindingsJSON;
 
 	std::ofstream file(path);
 	if (!file.is_open())

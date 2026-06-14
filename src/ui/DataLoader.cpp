@@ -9,7 +9,6 @@
 #include "ui/Label.h"
 #include "ui/Slider.h"
 #include "ui/Stepper.h"
-#include "ui/TextField.h"
 
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -80,16 +79,6 @@ namespace UI
 		floatActions[name] = std::move(action);
 	}
 
-	void DataLoader::RegisterStringAction(const std::string& name, std::function<void(const std::string&)> action)
-	{
-		stringActions[name] = std::move(action);
-	}
-
-	void DataLoader::RegisterFilter(const std::string& name, std::function<bool(char32_t)> filter)
-	{
-		filters[name] = std::move(filter);
-	}
-
 	std::function<void()> DataLoader::FindAction(const std::string& name) const
 	{
 		const auto it = actions.find(name);
@@ -106,23 +95,6 @@ namespace UI
 	{
 		const auto it = floatActions.find(name);
 		return (it != floatActions.end()) ? it->second : nullptr;
-	}
-
-	std::function<void(const std::string&)> DataLoader::FindStringAction(const std::string& name) const
-	{
-		const auto it = stringActions.find(name);
-		return (it != stringActions.end()) ? it->second : nullptr;
-	}
-
-	std::function<bool(char32_t)> DataLoader::FindFilter(const std::string& name) const
-	{
-		const auto it = filters.find(name);
-		return (it != filters.end()) ? it->second : nullptr;
-	}
-
-	void DataLoader::SetPrefabDirectory(const std::string& directory)
-	{
-		prefabDirectory = directory;
 	}
 
 	const nlohmann::json& DataLoader::LoadPrefab(const std::string& name)
@@ -475,44 +447,6 @@ namespace UI
 				}
 
 				return stepper;
-			};
-
-		factories["TextField"] = [](DataLoader& loader, const nlohmann::json& data) -> std::unique_ptr<Element>
-			{
-				const std::string fontName = data.at("fontName");
-
-				auto textField = std::make_unique<TextField>(loader.GetResources(), fontName);
-				ApplyCommonFields(*textField, data);
-
-				if (data.contains("backgrounds"))
-				{
-					for (const auto& [stateName, slotData] : data["backgrounds"].items())
-					{
-						const InteractionState state = ParseInteractionState(stateName);
-						textField->SetBackground(state, loader.LoadElement(slotData));
-					}
-				}
-
-				if (data.contains("filter"))
-				{
-					const std::string filterName = data["filter"];
-					auto filter = loader.FindFilter(filterName);
-					if (filter)
-						textField->SetFilter(std::move(filter));
-				}
-
-				if (data.contains("text"))
-					textField->SetText(data["text"]);
-
-				if (data.contains("action"))
-				{
-					const std::string actionName = data["action"];
-					auto action = loader.FindStringAction(actionName);
-					if (action)
-						textField->SetOnTextChanged(std::move(action));
-				}
-
-				return textField;
 			};
 	}
 

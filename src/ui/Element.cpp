@@ -55,18 +55,6 @@ namespace UI
 		return *children.back();
 	}
 
-	Element& Element::AddChildBehind(std::unique_ptr<Element> child)
-	{
-		children.insert(children.begin(), std::move(child));
-
-		return *children.front();
-	}
-
-	void Element::ClearChildren()
-	{
-		children.clear();
-	}
-
 	std::vector<Element*> Element::GetChildren() const
 	{
 		std::vector<Element*> result;
@@ -97,11 +85,6 @@ namespace UI
 		animations.push_back(std::move(animation));
 
 		return *animations.back();
-	}
-
-	void Element::ClearAnimations()
-	{
-		animations.clear();
 	}
 
 	sf::Vector2f Element::ComputePosition(sf::Vector2f parentPosition, sf::Vector2f parentSize) const

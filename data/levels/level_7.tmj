@@ -416,32 +416,6 @@
                         }, 
                         {
                          "height":0,
-                         "id":105,
-                         "name":"turtle",
-                         "opacity":1,
-                         "point":true,
-                         "rotation":0,
-                         "type":"turtle",
-                         "visible":true,
-                         "width":0,
-                         "x":712,
-                         "y":880
-                        }, 
-                        {
-                         "height":0,
-                         "id":106,
-                         "name":"turtle",
-                         "opacity":1,
-                         "point":true,
-                         "rotation":0,
-                         "type":"turtle",
-                         "visible":true,
-                         "width":0,
-                         "x":520,
-                         "y":880
-                        }, 
-                        {
-                         "height":0,
                          "id":107,
                          "name":"turtle",
                          "opacity":1,

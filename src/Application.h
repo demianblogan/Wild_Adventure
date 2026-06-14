@@ -31,8 +31,6 @@ private:
 	void Update(float deltaTime);
 	void Render(float interpolationFactor);
 	void DrawCursor();
-	void DrawFps();
-	void UpdateFps(float deltaTime);
 
 	static constexpr float FIXED_DELTA_TIME = 1.0f / 60.0f;
 	static constexpr float MAX_FRAME_TIME = 0.25f;
@@ -47,10 +45,6 @@ private:
 	Settings settings;
 	Campaign campaign;
 	Context context;
-
-	float fpsTimer = 0.0f;
-	int fpsFrameCount = 0;
-	int fpsDisplayed = 0;
 
 	int appliedWidth = 0;
 	int appliedHeight = 0;
