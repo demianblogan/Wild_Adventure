@@ -74,6 +74,19 @@ TEST_SUITE("Settings")
 		CHECK_FALSE(reloaded.IsDirty()); // Load must mark the freshly loaded state as saved
 	}
 
+	TEST_CASE("A failed Save leaves the settings dirty instead of reporting success")
+	{
+		const TempDirectory dir;
+		// The parent directory does not exist, so the write cannot succeed.
+		const std::string path = (dir.GetPath() / "missing_subdir" / "settings.json").string();
+
+		Settings settings;
+		settings.SetSoundVolume(3);
+
+		CHECK_FALSE(settings.Save(path));
+		CHECK(settings.IsDirty()); // must not be mistaken for a successful save
+	}
+
 	TEST_CASE("Loading a corrupt settings file falls back to defaults and preserves the file")
 	{
 		const TempDirectory dir;

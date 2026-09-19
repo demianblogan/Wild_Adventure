@@ -57,10 +57,10 @@ void Campaign::Load(const std::string& path)
 	}
 }
 
-void Campaign::Save() const
+bool Campaign::Save() const
 {
 	if (savePath.empty())
-		return;
+		return false;
 
 	nlohmann::json data;
 	data["victoryShown"] = wasVictoryShown;
@@ -73,7 +73,7 @@ void Campaign::Save() const
 			data["levels"][std::to_string(i + 1)]["stars"] = bestStars[i];
 	}
 
-	static_cast<void>(SafeFileWrite::WriteFileAtomically(savePath, data.dump(1, '\t')));
+	return SafeFileWrite::WriteFileAtomically(savePath, data.dump(1, '\t'));
 }
 
 void Campaign::RecordCompletion(int levelNumber, int stars)

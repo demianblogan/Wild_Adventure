@@ -438,6 +438,10 @@ bool SettingsController::PanelIsDirty(const std::string& panel) const
 
 void SettingsController::SavePanel(const std::string& panel)
 {
+	// If the write fails (disk full, file locked, ...), Save()/SaveConfig()
+	// leave the in-memory state dirty rather than pretending it succeeded,
+	// so the existing "unsaved changes" prompt keeps firing on the next
+	// attempt to leave the panel instead of silently losing the changes.
 	if (panel == "keyboard")
 	{
 		context.input.SaveConfig(InputPath);

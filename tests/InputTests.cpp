@@ -119,6 +119,22 @@ TEST_SUITE("Input")
 		CHECK(input.GetPrimaryKey(Action::Pause) == sf::Keyboard::Key::Escape);
 	}
 
+	TEST_CASE("A failed SaveConfig leaves the bindings dirty instead of reporting success")
+	{
+		const TempDirectory dir;
+		const std::filesystem::path path = dir.GetPath() / "input.json";
+		REQUIRE(SafeFileWrite::WriteFileAtomically(path, VALID_BINDINGS));
+
+		Input input;
+		input.LoadConfig(path.string());
+		input.SetPrimaryKey(Action::Jump, sf::Keyboard::Key::LShift);
+
+		// The parent directory does not exist, so the write cannot succeed.
+		const std::string badPath = (dir.GetPath() / "missing_subdir" / "input.json").string();
+		CHECK_FALSE(input.SaveConfig(badPath));
+		CHECK(input.IsDirty()); // must not be mistaken for a successful save
+	}
+
 	TEST_CASE("KeyName round-trips through LoadConfig and SaveConfig")
 	{
 		CHECK(Input::KeyName(sf::Keyboard::Key::Space) == "Space");

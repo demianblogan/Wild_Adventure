@@ -212,7 +212,7 @@ void Input::ResetToDefaults()
 		bindings[i] = defaultBindings[i];
 }
 
-void Input::SaveConfig(const std::string& path)
+bool Input::SaveConfig(const std::string& path)
 {
 	nlohmann::json data;
 	data["axisThreshold"] = axisThreshold;
@@ -249,10 +249,13 @@ void Input::SaveConfig(const std::string& path)
 
 	data["bindings"] = bindingsJSON;
 
-	static_cast<void>(SafeFileWrite::WriteFileAtomically(path, data.dump(1, '\t')));
+	if (!SafeFileWrite::WriteFileAtomically(path, data.dump(1, '\t')))
+		return false;
 
 	for (int i = 0; i < ActionCount; i++)
 		savedBindings[i] = bindings[i];
+
+	return true;
 }
 
 sf::Keyboard::Key Input::GetPrimaryKey(Action action) const

@@ -27,7 +27,11 @@ class Settings
 {
 public:
 	void Load(const std::string& path);
-	void Save(const std::string& path);
+
+	// Returns false if the write failed (e.g. disk full, file locked); the
+	// in-memory state then stays dirty so IsDirty() keeps reporting unsaved
+	// changes instead of the caller believing the save went through.
+	bool Save(const std::string& path);
 
 	bool IsDirty() const { return !(current == saved); }
 	void Revert() { current = saved; }
