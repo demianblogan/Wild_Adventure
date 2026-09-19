@@ -63,7 +63,7 @@ private:
 		std::string texture;
 		int frameIndex = 0;
 		int frameCount = 1;
-		bool animated = false; // play through the frames over the lifetime instead of holding frameIndex
+		bool isAnimated = false; // play through the frames over the lifetime instead of holding frameIndex
 		float startScale = 1.0f;
 
 		// Dust
@@ -74,7 +74,7 @@ private:
 		DebrisPhase phase = DebrisPhase::Flying;
 		float phaseTimer = 0.0f;
 		float flyTimer = 0.0f;
-		bool dead = false;
+		bool isDead = false;
 	};
 
 	Resources& resources;
@@ -86,11 +86,11 @@ private:
 	float gravity = 0.0f;
 	float runBackOffset = 0.0f;
 
-	static constexpr float DEBRIS_GRAVITY = 600.0f;
-	static constexpr float DEBRIS_SPREAD_X = 70.0f;
-	static constexpr float DEBRIS_UP_MIN = 90.0f;
-	static constexpr float DEBRIS_UP_MAX = 160.0f;
-	static constexpr float DEBRIS_REST = 0.5f;
-	static constexpr float DEBRIS_BLINK = 1.0f;
-	static constexpr float DEBRIS_MAX_FLY = 2.0f;
+	static constexpr float DebrisGravity = 600.0f;
+	static constexpr float DebrisSpreadX = 70.0f;
+	static constexpr float DebrisUpMin = 90.0f;
+	static constexpr float DebrisUpMax = 160.0f;
+	static constexpr float DebrisRest = 0.5f;
+	static constexpr float DebrisBlink = 1.0f;
+	static constexpr float DebrisMaxFly = 2.0f;
 };

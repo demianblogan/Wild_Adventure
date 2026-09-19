@@ -9,6 +9,9 @@
 #include "graphics/Transition.h"
 #include "graphics/AnimatedBackground.h"
 #include "graphics/LightOverlay.h"
+#include "level/LevelSequencer.h"
+#include "level/PlayerFeedbackController.h"
+#include "level/ProgressSnapshot.h"
 #include "systems/core/AnimationSystem.h"
 #include "systems/enemies/BulletSystem.h"
 #include "systems/core/DamageSystem.h"
@@ -47,13 +50,6 @@
 #include <string>
 #include <vector>
 
-struct ProgressSnapshot
-{
-	std::vector<sf::Vector2f> aliveCollectibles; // positions of uncollected fruits at checkpoint
-	std::vector<sf::Vector2f> aliveBoxes;        // positions of unbroken boxes at checkpoint
-	std::vector<sf::Vector2f> aliveEnemies;      // spawn positions of living enemies at checkpoint
-};
-
 class GameState : public State
 {
 public:
@@ -74,22 +70,7 @@ private:
 	void SpawnPlayer();
 	void UpdatePlayer(float deltaTime);
 
-	void UpdateLevelFlow(float deltaTime);
-	void UpdateCheckpoints();
-
-	bool IsPlayerOnStartPlatform();
-	bool IsPlayerOnFinish();
 	bool IsPlayerOnDeathTile();
-
-	enum class LevelPhase
-	{
-		Revealing,
-		Appearing,
-		Playing,
-		Finishing,
-		Disappearing,
-		Complete
-	};
 
 	ECS::Registry registry;
 	SceneLoader sceneLoader;
@@ -111,8 +92,6 @@ private:
 	int enemiesKilled = 0;
 	int maxFruits = 0;
 	int maxEnemies = 0;
-	int checkpointFruitsCollected = 0;
-	int checkpointEnemiesKilled = 0;
 
 	ECS::InputSystem inputSystem;
 	ECS::JumpSystem jumpSystem;
@@ -147,64 +126,40 @@ private:
 
 	Transition transition;
 
+	// Level phase/checkpoint flow and the player's cosmetic reactions are each
+	// their own class; GameState is left orchestrating which systems run, in
+	// what order, and how a death or level completion transitions to the next
+	// state.
+	LevelSequencer levelSequencer;
+	PlayerFeedbackController playerFeedback;
+
 	std::string levelPath;
 	int levelNumber = 1;
 	float fallLimit = 0.0f;
 	bool isRestarting = false;
 
-	bool wasOnGround = false;
-	bool deathSoundPlayed = false;
+	bool hasPlayedDeathSound = false;
 	float deathFlashTimer = 0.0f; // white "lightning" flash over the background on death
 	float deathFallTimer = 0.0f;  // time spent tumbling after a damage death
 
-	bool  waterLevel = false;     // "water" theme: floaty gravity and ambient bubbles
+	bool  isWaterLevel = false;     // "water" theme: floaty gravity and ambient bubbles
 	float bubbleTimer = 0.0f;     // countdown to the next ambient bubble
 
-	static constexpr float DEATH_FLASH_TIME = 0.2f; // duration of the death "lightning" flash
-	static constexpr float DEATH_FALL_TIME = 0.5f;  // max tumble time before the restart kicks in
-	static constexpr float WATER_GRAVITY_SCALE = 0.55f;   // gravity multiplier in a water level
-	static constexpr float WATER_BUBBLE_INTERVAL = 0.15f; // seconds between ambient bubbles
-
-	int previousPlayerHealth = -1;
-	int previousJumpsRemaining = 0;
-	float runDustTimer = 0.0f;
-	float previousLockTimer = 0.0f;
-
-	static constexpr float RUN_DUST_INTERVAL = 0.12f;
+	static constexpr float DeathFlashTime = 0.2f; // duration of the death "lightning" flash
+	static constexpr float DeathFallTime = 0.5f;  // max tumble time before the restart kicks in
+	static constexpr float WaterGravityScale = 0.55f;   // gravity multiplier in a water level
+	static constexpr float WaterBubbleInterval = 0.15f; // seconds between ambient bubbles
 
 	// Hit stop: the world freezes for a moment after stomping an enemy.
 	float hitStopTimer = 0.0f;
-	bool hitStopFrozen = false; // interpolation already pinned for this freeze
+	bool isHitStopFrozen = false; // interpolation already pinned for this freeze
 
-	static constexpr float HIT_STOP_DURATION = 0.06f;
+	static constexpr float HitStopDuration = 0.06f;
 
-	// Squash & stretch: the player's sprite briefly deforms on jump, land and
-	// hit, then springs back to normal. X/Y pairs roughly preserve volume.
-	float squashX = 1.0f;
-	float squashY = 1.0f;
+	ECS::Entity playerEntity = ECS::InvalidEntity;
+	ECS::Entity startPlatformEntity = ECS::InvalidEntity;
 
-	static constexpr sf::Vector2f SQUASH_JUMP = { 0.80f, 1.25f }; // taking off: tall and thin
-	static constexpr sf::Vector2f SQUASH_LAND = { 1.25f, 0.80f }; // touchdown: wide and short
-	static constexpr sf::Vector2f SQUASH_HIT_SIDE     = { 0.75f, 1.20f }; // compressed along the blow
-	static constexpr sf::Vector2f SQUASH_HIT_VERTICAL = { 1.20f, 0.75f };
-	static constexpr float SQUASH_RETURN_SPEED = 10.0f; // exponential snap-back rate
+	std::optional<sf::Vector2f> respawnOverride; // set when reloading at a checkpoint
 
-	LevelPhase levelPhase = LevelPhase::Revealing;
-	ECS::Entity playerEntity = ECS::INVALID_ENTITY;
-	ECS::Entity startPlatformEntity = ECS::INVALID_ENTITY;
-	ECS::Entity appearEffectEntity = ECS::INVALID_ENTITY;
-	bool startMovingPlayed = false;
-
-	ECS::Entity finishEntity = ECS::INVALID_ENTITY;
-	ECS::Entity disappearEffectEntity = ECS::INVALID_ENTITY;
-	float finishTimer = 0.0f;
-	bool levelCompleteShown = false;
-
-	std::optional<sf::Vector2f> respawnOverride;           // set when reloading at a checkpoint
-	sf::Vector2f respawnPoint;                             // current respawn (start, or last checkpoint)
-	int checkpointScore = 0;                               // score frozen at the last checkpoint touch
-	std::optional<ProgressSnapshot> checkpointSnapshot;   // entity state at the last checkpoint touch
-
-	static constexpr float APPEAR_HEIGHT = 50.0f;
-	static constexpr float FINISH_RISE_TIME = 0.3f; // bounce arc before the hero vanishes
+	static constexpr float AppearHeight = 50.0f;
 };

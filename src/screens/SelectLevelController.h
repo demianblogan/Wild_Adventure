@@ -5,7 +5,7 @@
 #include <array>
 #include <functional>
 
-class Context;
+struct Context;
 
 namespace sf
 {
@@ -35,16 +35,16 @@ public:
 private:
 	struct Cell
 	{
-		bool selectable = false; // unlocked and its .tmj file exists
-		bool completed = false;
+		bool isSelectable = false; // unlocked and its .tmj file exists
+		bool isCompleted = false;
 		int stars = 0;           // best stars when completed
 	};
 
-	static constexpr int COLUMNS = 3;
-	static constexpr int ROWS = 3;
+	static constexpr int Columns = 3;
+	static constexpr int Rows = 3;
 
-	static constexpr float CELL_SIZE = 40.0f;
-	static constexpr float CELL_GAP = 8.0f;
+	static constexpr float CellSize = 40.0f;
+	static constexpr float CellGap = 8.0f;
 
 	void RebuildCells();
 	void MoveSelection(int deltaColumn, int deltaRow);
@@ -55,7 +55,7 @@ private:
 
 	Context& context;
 
-	std::array<Cell, Campaign::LEVEL_COUNT> cells;
+	std::array<Cell, Campaign::LevelCount> cells;
 	int selected = 0;
 	bool wantsClose = false;
 	std::function<void(int)> launchHandler;

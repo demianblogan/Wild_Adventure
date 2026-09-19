@@ -1,6 +1,6 @@
 # 🦊 Wild Adventure
 
-A handcrafted pixel-art 2D platformer built with **C++23**, **SFML 3**, and a fully custom **Entity-Component-System architecture**.
+A handcrafted pixel-art 2D platformer built with **C++23**, **SFML 3.1**, and a fully custom **Entity-Component-System architecture**.
 
 Run, jump, explore, defeat enemies, avoid deadly traps, collect fruits, and master every challenge to achieve 100% completion.
 
@@ -151,7 +151,7 @@ README.md
 ## ⚙️ Technologies
 
 * C++23
-* SFML 3
+* SFML 3.1
 * nlohmann/json
 * CMake
 * vcpkg
@@ -177,7 +177,23 @@ Quick start:
 
 * C++23 compatible compiler
 * CMake 3.25+
-* vcpkg
+* [vcpkg](https://github.com/microsoft/vcpkg) (for nlohmann-json)
+* SFML 3.1.0, built locally — see [libs/SFML/README.md](libs/SFML/README.md).
+  vcpkg's own `sfml` port isn't updated past 3.0.2 yet, so SFML is vendored
+  separately from the rest of the dependencies.
+
+### Set up the `default` preset
+
+`CMakePresets.json` only defines the shared, machine-independent `base` preset. The
+`default` and `release` presets point at *your* local vcpkg install, so they live in
+`CMakeUserPresets.json` — a gitignored file you create once from the example:
+
+```bash
+cp CMakeUserPresets.json.example CMakeUserPresets.json
+```
+
+Then edit `CMAKE_TOOLCHAIN_FILE` in `CMakeUserPresets.json` to point at
+`<your vcpkg checkout>/scripts/buildsystems/vcpkg.cmake`.
 
 ### Configure
 
@@ -188,7 +204,13 @@ cmake --preset default
 ### Build
 
 ```bash
-cmake --build build
+cmake --build build/default
+```
+
+### Test
+
+```bash
+ctest --test-dir build/default
 ```
 
 ### Run

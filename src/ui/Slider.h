@@ -45,7 +45,7 @@ namespace UI
 
 		Element* track = nullptr;
 		Element* fill = nullptr;
-		std::array<Element*, INTERACTION_STATE_COUNT> handles = { nullptr, nullptr, nullptr };
+		std::array<Element*, InteractionStateCount> handles = { nullptr, nullptr, nullptr };
 		Element* activatedHandle = nullptr;
 
 		float minValue = 0.0f;

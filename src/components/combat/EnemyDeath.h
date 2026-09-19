@@ -7,11 +7,13 @@ namespace ECS
 		enum class State { DeathPause, DeathFalling };
 
 		State state = State::DeathPause;
-		float stateTimer = DEATH_PAUSE_DURATION; // initialized to full duration when added
+		float stateTimer = DeathPauseDuration; // initialized to full duration when added
 
-		static constexpr float DEATH_PAUSE_DURATION = 0.1f;
-		static constexpr float DEATH_BOUNCE_SPEED = 150.0f;
-		static constexpr float FALL_GRAVITY = 800.0f; // for flyers that patrol with zero gravity
-		static constexpr float MAX_FALL_SPEED = 500.0f;
+		static constexpr float DeathPauseDuration = 0.1f;
+		static constexpr float DeathBounceSpeed = 150.0f;
+		static constexpr float FallGravity = 800.0f; // for flyers that patrol with zero gravity
+		static constexpr float MaxFallSpeed = 500.0f;
+		static constexpr float SpinBaseSpeed = 270.0f;     // degrees/second, before the random extra
+		static constexpr float SpinSpeedVariance = 90.0f;  // random extra added on top of the base
 	};
 }

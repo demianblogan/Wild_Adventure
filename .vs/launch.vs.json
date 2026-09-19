@@ -1,0 +1,13 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "CMakeLists.txt",
+      "projectTarget": "Platformer.exe (Platformer.exe)",
+      "name": "Platformer.exe (Platformer.exe)",
+      "currentDir": "${workspaceRoot}"
+    }
+  ]
+}

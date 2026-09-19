@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics/Rect.hpp>
 
-class Context;
+struct Context;
 
 namespace sf
 {

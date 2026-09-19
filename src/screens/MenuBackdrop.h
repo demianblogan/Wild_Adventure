@@ -61,5 +61,5 @@ private:
 	float panMaxX = 0.0f;
 	int panDirection = 1;
 
-	static constexpr float PAN_SPEED = 60.0f; // pixels per second (1 virtual pixel per frame at 60 FPS)
+	static constexpr float PanSpeed = 60.0f; // pixels per second (1 virtual pixel per frame at 60 FPS)
 };

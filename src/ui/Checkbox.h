@@ -38,11 +38,11 @@ namespace UI
 
 		Element* GetBackgroundForState(InteractionState state) const;
 
-		std::array<Element*, INTERACTION_STATE_COUNT> backgrounds = { nullptr, nullptr, nullptr };
+		std::array<Element*, InteractionStateCount> backgrounds = { nullptr, nullptr, nullptr };
 		Element* checkedView = nullptr;
 		Element* uncheckedView = nullptr;
 
-		std::array<std::optional<sf::Color>, INTERACTION_STATE_COUNT> viewColors = {};
+		std::array<std::optional<sf::Color>, InteractionStateCount> viewColors = {};
 
 		bool isChecked = false;
 		std::function<void(bool)> onCheckedChanged;

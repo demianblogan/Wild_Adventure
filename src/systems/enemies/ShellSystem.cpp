@@ -17,6 +17,11 @@
 
 namespace ECS
 {
+	namespace
+	{
+		constexpr float StompBounceSpeed = 200.0f; // upward speed the player gets from a successful stomp
+	}
+
 	ShellSystem::ShellSystem(Registry& registry, Audio::Mixer& mixer)
 		: registry(registry)
 		, mixer(mixer)
@@ -32,7 +37,7 @@ namespace ECS
 		Velocity*       playerVelocity  = nullptr;
 		AnimationState* playerAnimState = nullptr;
 
-		if (playerEntity != INVALID_ENTITY)
+		if (playerEntity != InvalidEntity)
 		{
 			playerTransform = &registry.Get<Transform>(playerEntity);
 			playerCollider  = &registry.Get<Collider>(playerEntity);
@@ -77,11 +82,11 @@ namespace ECS
 					{
 						// Roll away from the player at once (touched on its right -> rolls
 						// left); the impact flash plays while it already moves.
-						shell.direction        = (playerTransform->x > transform.x) ? -1 : 1;
-						shell.state            = Shell::State::Rolling;
-						shell.harmlessToKicker = true;
-						velocity.x             = shell.speed * static_cast<float>(shell.direction);
-						animState.current      = "WallHit";
+						shell.direction          = (playerTransform->x > transform.x) ? -1 : 1;
+						shell.state              = Shell::State::Rolling;
+						shell.isHarmlessToKicker = true;
+						velocity.x               = shell.speed * static_cast<float>(shell.direction);
+						animState.current        = "WallHit";
 					}
 					break;
 
@@ -105,7 +110,7 @@ namespace ECS
 
 					// The shell becomes dangerous to the kicker only once they step clear.
 					if (!overlap)
-						shell.harmlessToKicker = false;
+						shell.isHarmlessToKicker = false;
 
 					if (overlap && playerHittable)
 					{
@@ -121,12 +126,12 @@ namespace ECS
 							velocity.x = 0.0f;
 
 							mixer.PlaySound("jump_on_enemy");
-							playerVelocity->y = -200.0f;
+							playerVelocity->y = -StompBounceSpeed;
 							if (registry.Has<Jump>(playerEntity)
 								&& registry.Get<Jump>(playerEntity).jumpsRemaining < 1)
 								registry.Get<Jump>(playerEntity).jumpsRemaining = 1;
 						}
-						else if (!shell.harmlessToKicker)
+						else if (!shell.isHarmlessToKicker)
 						{
 							// Side contact hurts the player; the shell keeps rolling.
 							playerHealth->current -= 1;

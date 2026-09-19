@@ -80,6 +80,13 @@ namespace ECS
 			return *static_cast<ComponentPool<T>*>(basePool);
 		}
 
+		// Never reused: a destroyed entity's id is retired for good, so a
+		// stale Entity value can never later collide with a newly created,
+		// unrelated one (the classic ABA problem a generation counter guards
+		// against). The trade-off is that ids only grow -- fine here because
+		// a Registry lives for at most one level attempt (GameState owns it
+		// and is rebuilt on every restart/reload), so this never accumulates
+		// across more than a single playthrough.
 		Entity nextEntity = 0;
 		std::vector<std::unique_ptr<IComponentPool>> pools;
 	};

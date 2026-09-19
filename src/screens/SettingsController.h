@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-class Context;
+struct Context;
 
 namespace sf
 {
@@ -85,9 +85,9 @@ private:
 	int resolutionIndex = 0;
 
 	sf::Color resolutionCaptionColor; // caption color while the resolution row is enabled
-	bool resolutionCaptionColorKnown = false;
+	bool isResolutionCaptionColorKnown = false;
 
-	bool capturingKey = false;
+	bool isCapturingKey = false;
 	Action captureAction = Action::MoveLeft;
-	bool waitForKeyRelease = false; // suppress nav until keys from a finished capture are released
+	bool isWaitingForKeyRelease = false; // suppress nav until keys from a finished capture are released
 };

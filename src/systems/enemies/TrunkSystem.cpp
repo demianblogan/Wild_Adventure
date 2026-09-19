@@ -19,6 +19,12 @@
 
 namespace ECS
 {
+	namespace
+	{
+		constexpr float BulletSpawnSideGap = 6.0f; // clears the trunk's own collider
+		constexpr float BulletSpawnRise = 5.0f;     // just above the trunk's base
+	}
+
 	TrunkSystem::TrunkSystem(Registry& registry)
 		: registry(registry)
 	{}
@@ -52,43 +58,43 @@ namespace ECS
 
 				const float trunkCenterY  = transform.y - collider.height * 0.5f;
 				const float dx            = playerX - transform.x;
-				const bool  sameLevel     = std::abs(playerCenterY - trunkCenterY) < TrunkAI::SIGHT_TOLERANCE;
-				const bool  inRange       = std::abs(dx) < TrunkAI::SIGHT_RANGE;
+				const bool  sameLevel     = std::abs(playerCenterY - trunkCenterY) < TrunkAI::SightTolerance;
+				const bool  inRange       = std::abs(dx) < TrunkAI::SightRange;
 				const bool  playerInFront = (dx * static_cast<float>(patrol.direction)) > 0.0f;
 				const bool  playerVisible = sameLevel && inRange && playerInFront;
 
 				switch (trunk.state)
 				{
 				case TrunkAI::State::Patrolling:
-					patrol.paused = false;
+					patrol.isPaused = false;
 					if (playerVisible)
 					{
-						trunk.state         = TrunkAI::State::Shooting;
-						trunk.shootCooldown = 0.0f;
-						trunk.bulletFired   = false;
-						patrol.paused       = true;
-						velocity.x          = 0.0f;
-						patrol.direction    = (dx >= 0.0f) ? 1 : -1;
+						trunk.state           = TrunkAI::State::Shooting;
+						trunk.shootCooldown   = 0.0f;
+						trunk.hasFiredBullet  = false;
+						patrol.isPaused       = true;
+						velocity.x            = 0.0f;
+						patrol.direction      = (dx >= 0.0f) ? 1 : -1;
 						facing.isLookingRight = (dx >= 0.0f);
-						animState.current   = "Attack";
+						animState.current     = "Attack";
 					}
 					break;
 
 				case TrunkAI::State::Shooting:
 					if (!playerVisible)
 					{
-						trunk.state       = TrunkAI::State::Patrolling;
-						trunk.bulletFired = false;
-						patrol.paused     = false;
-						animState.current = "Run";
+						trunk.state          = TrunkAI::State::Patrolling;
+						trunk.hasFiredBullet = false;
+						patrol.isPaused      = false;
+						animState.current    = "Run";
 						break;
 					}
 
 					// Keep stopped and facing the player even if they strafed slightly.
-					patrol.paused         = true;
-					velocity.x            = 0.0f;
-					patrol.direction      = (dx >= 0.0f) ? 1 : -1;
-					facing.isLookingRight = (dx >= 0.0f);
+					patrol.isPaused         = true;
+					velocity.x              = 0.0f;
+					patrol.direction        = (dx >= 0.0f) ? 1 : -1;
+					facing.isLookingRight   = (dx >= 0.0f);
 
 					// Count down cooldown between shots.
 					if (trunk.shootCooldown > 0.0f)
@@ -96,29 +102,29 @@ namespace ECS
 						trunk.shootCooldown -= deltaTime;
 						if (trunk.shootCooldown <= 0.0f)
 						{
-							trunk.shootCooldown   = 0.0f;
-							trunk.bulletFired     = false; // reset so new attack can fire
-							animState.current     = "Attack";
+							trunk.shootCooldown  = 0.0f;
+							trunk.hasFiredBullet = false; // reset so new attack can fire
+							animState.current    = "Attack";
 						}
 						break;
 					}
 
-					// Wait for the attack animation; fire on frame 8, transition after finish.
+					// Wait for the attack animation; fire on TrunkAI::FireFrame, transition after finish.
 					if (registry.Has<Animation>(entity))
 					{
 						const Animation& anim = registry.Get<Animation>(entity);
 						if (anim.playingState == "Attack")
 						{
-							if (!trunk.bulletFired && anim.currentFrame >= 7)
+							if (!trunk.hasFiredBullet && anim.currentFrame >= TrunkAI::FireFrame)
 							{
 								SpawnBullet(transform, collider, patrol.direction);
-								trunk.bulletFired = true;
+								trunk.hasFiredBullet = true;
 							}
 							if (anim.isFinished)
 							{
-								trunk.shootCooldown = TrunkAI::SHOOT_INTERVAL;
-								trunk.bulletFired   = false;
-								animState.current   = "Idle";
+								trunk.shootCooldown  = TrunkAI::ShootInterval;
+								trunk.hasFiredBullet = false;
+								animState.current    = "Idle";
 							}
 						}
 					}
@@ -129,13 +135,13 @@ namespace ECS
 
 	void TrunkSystem::SpawnBullet(const Transform& transform, const Collider& collider, int direction)
 	{
-		const float spawnX = transform.x + static_cast<float>(direction) * (collider.width / 2.0f + 6.0f);
-		const float spawnY = transform.y - 5.0f;
+		const float spawnX = transform.x + static_cast<float>(direction) * (collider.width / 2.0f + BulletSpawnSideGap);
+		const float spawnY = transform.y - BulletSpawnRise;
 
 		Entity bullet = registry.CreateEntity();
 		registry.Add<Transform>(bullet, {spawnX, spawnY});
 		registry.Add<PreviousTransform>(bullet, {spawnX, spawnY});
-		registry.Add<Velocity>(bullet, {TrunkAI::BULLET_SPEED * static_cast<float>(direction), 0.0f});
+		registry.Add<Velocity>(bullet, {TrunkAI::BulletSpeed * static_cast<float>(direction), 0.0f});
 
 		Sprite sprite;
 		sprite.textureName = "trunk_bullet";

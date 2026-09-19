@@ -364,7 +364,7 @@ void SceneLoader::RegisterLoaders()
 		{
 			ECS::Box box;
 			box.hitsToBreak = data.at("hitsToBreak");
-			box.dropFruitPerHit = data.at("dropFruitPerHit");
+			box.dropsFruitPerHit = data.at("dropFruitPerHit");
 
 			for (const auto& fruit : data.at("fruits"))
 				box.fruits.push_back(fruit.get<std::string>());

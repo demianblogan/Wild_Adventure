@@ -17,6 +17,6 @@ namespace ECS
 
 		// Right after a kick the player still overlaps the shell; it must not hurt them
 		// until they have stepped clear, so pushing it never "rolls into" the kicker.
-		bool harmlessToKicker = false;
+		bool isHarmlessToKicker = false;
 	};
 }

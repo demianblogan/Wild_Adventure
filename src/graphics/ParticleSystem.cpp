@@ -103,10 +103,10 @@ void ParticleSystem::EmitDebris(sf::Vector2f position, const std::string& textur
 		// directionX == 0 spreads pieces both ways (box debris); a non-zero value
 		// biases them to fly off in that direction (bullet pieces bouncing off a wall).
 		const float velocityX = (directionX == 0)
-			? Random::Float(-DEBRIS_SPREAD_X, DEBRIS_SPREAD_X)
-			: directionX * Random::Float(DEBRIS_SPREAD_X * 0.4f, DEBRIS_SPREAD_X);
+			? Random::Float(-DebrisSpreadX, DebrisSpreadX)
+			: directionX * Random::Float(DebrisSpreadX * 0.4f, DebrisSpreadX);
 
-		particle.velocity = { velocityX, -Random::Float(DEBRIS_UP_MIN, DEBRIS_UP_MAX) };
+		particle.velocity = { velocityX, -Random::Float(DebrisUpMin, DebrisUpMax) };
 		particle.startScale = 1.0f;
 		particle.phase = DebrisPhase::Flying;
 
@@ -120,7 +120,7 @@ void ParticleSystem::EmitGhostTrail(sf::Vector2f position, int facingDir)
 	particle.kind = Kind::Dust;
 	particle.texture = "ghost_particles";
 	particle.frameCount = 4;
-	particle.animated = true;
+	particle.isAnimated = true;
 
 	// Spawn a touch off the back at a varied height, then drift straight out (no gravity).
 	particle.position = { position.x + Random::Float(-2.0f, 2.0f), position.y + Random::Float(-9.0f, 9.0f) };
@@ -153,7 +153,7 @@ void ParticleSystem::Update(float deltaTime)
 		if (particle.kind == Kind::Dust)
 		{
 			// Animated wisps (the ghost's) drift straight; plain dust is pulled by gravity.
-			if (!particle.animated)
+			if (!particle.isAnimated)
 				particle.velocity.y += gravity * deltaTime;
 			particle.position += particle.velocity * deltaTime;
 			particle.age += deltaTime;
@@ -172,7 +172,7 @@ void ParticleSystem::Update(float deltaTime)
 		// Debris.
 		if (particle.phase == DebrisPhase::Flying)
 		{
-			particle.velocity.y += DEBRIS_GRAVITY * deltaTime;
+			particle.velocity.y += DebrisGravity * deltaTime;
 			particle.position += particle.velocity * deltaTime;
 			particle.flyTimer += deltaTime;
 
@@ -191,7 +191,7 @@ void ParticleSystem::Update(float deltaTime)
 					particle.position.y = row * tileSize;
 					particle.velocity = { 0.0f, 0.0f };
 					particle.phase = DebrisPhase::Resting;
-					particle.phaseTimer = DEBRIS_REST;
+					particle.phaseTimer = DebrisRest;
 					landed = true;
 				}
 				else if (inSolid)
@@ -206,8 +206,8 @@ void ParticleSystem::Update(float deltaTime)
 				}
 			}
 
-			if (!landed && particle.flyTimer >= DEBRIS_MAX_FLY)
-				particle.dead = true; // fell into a pit / never landed
+			if (!landed && particle.flyTimer >= DebrisMaxFly)
+				particle.isDead = true; // fell into a pit / never landed
 		}
 		else if (particle.phase == DebrisPhase::Resting)
 		{
@@ -215,21 +215,21 @@ void ParticleSystem::Update(float deltaTime)
 			if (particle.phaseTimer <= 0.0f)
 			{
 				particle.phase = DebrisPhase::Blinking;
-				particle.phaseTimer = DEBRIS_BLINK;
+				particle.phaseTimer = DebrisBlink;
 			}
 		}
 		else // Blinking
 		{
 			particle.phaseTimer -= deltaTime;
 			if (particle.phaseTimer <= 0.0f)
-				particle.dead = true;
+				particle.isDead = true;
 		}
 	}
 
 	std::erase_if(particles, [](const Particle& particle)
 		{
 			if (particle.kind == Kind::Debris)
-				return particle.dead;
+				return particle.isDead;
 			return particle.age >= particle.lifetime; // Dust and Bubble
 		});
 }
@@ -270,7 +270,7 @@ void ParticleSystem::Draw(sf::RenderTarget& target)
 
 		// Animated particles cycle through their frames over their life; others hold one frame.
 		int displayedFrame = particle.frameIndex;
-		if (particle.animated)
+		if (particle.isAnimated)
 			displayedFrame = std::clamp(static_cast<int>(dustProgress * particle.frameCount), 0, particle.frameCount - 1);
 
 		sf::Sprite sprite(texture);
@@ -283,7 +283,7 @@ void ParticleSystem::Draw(sf::RenderTarget& target)
 			const auto alpha = static_cast<std::uint8_t>(remaining * 255.0f);
 
 			// Animated wisps keep their size and just fade; plain dust shrinks as it fades.
-			const float scale = particle.animated ? particle.startScale : particle.startScale * remaining;
+			const float scale = particle.isAnimated ? particle.startScale : particle.startScale * remaining;
 			sprite.setScale({ scale, scale });
 			sprite.setColor(sf::Color(255, 255, 255, alpha));
 		}

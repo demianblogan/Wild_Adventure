@@ -18,7 +18,7 @@ namespace ECS
 {
 	namespace
 	{
-		constexpr float SHELL_KICK_GRACE = 0.3f; // keep the shell un-kickable just after it appears
+		constexpr float ShellKickGrace = 0.3f; // keep the shell un-kickable just after it appears
 	}
 
 	SnailSystem::SnailSystem(Registry& registry, SceneLoader& loader)
@@ -73,7 +73,7 @@ namespace ECS
 		if (registry.Has<Facing>(shell))
 			registry.Get<Facing>(shell).isLookingRight = faceRight;
 		if (registry.Has<Shell>(shell))
-			registry.Get<Shell>(shell).kickGrace = SHELL_KICK_GRACE;
+			registry.Get<Shell>(shell).kickGrace = ShellKickGrace;
 	}
 
 	void SnailSystem::SpawnBody(float x, float y)

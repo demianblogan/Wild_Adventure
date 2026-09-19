@@ -2,7 +2,7 @@
 
 #include <SFML/Window/Event.hpp>
 
-class Context;
+struct Context;
 
 class State
 {

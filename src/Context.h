@@ -2,7 +2,7 @@
 
 class VirtualScreen;
 class StateMachine;
-class Resources;
+struct Resources;
 class Input;
 class Settings;
 class GraphicsTarget;

@@ -42,7 +42,7 @@ namespace UI
 
 		Animation& AddAnimation(std::unique_ptr<Animation> animation);
 
-		virtual void SetColor(sf::Color color) {}
+		virtual void SetColor(sf::Color) {}
 
 		std::string name;
 
@@ -61,7 +61,6 @@ namespace UI
 		// (left/right move between them, up/down leave the row).
 		bool isNavigationRow = false;
 
-	protected:
 	protected:
 		sf::Vector2f ComputePosition(sf::Vector2f parentPosition, sf::Vector2f parentSize) const;
 

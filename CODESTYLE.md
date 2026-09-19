@@ -4,7 +4,7 @@
 - Types (classes, structs, enums): `PascalCase`
 - Functions and methods: `PascalCase`
 - Variables, parameters, fields: `camelCase`
-- Compile-time / true constants (one fixed value for the whole program or object lifetime): `UPPER_CASE`
+- Compile-time / true constants (one fixed value for the whole program or object lifetime): `PascalCase`
 - Local `const` variables that receive a new value each call/iteration are still variables: `camelCase`
 
 ## Files

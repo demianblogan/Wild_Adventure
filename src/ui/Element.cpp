@@ -95,6 +95,6 @@ namespace UI
 			- sf::Vector2f(pivot.x * size.x, pivot.y * size.y);
 	}
 
-	void Element::DrawSelf(sf::RenderTarget& target, sf::Vector2f absolutePosition) const
+	void Element::DrawSelf(sf::RenderTarget&, sf::Vector2f) const
 	{}
 }

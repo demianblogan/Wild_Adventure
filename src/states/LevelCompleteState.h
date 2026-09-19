@@ -54,12 +54,12 @@ private:
 	int maxEnemies;
 
 	// Which stats/stars have been revealed.
-	bool showDeaths   = false;
-	bool showFruits   = false;
-	bool showEnemies  = false;
-	bool star1Earned  = false;
-	bool star2Earned  = false;
-	bool star3Earned  = false;
+	bool hasRevealedDeaths  = false;
+	bool hasRevealedFruits  = false;
+	bool hasRevealedEnemies = false;
+	bool hasEarnedStar1     = false;
+	bool hasEarnedStar2     = false;
+	bool hasEarnedStar3     = false;
 
 	// Current animated display values (fractional for smooth counting).
 	float displayedDeaths   = 0.0f;
@@ -73,13 +73,13 @@ private:
 	float starAnimTimer  = 0.0f;
 	int   starFrame      = 0;
 
-	static constexpr float STAR_FRAME_DURATION = 0.07f;
-	static constexpr int   STAR_FRAME_COUNT    = 13;
-	static constexpr int   STAR_FRAME_SIZE     = 32;
+	static constexpr float StarFrameDuration = 0.07f;
+	static constexpr int   StarFrameCount    = 13;
+	static constexpr int   StarFrameSize     = 32;
 
-	static constexpr float TITLE_WAIT    = 1.0f;
-	static constexpr float COUNT_DURATION = 0.7f;
-	static constexpr float STAR_PAUSE    = 0.35f;
+	static constexpr float TitleWait    = 1.0f;
+	static constexpr float CountDuration = 0.7f;
+	static constexpr float StarPause    = 0.35f;
 
 	UI::Root       completeInterface;
 	UI::DataLoader completeLoader;

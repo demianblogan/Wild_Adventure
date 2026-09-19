@@ -17,6 +17,11 @@
 
 namespace ECS
 {
+	namespace
+	{
+		constexpr float BulletSpawnDrop = 4.0f; // just below the bee's body
+	}
+
 	BeeSystem::BeeSystem(Registry& registry)
 		: registry(registry)
 	{}
@@ -26,7 +31,7 @@ namespace ECS
 		// Capture the player's X by value, not by reference: SpawnBullet adds components
 		// below, which can reallocate the Transform pool and dangle a held pointer.
 		const Entity player      = FindPlayer(registry);
-		const bool   playerFound = player != INVALID_ENTITY;
+		const bool   playerFound = player != InvalidEntity;
 		const float  playerX     = playerFound ? registry.Get<Transform>(player).x : 0.0f;
 
 		registry.ForEach<BeeAI, Transform, Collider, Velocity, AnimationState>(
@@ -38,11 +43,11 @@ namespace ECS
 					return;
 
 				// Capture the spawn point as the centre of the figure-8 on first tick.
-				if (!bee.initialized)
+				if (!bee.isInitialized)
 				{
-					bee.anchorX     = transform.x;
-					bee.anchorY     = transform.y;
-					bee.initialized = true;
+					bee.anchorX       = transform.x;
+					bee.anchorY       = transform.y;
+					bee.isInitialized = true;
 				}
 
 				// Drive the figure-8 by steering velocity toward the exact path point for
@@ -62,7 +67,7 @@ namespace ECS
 
 				// The player is "near" purely by horizontal distance: the bee rains bullets
 				// straight down, so vertical alignment does not matter.
-				const float attackRange = collider.width * BeeAI::ATTACK_RANGE_FACTOR;
+				const float attackRange = collider.width * BeeAI::AttackRangeFactor;
 				const bool  playerNear  = playerFound
 					&& std::abs(playerX - transform.x) < attackRange;
 
@@ -71,19 +76,19 @@ namespace ECS
 				case BeeAI::State::Flying:
 					if (playerNear)
 					{
-						bee.state         = BeeAI::State::Attacking;
-						bee.shootCooldown = 0.0f;
-						bee.bulletFired   = false;
-						animState.current = "Attack";
+						bee.state          = BeeAI::State::Attacking;
+						bee.shootCooldown  = 0.0f;
+						bee.hasFiredBullet = false;
+						animState.current  = "Attack";
 					}
 					break;
 
 				case BeeAI::State::Attacking:
 					if (!playerNear)
 					{
-						bee.state         = BeeAI::State::Flying;
-						bee.bulletFired   = false;
-						animState.current = "Idle";
+						bee.state          = BeeAI::State::Flying;
+						bee.hasFiredBullet = false;
+						animState.current  = "Idle";
 						break;
 					}
 
@@ -93,9 +98,9 @@ namespace ECS
 						bee.shootCooldown -= deltaTime;
 						if (bee.shootCooldown <= 0.0f)
 						{
-							bee.shootCooldown = 0.0f;
-							bee.bulletFired   = false;
-							animState.current = "Attack";
+							bee.shootCooldown  = 0.0f;
+							bee.hasFiredBullet = false;
+							animState.current  = "Attack";
 						}
 						break;
 					}
@@ -106,16 +111,16 @@ namespace ECS
 						const Animation& anim = registry.Get<Animation>(entity);
 						if (anim.playingState == "Attack")
 						{
-							if (!bee.bulletFired && anim.currentFrame >= BeeAI::FIRE_FRAME)
+							if (!bee.hasFiredBullet && anim.currentFrame >= BeeAI::FireFrame)
 							{
 								SpawnBullet(transform);
-								bee.bulletFired = true;
+								bee.hasFiredBullet = true;
 							}
 							if (anim.isFinished)
 							{
-								bee.shootCooldown = BeeAI::SHOOT_INTERVAL;
-								bee.bulletFired   = false;
-								animState.current = "Idle";
+								bee.shootCooldown  = BeeAI::ShootInterval;
+								bee.hasFiredBullet = false;
+								animState.current  = "Idle";
 							}
 						}
 					}
@@ -127,12 +132,12 @@ namespace ECS
 	void BeeSystem::SpawnBullet(const Transform& transform)
 	{
 		const float spawnX = transform.x;
-		const float spawnY = transform.y + 4.0f; // just below the bee's body
+		const float spawnY = transform.y + BulletSpawnDrop;
 
 		Entity bullet = registry.CreateEntity();
 		registry.Add<Transform>(bullet, {spawnX, spawnY});
 		registry.Add<PreviousTransform>(bullet, {spawnX, spawnY});
-		registry.Add<Velocity>(bullet, {0.0f, BeeAI::BULLET_SPEED});
+		registry.Add<Velocity>(bullet, {0.0f, BeeAI::BulletSpeed});
 
 		Sprite sprite;
 		sprite.textureName = "bee_bullet";

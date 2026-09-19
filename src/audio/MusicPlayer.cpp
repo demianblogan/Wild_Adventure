@@ -28,7 +28,7 @@ namespace Audio
 		if (!currentMusic->openFromFile(iter->second.path))
 			throw std::runtime_error("MusicPlayer: cannot open music file '" + iter->second.path + "'");
 
-		currentMusic->setLooping(iter->second.loop);
+		currentMusic->setLooping(iter->second.isLooping);
 		ApplyVolume();
 		currentMusic->play();
 	}

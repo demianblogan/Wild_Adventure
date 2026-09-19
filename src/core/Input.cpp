@@ -1,5 +1,7 @@
 #include "Input.h"
 
+#include "core/SafeFileWrite.h"
+
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -9,7 +11,7 @@
 
 namespace
 {
-	const std::unordered_map<std::string, Action> ACTION_NAMES =
+	const std::unordered_map<std::string, Action> ActionNames =
 	{
 		{ "MoveLeft", Action::MoveLeft },
 		{ "MoveRight", Action::MoveRight },
@@ -23,7 +25,7 @@ namespace
 		{ "MenuBack", Action::MenuBack }
 	};
 
-	const std::unordered_map<std::string, sf::Keyboard::Key> KEY_NAMES =
+	const std::unordered_map<std::string, sf::Keyboard::Key> KeyNames =
 	{
 		{ "A", sf::Keyboard::Key::A }, { "B", sf::Keyboard::Key::B }, { "C", sf::Keyboard::Key::C },
 		{ "D", sf::Keyboard::Key::D }, { "E", sf::Keyboard::Key::E }, { "F", sf::Keyboard::Key::F },
@@ -48,7 +50,7 @@ namespace
 		{ "LControl", sf::Keyboard::Key::LControl }, { "RControl", sf::Keyboard::Key::RControl }
 	};
 
-	const std::unordered_map<std::string, sf::Joystick::Axis> AXIS_NAMES =
+	const std::unordered_map<std::string, sf::Joystick::Axis> AxisNames =
 	{
 		{ "X", sf::Joystick::Axis::X }, { "Y", sf::Joystick::Axis::Y },
 		{ "Z", sf::Joystick::Axis::Z }, { "R", sf::Joystick::Axis::R },
@@ -58,7 +60,7 @@ namespace
 
 	std::string ActionToString(Action action)
 	{
-		for (const auto& [name, value] : ACTION_NAMES)
+		for (const auto& [name, value] : ActionNames)
 			if (value == action)
 				return name;
 
@@ -67,7 +69,7 @@ namespace
 
 	std::string AxisToString(sf::Joystick::Axis axis)
 	{
-		for (const auto& [name, value] : AXIS_NAMES)
+		for (const auto& [name, value] : AxisNames)
 			if (value == axis)
 				return name;
 
@@ -77,7 +79,7 @@ namespace
 
 std::string Input::KeyName(sf::Keyboard::Key key)
 {
-	for (const auto& [name, value] : KEY_NAMES)
+	for (const auto& [name, value] : KeyNames)
 		if (value == key)
 			return name;
 
@@ -95,13 +97,13 @@ void Input::LoadBindingsFile(const std::string& path, BindingSet target, float* 
 	if (outAxisThreshold != nullptr)
 		*outAxisThreshold = data.value("axisThreshold", 50.0f);
 
-	for (int i = 0; i < ACTION_COUNT; i++)
+	for (int i = 0; i < ActionCount; i++)
 		target[i].clear();
 
 	for (const auto& [actionName, bindingList] : data.at("bindings").items())
 	{
-		const auto actionFound = ACTION_NAMES.find(actionName);
-		if (actionFound == ACTION_NAMES.end())
+		const auto actionFound = ActionNames.find(actionName);
+		if (actionFound == ActionNames.end())
 			throw std::runtime_error("Input: unknown action '" + actionName + "'");
 
 		std::vector<Binding>& list = target[static_cast<int>(actionFound->second)];
@@ -113,8 +115,8 @@ void Input::LoadBindingsFile(const std::string& path, BindingSet target, float* 
 			if (bindingData.contains("key"))
 			{
 				const std::string keyName = bindingData.at("key");
-				const auto keyFound = KEY_NAMES.find(keyName);
-				if (keyFound == KEY_NAMES.end())
+				const auto keyFound = KeyNames.find(keyName);
+				if (keyFound == KeyNames.end())
 					throw std::runtime_error("Input: unknown key '" + keyName + "'");
 
 				binding.type = BindingType::Key;
@@ -128,8 +130,8 @@ void Input::LoadBindingsFile(const std::string& path, BindingSet target, float* 
 			else if (bindingData.contains("axis"))
 			{
 				const std::string axisName = bindingData.at("axis");
-				const auto axisFound = AXIS_NAMES.find(axisName);
-				if (axisFound == AXIS_NAMES.end())
+				const auto axisFound = AxisNames.find(axisName);
+				if (axisFound == AxisNames.end())
 					throw std::runtime_error("Input: unknown axis '" + axisName + "'");
 
 				binding.type = BindingType::Axis;
@@ -163,9 +165,24 @@ void Input::LoadBindingsFile(const std::string& path, BindingSet target, float* 
 
 void Input::LoadConfig(const std::string& path)
 {
-	LoadBindingsFile(path, bindings, &axisThreshold);
+	try
+	{
+		LoadBindingsFile(path, bindings, &axisThreshold);
+	}
+	catch (const std::exception&)
+	{
+		// A hand-edited or crash-truncated bindings file must never take the
+		// game down with it: fall back to the factory defaults (already
+		// loaded by LoadDefaults) and keep the bad file around for inspection
+		// instead of silently overwriting it.
+		axisThreshold = DefaultAxisThreshold;
+		for (int i = 0; i < ActionCount; i++)
+			bindings[i] = defaultBindings[i];
 
-	for (int i = 0; i < ACTION_COUNT; i++)
+		static_cast<void>(SafeFileWrite::PreserveCorruptFile(path));
+	}
+
+	for (int i = 0; i < ActionCount; i++)
 		savedBindings[i] = bindings[i];
 }
 
@@ -176,7 +193,7 @@ void Input::LoadDefaults(const std::string& path)
 
 bool Input::IsDirty() const
 {
-	for (int i = 0; i < ACTION_COUNT; i++)
+	for (int i = 0; i < ActionCount; i++)
 		if (bindings[i] != savedBindings[i])
 			return true;
 
@@ -185,13 +202,13 @@ bool Input::IsDirty() const
 
 void Input::Revert()
 {
-	for (int i = 0; i < ACTION_COUNT; i++)
+	for (int i = 0; i < ActionCount; i++)
 		bindings[i] = savedBindings[i];
 }
 
 void Input::ResetToDefaults()
 {
-	for (int i = 0; i < ACTION_COUNT; i++)
+	for (int i = 0; i < ActionCount; i++)
 		bindings[i] = defaultBindings[i];
 }
 
@@ -202,7 +219,7 @@ void Input::SaveConfig(const std::string& path)
 
 	nlohmann::json bindingsJSON = nlohmann::json::object();
 
-	for (int i = 0; i < ACTION_COUNT; i++)
+	for (int i = 0; i < ActionCount; i++)
 	{
 		nlohmann::json list = nlohmann::json::array();
 
@@ -232,13 +249,9 @@ void Input::SaveConfig(const std::string& path)
 
 	data["bindings"] = bindingsJSON;
 
-	std::ofstream file(path);
-	if (!file.is_open())
-		throw std::runtime_error("Input: cannot write '" + path + "'");
+	static_cast<void>(SafeFileWrite::WriteFileAtomically(path, data.dump(1, '\t')));
 
-	file << data.dump(1, '\t');
-
-	for (int i = 0; i < ACTION_COUNT; i++)
+	for (int i = 0; i < ActionCount; i++)
 		savedBindings[i] = bindings[i];
 }
 
@@ -310,7 +323,7 @@ void Input::Update()
 	bool anyNewPress = false;
 	InputDevice pressDevice = activeDevice;
 
-	for (int i = 0; i < ACTION_COUNT; i++)
+	for (int i = 0; i < ActionCount; i++)
 	{
 		previousDown[i] = currentDown[i];
 

@@ -18,9 +18,9 @@ namespace Audio
 	class SoundPlayer
 	{
 	public:
-		static constexpr std::size_t DEFAULT_VOICE_COUNT = 32; // max simultaneous effects
+		static constexpr std::size_t DefaultVoiceCount = 32; // max simultaneous effects
 
-		SoundPlayer(Resources& resources, std::size_t voiceCount = DEFAULT_VOICE_COUNT);
+		SoundPlayer(Resources& resources, std::size_t voiceCount = DefaultVoiceCount);
 
 		// A sound's name doubles as the key of its loaded buffer in Resources.
 		void Register(const std::string& soundName, float volume = 1.0f);

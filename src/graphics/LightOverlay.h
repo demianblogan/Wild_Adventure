@@ -24,6 +24,6 @@ public:
 private:
 	sf::Texture gradientTexture;
 
-	static constexpr unsigned int TEXTURE_SIZE = 256;
-	static constexpr float INNER_FRACTION = 0.45f; // fully lit portion of the radius
+	static constexpr unsigned int TextureSize = 256;
+	static constexpr float InnerFraction = 0.45f; // fully lit portion of the radius
 };

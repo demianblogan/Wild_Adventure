@@ -41,7 +41,7 @@ namespace ECS
 						const float midY      = transform.y - collider.height * 0.5f;
 
 						particles.EmitGhostTrail({ backX, midY }, facingDir);
-						ghost.particleTimer = GhostAI::PARTICLE_INTERVAL;
+						ghost.particleTimer = GhostAI::ParticleInterval;
 					}
 
 					ghost.phaseTimer -= deltaTime;
@@ -62,7 +62,7 @@ namespace ECS
 							// Now fully gone: hide from rendering and from combat, keep moving.
 							registry.Add<Hidden>(entity, {});
 							ghost.phase      = GhostAI::Phase::Invisible;
-							ghost.phaseTimer = GhostAI::INVISIBLE_DURATION;
+							ghost.phaseTimer = GhostAI::InvisibleDuration;
 						}
 					}
 					break;
@@ -84,7 +84,7 @@ namespace ECS
 						if (anim.playingState == "Appear" && anim.isFinished)
 						{
 							ghost.phase       = GhostAI::Phase::Visible;
-							ghost.phaseTimer  = GhostAI::VISIBLE_DURATION;
+							ghost.phaseTimer  = GhostAI::VisibleDuration;
 							animState.current = "Idle";
 						}
 					}

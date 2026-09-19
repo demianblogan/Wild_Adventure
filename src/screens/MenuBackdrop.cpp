@@ -44,7 +44,7 @@ MenuBackdrop::MenuBackdrop(Context& context)
 	};
 	camera.SetWorldSize(worldSize);
 
-	const float halfViewWidth = VirtualScreen::WIDTH / 2.0f;
+	const float halfViewWidth = VirtualScreen::Width / 2.0f;
 	panMinX = halfViewWidth;
 	panMaxX = worldSize.x - halfViewWidth;
 	panX = panMinX;
@@ -56,7 +56,7 @@ MenuBackdrop::MenuBackdrop(Context& context)
 
 void MenuBackdrop::Update(float deltaTime)
 {
-	panX += panDirection * PAN_SPEED * deltaTime;
+	panX += panDirection * PanSpeed * deltaTime;
 
 	if (panX >= panMaxX)
 	{
@@ -94,7 +94,7 @@ void MenuBackdrop::Render(float interpolationFactor)
 	renderTarget.clear(sf::Color::Black);
 
 	// Background in screen space.
-	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
 	background.Draw(renderTarget);
 
 	// World in camera space.

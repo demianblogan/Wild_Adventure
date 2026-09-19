@@ -26,7 +26,7 @@ private:
 	UI::DataLoader pauseLoader;
 	SettingsController settings;
 
-	bool inSettings = false;
+	bool isInSettings = false;
 	NavRequest pendingRequest = NavRequest::None;
 
 	std::string levelPath;

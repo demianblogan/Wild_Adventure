@@ -20,11 +20,11 @@
 
 namespace
 {
-	const std::string VICTORY_UI_PATH = "data/ui/menu/campaign_victory.json";
+	const std::string VictoryUiPath = "data/ui/menu/campaign_victory.json";
 
-	constexpr float W = static_cast<float>(VirtualScreen::WIDTH);
-	constexpr float H = static_cast<float>(VirtualScreen::HEIGHT);
-	constexpr float CX = W / 2.f;
+	constexpr float ScreenWidth = static_cast<float>(VirtualScreen::Width);
+	constexpr float ScreenHeight = static_cast<float>(VirtualScreen::Height);
+	constexpr float CenterX = ScreenWidth / 2.f;
 }
 
 CampaignVictoryState::CampaignVictoryState(Context& context)
@@ -34,7 +34,7 @@ CampaignVictoryState::CampaignVictoryState(Context& context)
 {
 	victoryLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
 	RegisterActions();
-	victoryInterface.SetContent(victoryLoader.LoadFromFile(VICTORY_UI_PATH));
+	victoryInterface.SetContent(victoryLoader.LoadFromFile(VictoryUiPath));
 	victoryInterface.ResetFocus();
 
 	const sf::Color gold(244, 199, 110, 255);
@@ -61,7 +61,7 @@ CampaignVictoryState::CampaignVictoryState(Context& context)
 
 void CampaignVictoryState::RegisterActions()
 {
-	victoryLoader.RegisterAction("cv_menu", [this] { goToMenu = true; });
+	victoryLoader.RegisterAction("cv_menu", [this] { wantsToGoToMenu = true; });
 }
 
 std::size_t CampaignVictoryState::TotalCharacters() const
@@ -104,9 +104,9 @@ void CampaignVictoryState::Update(float deltaTime)
 
 		typeTimer += deltaTime;
 
-		while (typeTimer >= CHAR_INTERVAL && revealed < TotalCharacters())
+		while (typeTimer >= CharInterval && revealed < TotalCharacters())
 		{
-			typeTimer -= CHAR_INTERVAL;
+			typeTimer -= CharInterval;
 			revealed++;
 		}
 
@@ -127,7 +127,7 @@ void CampaignVictoryState::Update(float deltaTime)
 
 		waitTimer += deltaTime;
 
-		if (waitTimer >= BUTTON_DELAY)
+		if (waitTimer >= ButtonDelay)
 		{
 			phase = Phase::Done;
 			victoryInterface.ResetFocus();
@@ -142,9 +142,9 @@ void CampaignVictoryState::Update(float deltaTime)
 		else if (input.WasReleased(Action::MenuConfirm))
 			victoryInterface.Confirm(false);
 
-		if (goToMenu)
+		if (wantsToGoToMenu)
 		{
-			goToMenu = false;
+			wantsToGoToMenu = false;
 			context.stateMachine.Clear();
 			context.stateMachine.Push(std::make_unique<MenuState>(context));
 		}
@@ -155,10 +155,10 @@ void CampaignVictoryState::Update(float deltaTime)
 void CampaignVictoryState::Render(float /*interpolationFactor*/)
 {
 	sf::RenderTarget& rt = context.virtualScreen.GetRenderTarget();
-	context.virtualScreen.SetCameraCenter(W / 2.f, H / 2.f);
+	context.virtualScreen.SetCameraCenter(ScreenWidth / 2.f, ScreenHeight / 2.f);
 
 	// Solid black background.
-	sf::RectangleShape background({ W, H });
+	sf::RectangleShape background({ ScreenWidth, ScreenHeight });
 	background.setFillColor(sf::Color::Black);
 	rt.draw(background);
 
@@ -182,7 +182,7 @@ void CampaignVictoryState::Render(float /*interpolationFactor*/)
 		text.setOrigin({
 			fullBounds.position.x + fullBounds.size.x / 2.f,
 			fullBounds.position.y + fullBounds.size.y / 2.f });
-		text.setPosition({ CX, line.centerY });
+		text.setPosition({ CenterX, line.centerY });
 
 		text.setString(line.text.substring(0, visible));
 		text.setFillColor(line.color);
@@ -193,5 +193,5 @@ void CampaignVictoryState::Render(float /*interpolationFactor*/)
 		victoryInterface.Draw(rt);
 
 	// Bloom the highlighted button.
-	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
+	context.virtualScreen.CompositeGlow(VirtualScreen::GlowUiStrength);
 }

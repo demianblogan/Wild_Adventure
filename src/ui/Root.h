@@ -77,6 +77,6 @@ namespace UI
 		InteractiveElement* draggedElement = nullptr;
 		InteractiveElement* activatedElement = nullptr;
 
-		bool confirmHeld = false; // true while the confirm key is held down
+		bool isConfirmHeld = false; // true while the confirm key is held down
 	};
 }

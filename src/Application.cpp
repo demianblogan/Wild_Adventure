@@ -29,8 +29,10 @@ Application::Application()
 	audioMixer.SetSoundVolume(settings.GetSoundVolume() / 10.0f);
 	audioMixer.SetMusicVolume(settings.GetMusicVolume() / 10.0f);
 
-	input.LoadConfig("data/input.json");
+	// Defaults load first: LoadConfig falls back to them if the saved
+	// bindings file turns out to be missing or corrupt.
 	input.LoadDefaults("data/input_default.json");
+	input.LoadConfig("data/input.json");
 
 	resources.textures.Load("cursor", "assets/textures/cursor/pointer.png");
 	resources.textures.Get("cursor").setSmooth(false);
@@ -103,17 +105,17 @@ void Application::Run()
 	while (window.isOpen())
 	{
 		float frameTime = clock.restart().asSeconds();
-		if (frameTime > MAX_FRAME_TIME)
-			frameTime = MAX_FRAME_TIME;
+		if (frameTime > MaxFrameTime)
+			frameTime = MaxFrameTime;
 
 		remainderTime += frameTime;
 
 		ProcessEvents();
 
-		while (remainderTime >= FIXED_DELTA_TIME)
+		while (remainderTime >= FixedDeltaTime)
 		{
-			Update(FIXED_DELTA_TIME);
-			remainderTime -= FIXED_DELTA_TIME;
+			Update(FixedDeltaTime);
+			remainderTime -= FixedDeltaTime;
 		}
 
 		if (!stateMachine.IsEmpty())
@@ -124,7 +126,7 @@ void Application::Run()
 			break;
 		}
 
-		const float interpolationFactor = remainderTime / FIXED_DELTA_TIME;
+		const float interpolationFactor = remainderTime / FixedDeltaTime;
 		Render(interpolationFactor);
 	}
 }
@@ -182,8 +184,8 @@ void Application::DrawCursor()
 
 	const sf::Vector2u windowSize = window.getSize();
 	const float scale = std::min(
-		static_cast<float>(windowSize.x) / VirtualScreen::WIDTH,
-		static_cast<float>(windowSize.y) / VirtualScreen::HEIGHT);
+		static_cast<float>(windowSize.x) / VirtualScreen::Width,
+		static_cast<float>(windowSize.y) / VirtualScreen::Height);
 
 	const sf::Vector2i mouse = sf::Mouse::getPosition(window);
 

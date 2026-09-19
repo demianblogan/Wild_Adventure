@@ -79,22 +79,24 @@ private:
 		bool operator==(const Binding& other) const = default;
 	};
 
-	static constexpr int ACTION_COUNT = static_cast<int>(Action::Count);
+	static constexpr int ActionCount = static_cast<int>(Action::Count);
 
-	using BindingSet = std::vector<Binding>[ACTION_COUNT];
+	using BindingSet = std::vector<Binding>[ActionCount];
 
 	static void LoadBindingsFile(const std::string& path, BindingSet target, float* outAxisThreshold);
 
 	static int FindGamepad();
 	bool IsBindingDown(const Binding& binding, int gamepad, bool& fromGamepad) const;
 
-	std::vector<Binding> bindings[ACTION_COUNT];        // working set used by Update
-	std::vector<Binding> savedBindings[ACTION_COUNT];   // last persisted state
-	std::vector<Binding> defaultBindings[ACTION_COUNT]; // factory defaults
+	std::vector<Binding> bindings[ActionCount];        // working set used by Update
+	std::vector<Binding> savedBindings[ActionCount];   // last persisted state
+	std::vector<Binding> defaultBindings[ActionCount]; // factory defaults
 
-	bool currentDown[ACTION_COUNT] = {};
-	bool previousDown[ACTION_COUNT] = {};
+	bool currentDown[ActionCount] = {};
+	bool previousDown[ActionCount] = {};
 
-	float axisThreshold = 50.0f; // percent of full axis travel
+	static constexpr float DefaultAxisThreshold = 50.0f; // percent of full axis travel
+
+	float axisThreshold = DefaultAxisThreshold;
 	InputDevice activeDevice = InputDevice::Keyboard;
 };

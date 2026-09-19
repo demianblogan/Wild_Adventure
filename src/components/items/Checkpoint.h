@@ -6,6 +6,6 @@ namespace ECS
 	// longer be re-triggered.
 	struct Checkpoint
 	{
-		bool activated = false;
+		bool isActivated = false;
 	};
 }

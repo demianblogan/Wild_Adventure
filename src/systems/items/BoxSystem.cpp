@@ -23,8 +23,14 @@ namespace ECS
 {
 	namespace
 	{
-		constexpr float FRUIT_GRAVITY = 700.0f;
-		constexpr float FRUIT_MAX_FALL_SPEED = 400.0f;
+		constexpr float FruitGravity = 700.0f;
+		constexpr float FruitMaxFallSpeed = 400.0f;
+		constexpr float FruitColliderSize = 12.0f;
+		constexpr float FruitEjectSpawnRise = 5.0f; // spawn a bit above the box's own position
+		constexpr float FruitEjectSpeedVarianceMin = 0.8f; // randomizes eject velocity so a
+		constexpr float FruitEjectSpeedVarianceMax = 1.2f; // multi-fruit break doesn't look uniform
+		constexpr float FruitPickupDelay = 0.4f; // seconds before an ejected fruit can be collected
+		constexpr int DebrisPieceCount = 4;
 	}
 
 	BoxSystem::BoxSystem(Registry& registry, SceneLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer)
@@ -46,23 +52,23 @@ namespace ECS
 		registry.Add<Transform>(fruit, transform);
 
 		Velocity velocity;
-		velocity.x = sign * ejectSpeedX * Random::Float(0.8f, 1.2f);
-		velocity.y = -ejectSpeedUp * Random::Float(0.8f, 1.2f);
+		velocity.x = sign * ejectSpeedX * Random::Float(FruitEjectSpeedVarianceMin, FruitEjectSpeedVarianceMax);
+		velocity.y = -ejectSpeedUp * Random::Float(FruitEjectSpeedVarianceMin, FruitEjectSpeedVarianceMax);
 		registry.Add<Velocity>(fruit, velocity);
 
 		Gravity gravity;
-		gravity.acceleration = FRUIT_GRAVITY;
-		gravity.maxFallSpeed = FRUIT_MAX_FALL_SPEED;
+		gravity.acceleration = FruitGravity;
+		gravity.maxFallSpeed = FruitMaxFallSpeed;
 		registry.Add<Gravity>(fruit, gravity);
 
 		Collider collider;
-		collider.width = 12.0f;
-		collider.height = 12.0f;
+		collider.width = FruitColliderSize;
+		collider.height = FruitColliderSize;
 		registry.Add<Collider>(fruit, collider);
 
 		registry.Add<CollisionState>(fruit, {});
 		registry.Add<PreviousTransform>(fruit, { x, y });
-		registry.Add<PickupDelay>(fruit, { 0.4f });
+		registry.Add<PickupDelay>(fruit, { FruitPickupDelay });
 	}
 
 	void BoxSystem::Update()
@@ -89,7 +95,7 @@ namespace ECS
 					box.isBreaking = true;
 
 				// One fruit per hit (sturdy wood box).
-				if (box.dropFruitPerHit)
+				if (box.dropsFruitPerHit)
 				{
 					const int index = box.hitsTaken - 1;
 					if (index >= 0 && index < static_cast<int>(box.fruits.size()))
@@ -97,7 +103,7 @@ namespace ECS
 						const std::string fruitName = box.fruits[index];
 						const Transform& boxTransform = registry.Get<Transform>(entity);
 						const float x = boxTransform.x;
-						const float y = boxTransform.y - 5.0f;
+						const float y = boxTransform.y - FruitEjectSpawnRise;
 						const float ejectX = box.ejectSpeedX;
 						const float ejectUp = box.ejectSpeedUp;
 
@@ -130,12 +136,12 @@ namespace ECS
 			Box& box = registry.Get<Box>(entity);
 
 			// All fruits at once on break (metal box).
-			if (!box.dropFruitPerHit)
+			if (!box.dropsFruitPerHit)
 			{
 				const std::vector<std::string> fruits = box.fruits;
 				const Transform& boxTransform = registry.Get<Transform>(entity);
 				const float x = boxTransform.x;
-				const float y = boxTransform.y - 5.0f;
+				const float y = boxTransform.y - FruitEjectSpawnRise;
 				const float ejectX = box.ejectSpeedX;
 				const float ejectUp = box.ejectSpeedUp;
 
@@ -146,13 +152,13 @@ namespace ECS
 			if (!box.debrisTexture.empty())
 			{
 				const Transform& debrisTransform = registry.Get<Transform>(entity);
-				particles.EmitDebris({ debrisTransform.x, debrisTransform.y - 5.0f }, box.debrisTexture, 4);
+				particles.EmitDebris({ debrisTransform.x, debrisTransform.y - FruitEjectSpawnRise }, box.debrisTexture, DebrisPieceCount);
 			}
 
 			if (!box.breakSound.empty())
 				mixer.PlaySound(box.breakSound);
 
-			registry.DestroyEntity(entity); // (debris on break come in Step 2)
+			registry.DestroyEntity(entity);
 		}
 	}
 }

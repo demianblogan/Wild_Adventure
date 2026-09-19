@@ -42,13 +42,13 @@ namespace ECS
 
 			components.pop_back();
 			ownerEntities.pop_back();
-			componentIndexes[entity] = INVALID_ENTITY;
+			componentIndexes[entity] = InvalidEntity;
 		}
 
 		bool Has(Entity entity) const override
 		{
 			return entity < componentIndexes.size()
-				&& componentIndexes[entity] != INVALID_ENTITY
+				&& componentIndexes[entity] != InvalidEntity
 				&& componentIndexes[entity] < ownerEntities.size()
 				&& ownerEntities[componentIndexes[entity]] == entity;
 		}
@@ -76,7 +76,7 @@ namespace ECS
 		void EnsureIndexSize(Entity entity)
 		{
 			if (entity >= componentIndexes.size())
-				componentIndexes.resize(entity + 1, INVALID_ENTITY);
+				componentIndexes.resize(entity + 1, InvalidEntity);
 		}
 
 		std::vector<T> components;

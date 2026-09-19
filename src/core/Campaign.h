@@ -8,7 +8,7 @@
 class Campaign
 {
 public:
-	static constexpr int LEVEL_COUNT = 7;
+	static constexpr int LevelCount = 7;
 
 	Campaign();
 
@@ -44,7 +44,7 @@ private:
 	void Save() const;
 
 	std::string savePath;
-	std::array<int, LEVEL_COUNT> bestStars; // -1 = not completed, 0..3 = best stars
-	bool victoryShown = false;
+	std::array<int, LevelCount> bestStars; // -1 = not completed, 0..3 = best stars
+	bool wasVictoryShown = false;
 	std::string selectedSkin = "ninja_frog";
 };

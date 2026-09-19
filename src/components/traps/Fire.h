@@ -13,7 +13,7 @@ namespace ECS
 		State state   = State::Off;
 		float onTimer = 0.0f; // counts down the On phase
 
-		static constexpr float ON_DURATION = 2.0f; // seconds the flame stays up
-		static constexpr int   BURN_DAMAGE = 1;    // damage dealt while On
+		static constexpr float OnDuration = 2.0f; // seconds the flame stays up
+		static constexpr int   BurnDamage = 1;    // damage dealt while On
 	};
 }

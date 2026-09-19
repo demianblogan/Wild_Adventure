@@ -15,7 +15,7 @@
 
 namespace
 {
-	const std::string PAUSE_UI_PATH = "data/ui/menu/pause.json";
+	const std::string PauseUiPath = "data/ui/menu/pause.json";
 }
 
 PauseState::PauseState(Context& context, std::string levelPath, int levelNumber)
@@ -29,7 +29,7 @@ PauseState::PauseState(Context& context, std::string levelPath, int levelNumber)
 	pauseLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
 	RegisterActions();
 
-	pauseInterface.SetContent(pauseLoader.LoadFromFile(PAUSE_UI_PATH));
+	pauseInterface.SetContent(pauseLoader.LoadFromFile(PauseUiPath));
 	pauseInterface.ResetFocus();
 }
 
@@ -43,7 +43,7 @@ void PauseState::RegisterActions()
 
 void PauseState::HandleEvent(const sf::Event& event)
 {
-	if (inSettings)
+	if (isInSettings)
 	{
 		settings.HandleEvent(event);
 		return;
@@ -54,13 +54,13 @@ void PauseState::HandleEvent(const sf::Event& event)
 
 void PauseState::Update(float deltaTime)
 {
-	if (inSettings)
+	if (isInSettings)
 	{
 		settings.Update(deltaTime);
 
 		if (settings.WantsClose())
 		{
-			inSettings = false;
+			isInSettings = false;
 			pauseInterface.ResetFocus();
 		}
 
@@ -115,7 +115,7 @@ void PauseState::ApplyPendingNavigation()
 		break;
 
 	case NavRequest::Options:
-		inSettings = true;
+		isInSettings = true;
 		settings.Open("pause_frame");
 		break;
 
@@ -139,20 +139,20 @@ void PauseState::Render(float /*interpolationFactor*/)
 	context.virtualScreen.BlurContents();
 
 	// Semi-transparent overlay to dim the level behind the pause menu.
-	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
-	sf::RectangleShape overlay({ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });
+	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
+	sf::RectangleShape overlay({ static_cast<float>(VirtualScreen::Width), static_cast<float>(VirtualScreen::Height) });
 	overlay.setFillColor(sf::Color(0, 0, 0, 150));
 	renderTarget.draw(overlay);
 
-	if (inSettings)
+	if (isInSettings)
 	{
 		settings.Render(renderTarget);
-		context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
+		context.virtualScreen.CompositeGlow(VirtualScreen::GlowUiStrength);
 		return;
 	}
 
 	pauseInterface.Draw(renderTarget);
 
 	// Bloom the highlighted button.
-	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
+	context.virtualScreen.CompositeGlow(VirtualScreen::GlowUiStrength);
 }

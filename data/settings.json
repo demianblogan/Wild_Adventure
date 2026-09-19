@@ -5,7 +5,7 @@
 	},
 	"graphics": {
 		"height": 1080,
-		"screenMode": "borderless",
+		"screenMode": "window",
 		"vsync": true,
 		"width": 1920
 	}

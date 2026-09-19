@@ -12,7 +12,7 @@
 
 namespace
 {
-	const std::string DIALOG_PATH = "data/ui/menu/dialog.json";
+	const std::string DialogPath = "data/ui/menu/dialog.json";
 }
 
 ConfirmState::ConfirmState(Context& context, const std::string& title, const std::string& message,
@@ -28,7 +28,7 @@ ConfirmState::ConfirmState(Context& context, const std::string& title, const std
 	loader.RegisterAction("dialog_yes", [this] { if (this->onYes) this->onYes(); Close(); });
 	loader.RegisterAction("dialog_no", [this] { if (this->onNo) this->onNo(); Close(); });
 
-	dialog.SetContent(loader.LoadFromFile(DIALOG_PATH));
+	dialog.SetContent(loader.LoadFromFile(DialogPath));
 
 	if (auto* titleLabel = dynamic_cast<UI::Label*>(dialog.FindByName("dialog_title")))
 		titleLabel->SetText(title);
@@ -38,10 +38,10 @@ ConfirmState::ConfirmState(Context& context, const std::string& title, const std
 
 void ConfirmState::Close()
 {
-	if (closed)
+	if (isClosed)
 		return;
 
-	closed = true;
+	isClosed = true;
 	context.stateMachine.Pop();
 }
 
@@ -77,11 +77,11 @@ void ConfirmState::Update(float deltaTime)
 		dialog.Confirm(false);
 }
 
-void ConfirmState::Render(float interpolationFactor)
+void ConfirmState::Render(float)
 {
-	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
 	dialog.Draw(context.virtualScreen.GetRenderTarget());
 
 	// Bloom the highlighted button.
-	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
+	context.virtualScreen.CompositeGlow(VirtualScreen::GlowUiStrength);
 }

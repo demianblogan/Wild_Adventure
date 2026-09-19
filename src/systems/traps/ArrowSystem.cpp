@@ -24,7 +24,7 @@ namespace ECS
 	void ArrowSystem::Update()
 	{
 		const Entity playerEntity = FindPlayer(registry);
-		if (playerEntity == INVALID_ENTITY)
+		if (playerEntity == InvalidEntity)
 			return;
 
 		const Transform& playerTransform = registry.Get<Transform>(playerEntity);
@@ -44,7 +44,7 @@ namespace ECS
 		registry.ForEach<Arrow, Transform, Hitbox, AnimationState>(
 			[&](Entity entity, Arrow& arrow, Transform& transform, Hitbox& hitbox, AnimationState& animState)
 			{
-				if (!arrow.triggered)
+				if (!arrow.hasTriggered)
 				{
 					const float hHalfW  = hitbox.width / 2.0f;
 					const float aLeft   = transform.x - hHalfW;
@@ -65,8 +65,8 @@ namespace ECS
 							&& registry.Get<Jump>(playerEntity).jumpsRemaining < 1)
 							registry.Get<Jump>(playerEntity).jumpsRemaining = 1;
 
-						animState.current = "Hit";
-						arrow.triggered   = true;
+						animState.current  = "Hit";
+						arrow.hasTriggered = true;
 						mixer.PlaySound("player_jump");
 					}
 				}

@@ -28,6 +28,6 @@ private:
 	float trauma = 0.0f;                       // 0..1
 	sf::Vector2f shakeOffset = { 0.0f, 0.0f }; // current frame's offset in pixels
 
-	static constexpr float MAX_SHAKE_OFFSET = 6.0f; // pixels at full trauma
-	static constexpr float TRAUMA_DECAY = 2.0f;     // trauma lost per second
+	static constexpr float MaxShakeOffset = 6.0f; // pixels at full trauma
+	static constexpr float TraumaDecay = 2.0f;     // trauma lost per second
 };

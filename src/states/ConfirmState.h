@@ -25,5 +25,5 @@ private:
 
 	std::function<void()> onYes;
 	std::function<void()> onNo;
-	bool closed = false;
+	bool isClosed = false;
 };

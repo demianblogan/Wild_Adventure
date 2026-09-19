@@ -8,6 +8,12 @@
 
 namespace ECS
 {
+	namespace
+	{
+		constexpr float TumbleSpinMin = 360.0f; // degrees/second
+		constexpr float TumbleSpinMax = 540.0f;
+	}
+
 	DeathSystem::DeathSystem(Registry& registry)
 		: registry(registry)
 	{}
@@ -26,7 +32,7 @@ namespace ECS
 					const float sign = (Random::Int(0, 1) == 0) ? -1.0f : 1.0f;
 
 					Rotation rotation;
-					rotation.spinSpeed = sign * Random::Float(360.0f, 540.0f);
+					rotation.spinSpeed = sign * Random::Float(TumbleSpinMin, TumbleSpinMax);
 					registry.Add<Rotation>(entity, rotation);
 				}
 

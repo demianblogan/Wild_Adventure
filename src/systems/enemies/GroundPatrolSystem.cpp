@@ -16,6 +16,11 @@
 
 namespace ECS
 {
+	namespace
+	{
+		constexpr float GroundProbeGap = 2.0f; // how far past the collider edge to probe for footing
+	}
+
 	GroundPatrolSystem::GroundPatrolSystem(Registry& registry, const Tilemap& tilemap, ParticleSystem& particles)
 		: registry(registry)
 		, tilemap(tilemap)
@@ -34,7 +39,7 @@ namespace ECS
 					return;
 
 				// AI systems (e.g. TrunkSystem) can suspend patrol during special behaviour.
-				if (patrol.paused)
+				if (patrol.isPaused)
 					return;
 
 				switch (patrol.state)
@@ -73,7 +78,7 @@ namespace ECS
 						if (patrol.dustTimer <= 0.0f)
 						{
 							particles.EmitRunDust({ transform.x, transform.y }, patrol.direction);
-							patrol.dustTimer = GroundPatrol::DUST_SPACING / patrol.speed;
+							patrol.dustTimer = GroundPatrol::DustSpacing / patrol.speed;
 						}
 					}
 					break;
@@ -103,7 +108,7 @@ namespace ECS
 		const Transform& transform, const Collider& collider, int direction) const
 	{
 		const float tileSize = static_cast<float>(tilemap.tileSize);
-		const float probeX   = transform.x + static_cast<float>(direction) * (collider.width / 2.0f + 2.0f);
+		const float probeX   = transform.x + static_cast<float>(direction) * (collider.width / 2.0f + GroundProbeGap);
 		const float probeY   = transform.y + tileSize * 0.5f;
 		const int   col      = static_cast<int>(std::floor(probeX / tileSize));
 		const int   row      = static_cast<int>(std::floor(probeY / tileSize));

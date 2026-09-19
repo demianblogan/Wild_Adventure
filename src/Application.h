@@ -32,8 +32,8 @@ private:
 	void Render(float interpolationFactor);
 	void DrawCursor();
 
-	static constexpr float FIXED_DELTA_TIME = 1.0f / 60.0f;
-	static constexpr float MAX_FRAME_TIME = 0.25f;
+	static constexpr float FixedDeltaTime = 1.0f / 60.0f;
+	static constexpr float MaxFrameTime = 0.25f;
 
 	sf::VideoMode desktopMode;
 	sf::RenderWindow window;

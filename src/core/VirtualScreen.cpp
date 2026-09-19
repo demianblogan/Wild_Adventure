@@ -10,11 +10,11 @@
 #include <cstdint>
 
 VirtualScreen::VirtualScreen()
-	: renderTexture({ WIDTH, HEIGHT })
-	, blurTexture({ WIDTH, HEIGHT })
-	, glowTexture({ WIDTH, HEIGHT })
-	, haloTexture({ WIDTH, HEIGHT })
-	, camera(sf::FloatRect({ 0.0f, 0.0f }, { static_cast<float>(WIDTH), static_cast<float>(HEIGHT) }))
+	: renderTexture({ Width, Height })
+	, blurTexture({ Width, Height })
+	, glowTexture({ Width, Height })
+	, haloTexture({ Width, Height })
+	, camera(sf::FloatRect({ 0.0f, 0.0f }, { static_cast<float>(Width), static_cast<float>(Height) }))
 {
 	renderTexture.setSmooth(false);
 	renderTexture.setView(camera);
@@ -26,28 +26,28 @@ VirtualScreen::VirtualScreen()
 
 	// Post effects degrade gracefully: without shader support the virtual
 	// screen is simply blitted as before.
-	gradingSupported = sf::Shader::isAvailable()
+	isGradingSupported = sf::Shader::isAvailable()
 		&& gradingShader.loadFromFile("assets/shaders/color_grading.frag", sf::Shader::Type::Fragment);
 
-	if (gradingSupported)
+	if (isGradingSupported)
 		gradingShader.setUniform("texture", sf::Shader::CurrentTexture);
 
-	blurSupported = sf::Shader::isAvailable()
+	isBlurSupported = sf::Shader::isAvailable()
 		&& blurShader.loadFromFile("assets/shaders/blur.frag", sf::Shader::Type::Fragment);
 
-	if (blurSupported)
+	if (isBlurSupported)
 		blurShader.setUniform("texture", sf::Shader::CurrentTexture);
 
-	silhouetteSupported = sf::Shader::isAvailable()
+	isSilhouetteSupported = sf::Shader::isAvailable()
 		&& silhouetteShader.loadFromFile("assets/shaders/glow_silhouette.frag", sf::Shader::Type::Fragment);
 
-	if (silhouetteSupported)
+	if (isSilhouetteSupported)
 		silhouetteShader.setUniform("texture", sf::Shader::CurrentTexture);
 
-	compositeSupported = sf::Shader::isAvailable()
+	isCompositeSupported = sf::Shader::isAvailable()
 		&& compositeShader.loadFromFile("assets/shaders/glow_composite.frag", sf::Shader::Type::Fragment);
 
-	if (compositeSupported)
+	if (isCompositeSupported)
 		compositeShader.setUniform("texture", sf::Shader::CurrentTexture);
 }
 
@@ -55,7 +55,7 @@ sf::RenderStates VirtualScreen::GlowSilhouetteStates(sf::Color color)
 {
 	sf::RenderStates states;
 
-	if (!silhouetteSupported)
+	if (!isSilhouetteSupported)
 		return states; // aura falls back to the sprite's own colors
 
 	silhouetteShader.setUniform("glowColor", sf::Glsl::Vec3(
@@ -67,14 +67,14 @@ sf::RenderStates VirtualScreen::GlowSilhouetteStates(sf::Color color)
 
 void VirtualScreen::BlurContents(int iterations)
 {
-	if (!blurSupported)
+	if (!isBlurSupported)
 		return;
 
 	// The blur passes copy full screens; views must map 1:1, independent of
 	// whatever camera a state has set.
 	const sf::View previousView = renderTexture.getView();
 	renderTexture.setView(sf::View(sf::FloatRect(
-		{ 0.0f, 0.0f }, { static_cast<float>(WIDTH), static_cast<float>(HEIGHT) })));
+		{ 0.0f, 0.0f }, { static_cast<float>(Width), static_cast<float>(Height) })));
 
 	sf::RenderStates states;
 	states.shader = &blurShader;
@@ -84,11 +84,11 @@ void VirtualScreen::BlurContents(int iterations)
 	{
 		renderTexture.display(); // make the content drawn so far samplable
 
-		blurShader.setUniform("direction", sf::Glsl::Vec2(1.0f / WIDTH, 0.0f));
+		blurShader.setUniform("direction", sf::Glsl::Vec2(1.0f / Width, 0.0f));
 		blurTexture.draw(sf::Sprite(renderTexture.getTexture()), states);
 		blurTexture.display();
 
-		blurShader.setUniform("direction", sf::Glsl::Vec2(0.0f, 1.0f / HEIGHT));
+		blurShader.setUniform("direction", sf::Glsl::Vec2(0.0f, 1.0f / Height));
 		renderTexture.draw(sf::Sprite(blurTexture.getTexture()), states);
 	}
 
@@ -97,11 +97,11 @@ void VirtualScreen::BlurContents(int iterations)
 
 void VirtualScreen::SetColorGrading(const ColorGrading& grading)
 {
-	gradingActive = gradingSupported && !grading.IsIdentity();
-	heatActive = gradingActive && grading.heat > 0.0f;
-	waterActive = gradingActive && grading.water > 0.0f;
+	isGradingActive = isGradingSupported && !grading.IsIdentity();
+	isHeatActive = isGradingActive && grading.heat > 0.0f;
+	isWaterActive = isGradingActive && grading.water > 0.0f;
 
-	if (!gradingActive)
+	if (!isGradingActive)
 		return;
 
 	gradingShader.setUniform("tint", grading.tint);
@@ -110,7 +110,7 @@ void VirtualScreen::SetColorGrading(const ColorGrading& grading)
 	gradingShader.setUniform("contrast", grading.contrast);
 
 	// The shader works in UV space; the data file speaks virtual pixels.
-	gradingShader.setUniform("heatStrength", grading.heat / static_cast<float>(WIDTH));
+	gradingShader.setUniform("heatStrength", grading.heat / static_cast<float>(Width));
 	gradingShader.setUniform("water", grading.water);
 	gradingShader.setUniform("time", 0.0f);
 }
@@ -119,29 +119,29 @@ void VirtualScreen::Clear()
 {
 	renderTexture.clear(sf::Color::Black);
 
-	if (glowUsed)
+	if (wasGlowUsed)
 	{
 		// Stale glow that was never composited last frame.
 		glowTexture.clear(sf::Color::Transparent);
-		glowUsed = false;
+		wasGlowUsed = false;
 	}
 }
 
 sf::RenderTarget& VirtualScreen::GetGlowTarget()
 {
-	glowUsed = true;
+	wasGlowUsed = true;
 	return glowTexture;
 }
 
 void VirtualScreen::CompositeGlow(float strength)
 {
-	if (!glowUsed)
+	if (!wasGlowUsed)
 		return;
 
-	glowUsed = false;
+	wasGlowUsed = false;
 
 	// Bloom needs the blur and composite shaders; without them drop the layer.
-	if (!blurSupported || !compositeSupported)
+	if (!isBlurSupported || !isCompositeSupported)
 	{
 		glowTexture.clear(sf::Color::Transparent);
 		return;
@@ -149,7 +149,7 @@ void VirtualScreen::CompositeGlow(float strength)
 
 	const sf::View previousMainView = renderTexture.getView();
 	const sf::View screenView(sf::FloatRect(
-		{ 0.0f, 0.0f }, { static_cast<float>(WIDTH), static_cast<float>(HEIGHT) }));
+		{ 0.0f, 0.0f }, { static_cast<float>(Width), static_cast<float>(Height) }));
 
 	sf::RenderStates blurStates;
 	blurStates.shader = &blurShader;
@@ -160,13 +160,13 @@ void VirtualScreen::CompositeGlow(float strength)
 	// Widen the glow sources; the untouched original stays in glowTexture,
 	// the blurred result lands in haloTexture.
 	const sf::Texture* source = &glowTexture.getTexture();
-	for (int i = 0; i < GLOW_BLUR_ITERATIONS; i++)
+	for (int i = 0; i < GlowBlurIterations; i++)
 	{
-		blurShader.setUniform("direction", sf::Glsl::Vec2(1.0f / WIDTH, 0.0f));
+		blurShader.setUniform("direction", sf::Glsl::Vec2(1.0f / Width, 0.0f));
 		blurTexture.draw(sf::Sprite(*source), blurStates);
 		blurTexture.display();
 
-		blurShader.setUniform("direction", sf::Glsl::Vec2(0.0f, 1.0f / HEIGHT));
+		blurShader.setUniform("direction", sf::Glsl::Vec2(0.0f, 1.0f / Height));
 		haloTexture.draw(sf::Sprite(blurTexture.getTexture()), blurStates);
 		haloTexture.display();
 
@@ -184,11 +184,11 @@ void VirtualScreen::CompositeGlow(float strength)
 	// aura color) instead of stacking additive passes, so the inner aura
 	// stays at the chosen hue instead of clamping every channel to white.
 	const float seconds = effectClock.getElapsedTime().asSeconds();
-	const float pulse = GLOW_PULSE_MIN
-		+ (1.0f - GLOW_PULSE_MIN) * 0.5f * (1.0f + std::sin(seconds * GLOW_PULSE_SPEED));
+	const float pulse = GlowPulseMin
+		+ (1.0f - GlowPulseMin) * 0.5f * (1.0f + std::sin(seconds * GlowPulseSpeed));
 
-	compositeShader.setUniform("boost", GLOW_BOOST * strength);
-	compositeShader.setUniform("intensity", GLOW_INTENSITY * pulse);
+	compositeShader.setUniform("boost", GlowBoost * strength);
+	compositeShader.setUniform("intensity", GlowIntensity * pulse);
 
 	sf::RenderStates additive;
 	additive.blendMode = sf::BlendMode(sf::BlendMode::Factor::One, sf::BlendMode::Factor::One);
@@ -234,10 +234,10 @@ void VirtualScreen::RenderToWindow(sf::RenderWindow& window)
 
 	// Fractional scale: fill the window as much as possible while keeping the
 	// 16:9 aspect ratio. The leftover space becomes letterbox bars.
-	const float scale = std::min(windowSize.x / WIDTH, windowSize.y / HEIGHT);
+	const float scale = std::min(windowSize.x / Width, windowSize.y / Height);
 
-	const float scaledWidth = WIDTH * scale;
-	const float scaledHeight = HEIGHT * scale;
+	const float scaledWidth = Width * scale;
+	const float scaledHeight = Height * scale;
 
 	sf::Sprite screenSprite(renderTexture.getTexture());
 	screenSprite.setScale({ scale, scale });
@@ -245,7 +245,7 @@ void VirtualScreen::RenderToWindow(sf::RenderWindow& window)
 		(windowSize.x - scaledWidth) / 2.0f,
 		(windowSize.y - scaledHeight) / 2.0f });
 
-	if (heatActive || waterActive)
+	if (isHeatActive || isWaterActive)
 	{
 		// Wrap at 200*pi so the float stays precise over long sessions; the
 		// shader's wave speeds are multiples of 0.1, which keeps the wrap
@@ -254,7 +254,7 @@ void VirtualScreen::RenderToWindow(sf::RenderWindow& window)
 		gradingShader.setUniform("time", time);
 	}
 
-	if (gradingActive)
+	if (isGradingActive)
 		window.draw(screenSprite, &gradingShader);
 	else
 		window.draw(screenSprite);
@@ -265,10 +265,10 @@ sf::Vector2f VirtualScreen::MapWindowToVirtual(sf::Vector2i windowPosition, sf::
 	const sf::Vector2f windowSize(window.getSize());
 
 	// Must match RenderToWindow exactly, so clicks land on the drawn elements.
-	const float scale = std::min(windowSize.x / WIDTH, windowSize.y / HEIGHT);
+	const float scale = std::min(windowSize.x / Width, windowSize.y / Height);
 
-	const float scaledWidth = WIDTH * scale;
-	const float scaledHeight = HEIGHT * scale;
+	const float scaledWidth = Width * scale;
+	const float scaledHeight = Height * scale;
 
 	const float offsetX = (windowSize.x - scaledWidth) / 2.0f;
 	const float offsetY = (windowSize.y - scaledHeight) / 2.0f;

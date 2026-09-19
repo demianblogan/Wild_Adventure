@@ -2,24 +2,6 @@
 
 namespace UI
 {
-	namespace
-	{
-		int StateToIndex(InteractionState state)
-		{
-			switch (state)
-			{
-			case InteractionState::Normal:
-				return 0;
-			case InteractionState::Highlighted:
-				return 1;
-			case InteractionState::Pressed:
-				return 2;
-			default:
-				return 0;
-			}
-		}
-	}
-
 	void Button::SetBackground(InteractionState state, std::unique_ptr<Element> element)
 	{
 		Element& added = AddChild(std::move(element));
@@ -73,7 +55,7 @@ namespace UI
 		}
 	}
 
-	Element* Button::GetVariant(const std::array<Element*, INTERACTION_STATE_COUNT>& variants, InteractionState state) const
+	Element* Button::GetVariant(const std::array<Element*, InteractionStateCount>& variants, InteractionState state) const
 	{
 		Element* variant = variants[StateToIndex(state)];
 

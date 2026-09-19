@@ -24,7 +24,7 @@ private:
 	Mode mode = Mode::Idle;
 	float elapsedTime = 0.0f;
 
-	static constexpr int COLUMN_COUNT = 8;
-	static constexpr float COLUMN_DELAY = 0.04f;    // stagger between columns
-	static constexpr float COLUMN_DURATION = 0.30f; // time for one column to fully shrink or grow
+	static constexpr int ColumnCount = 8;
+	static constexpr float ColumnDelay = 0.04f;    // stagger between columns
+	static constexpr float ColumnDuration = 0.30f; // time for one column to fully shrink or grow
 };

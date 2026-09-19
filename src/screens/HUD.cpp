@@ -21,10 +21,10 @@ HUD::HUD(Context& context)
 	, loader(context.resources)
 {}
 
-void HUD::Build(int levelNumber, bool showLevelBanner)
+void HUD::Build(int levelNumber, bool shouldShowLevelBanner)
 {
 	this->levelNumber = levelNumber;
-	this->showLevelBanner = showLevelBanner;
+	this->shouldShowLevelBanner = shouldShowLevelBanner;
 
 	interface.SetContent(loader.LoadFromFile("data/ui/hud.json"));
 }
@@ -53,7 +53,7 @@ void HUD::SetScore(int score)
 
 void HUD::StartBanner()
 {
-	if (showLevelBanner)
+	if (shouldShowLevelBanner)
 		bannerPhase = BannerPhase::SlideIn;
 }
 
@@ -63,7 +63,7 @@ void HUD::UpdateHearts(int currentHealth, float deltaTime)
 	if (currentHealth < displayedHealth && blinkingHeart < 0)
 	{
 		blinkingHeart = currentHealth; // heart index that will disappear
-		blinkTimer = HEART_BLINK_DURATION;
+		blinkTimer = HeartBlinkDuration;
 		displayedHealth = currentHealth;
 	}
 	// Health was restored (e.g. touching a checkpoint): refill the hearts at once
@@ -106,17 +106,17 @@ void HUD::UpdateBanner(float deltaTime)
 
 	bannerTimer += deltaTime;
 
-	if (bannerPhase == BannerPhase::SlideIn && bannerTimer >= BANNER_SLIDE_TIME)
+	if (bannerPhase == BannerPhase::SlideIn && bannerTimer >= BannerSlideTime)
 	{
 		bannerPhase = BannerPhase::Hold;
 		bannerTimer = 0.0f;
 	}
-	else if (bannerPhase == BannerPhase::Hold && bannerTimer >= BANNER_HOLD_TIME)
+	else if (bannerPhase == BannerPhase::Hold && bannerTimer >= BannerHoldTime)
 	{
 		bannerPhase = BannerPhase::SlideOut;
 		bannerTimer = 0.0f;
 	}
-	else if (bannerPhase == BannerPhase::SlideOut && bannerTimer >= BANNER_SLIDE_TIME)
+	else if (bannerPhase == BannerPhase::SlideOut && bannerTimer >= BannerSlideTime)
 	{
 		bannerPhase = BannerPhase::Done;
 	}
@@ -138,21 +138,21 @@ void HUD::DrawBanner(sf::RenderTarget& target)
 	if (bannerPhase == BannerPhase::Hidden || bannerPhase == BannerPhase::Done)
 		return;
 
-	float y = BANNER_TARGET_Y;
+	float y = BannerTargetY;
 
 	if (bannerPhase == BannerPhase::SlideIn)
 	{
 		// Ease out: fast entrance that settles softly.
-		const float t = std::min(bannerTimer / BANNER_SLIDE_TIME, 1.0f);
+		const float t = std::min(bannerTimer / BannerSlideTime, 1.0f);
 		const float eased = 1.0f - (1.0f - t) * (1.0f - t);
-		y = BANNER_START_Y + (BANNER_TARGET_Y - BANNER_START_Y) * eased;
+		y = BannerStartY + (BannerTargetY - BannerStartY) * eased;
 	}
 	else if (bannerPhase == BannerPhase::SlideOut)
 	{
 		// Ease in: slow start, accelerating off the screen.
-		const float t = std::min(bannerTimer / BANNER_SLIDE_TIME, 1.0f);
+		const float t = std::min(bannerTimer / BannerSlideTime, 1.0f);
 		const float eased = t * t;
-		y = BANNER_TARGET_Y + (BANNER_START_Y - BANNER_TARGET_Y) * eased;
+		y = BannerTargetY + (BannerStartY - BannerTargetY) * eased;
 	}
 
 	sf::Text text(context.resources.fonts.Get("main"), "Level " + std::to_string(levelNumber), 24);
@@ -164,7 +164,7 @@ void HUD::DrawBanner(sf::RenderTarget& target)
 	text.setOrigin({
 		bounds.position.x + bounds.size.x / 2.0f,
 		bounds.position.y + bounds.size.y / 2.0f });
-	text.setPosition({ std::floor(VirtualScreen::WIDTH / 2.0f), std::floor(y) });
+	text.setPosition({ std::floor(VirtualScreen::Width / 2.0f), std::floor(y) });
 
 	target.draw(text);
 }

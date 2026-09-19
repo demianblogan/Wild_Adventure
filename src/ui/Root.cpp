@@ -46,7 +46,7 @@ namespace UI
 		desiredColumn = 0;
 		draggedElement = nullptr;
 		activatedElement = nullptr;
-		confirmHeld = false;
+		isConfirmHeld = false;
 
 		rows.clear();
 
@@ -299,7 +299,7 @@ namespace UI
 				current->Activate();
 				activatedElement = current;
 			}
-			else if (confirmHeld)
+			else if (isConfirmHeld)
 			{
 				// Confirm is still held: the pressed visual follows the focus.
 				current->Press();
@@ -350,7 +350,7 @@ namespace UI
 			return;
 
 		content->Draw(target, { 0.0f, 0.0f },
-			{ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });
+			{ static_cast<float>(VirtualScreen::Width), static_cast<float>(VirtualScreen::Height) });
 
 		// Always-glowing decorations (e.g. the golden title) bloom in their
 		// own colors, at the positions the pass above just cached.
@@ -404,7 +404,7 @@ namespace UI
 	void Root::Confirm(bool pressed)
 	{
 		activeMode = InputMode::Selection;
-		confirmHeld = pressed;
+		isConfirmHeld = pressed;
 		HandleConfirm(pressed);
 	}
 }
