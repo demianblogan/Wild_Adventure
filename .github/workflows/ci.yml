@@ -37,7 +37,7 @@ jobs:
         run: |
           Invoke-WebRequest -Uri "https://github.com/SFML/SFML/releases/download/3.1.0/SFML-3.1.0-windows-vc17-64-bit.zip" -OutFile sfml.zip
           Expand-Archive -Path sfml.zip -DestinationPath sfml-extracted
-          Move-Item -Path sfml-extracted/SFML-3.1.0/* -Destination libs/SFML
+          Move-Item -Path sfml-extracted/SFML-3.1.0/* -Destination libs/SFML -Force
 
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
