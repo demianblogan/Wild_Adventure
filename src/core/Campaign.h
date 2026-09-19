@@ -41,7 +41,8 @@ public:
 	static bool IsLastLevel(int levelNumber);     // exists and has no next level
 
 private:
-	void Save() const;
+	// Returns false if the write failed (e.g. disk full, file locked).
+	bool Save() const;
 
 	std::string savePath;
 	std::array<int, LevelCount> bestStars; // -1 = not completed, 0..3 = best stars

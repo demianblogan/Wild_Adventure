@@ -105,7 +105,7 @@ void Settings::Load(const std::string& path)
 	saved = current;
 }
 
-void Settings::Save(const std::string& path)
+bool Settings::Save(const std::string& path)
 {
 	nlohmann::json data;
 	data["audio"]["sound"] = current.soundVolume;
@@ -117,9 +117,11 @@ void Settings::Save(const std::string& path)
 	data["graphics"]["vsync"] = current.isVsyncEnabled;
 	data["graphics"]["showFps"] = current.isShowFpsEnabled;
 
-	static_cast<void>(SafeFileWrite::WriteFileAtomically(path, data.dump(1, '\t')));
+	if (!SafeFileWrite::WriteFileAtomically(path, data.dump(1, '\t')))
+		return false;
 
 	saved = current;
+	return true;
 }
 
 void Settings::ResetAudioToDefaults()

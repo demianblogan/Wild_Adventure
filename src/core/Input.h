@@ -50,7 +50,10 @@ public:
 	// Working/saved model for the keyboard rebinding page (mirrors Settings).
 	bool IsDirty() const;
 	void Revert();
-	void SaveConfig(const std::string& path);
+	// Returns false if the write failed (e.g. disk full, file locked); the
+	// bindings then stay dirty so IsDirty() keeps reporting unsaved changes
+	// instead of the caller believing the save went through.
+	bool SaveConfig(const std::string& path);
 	void ResetToDefaults();
 
 	// Keyboard rebinding works on a single primary key per action; gamepad
