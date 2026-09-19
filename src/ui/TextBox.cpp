@@ -4,6 +4,7 @@
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/System/String.hpp>
 
 #include <cmath>
 #include <sstream>
@@ -14,6 +15,15 @@ namespace UI
 	{
 		// Gap between the "name" and "value" halves of a "name\tvalue" line.
 		constexpr float LinkValueGap = 4.0f;
+
+		// text is UTF-8 (JSON literals and every localization catalog are
+		// UTF-8); sf::Text's std::string constructor instead assumes ANSI and
+		// mangles anything outside plain ASCII, so it has to go through
+		// fromUtf8 explicitly.
+		sf::String ToDisplayString(const std::string& text)
+		{
+			return sf::String::fromUtf8(text.begin(), text.end());
+		}
 	}
 
 	TextBox::TextBox(Resources& resources, const std::string& fontName)
@@ -99,13 +109,13 @@ namespace UI
 		const std::size_t tabPosition = text.find('\t');
 		if (tabPosition != std::string::npos)
 		{
-			sf::Text nameText(font, text.substr(0, tabPosition), characterSize);
+			sf::Text nameText(font, ToDisplayString(text.substr(0, tabPosition)), characterSize);
 			nameText.setFillColor(color);
 			nameText.setOutlineColor(outlineColor);
 			nameText.setOutlineThickness(outlineThickness);
 			lineTexts.push_back(std::move(nameText));
 
-			sf::Text value(font, text.substr(tabPosition + 1), characterSize);
+			sf::Text value(font, ToDisplayString(text.substr(tabPosition + 1)), characterSize);
 			value.setFillColor(secondColor);
 			value.setOutlineColor(secondOutlineColor);
 			value.setOutlineThickness(outlineThickness);
@@ -124,7 +134,7 @@ namespace UI
 		{
 			const std::string candidate = currentLine.empty() ? word : currentLine + " " + word;
 
-			sf::Text probe(font, candidate, characterSize);
+			sf::Text probe(font, ToDisplayString(candidate), characterSize);
 			probe.setOutlineThickness(outlineThickness);
 
 			if (size.x > 0.0f && probe.getLocalBounds().size.x > size.x && !currentLine.empty())
@@ -143,7 +153,7 @@ namespace UI
 
 		for (const std::string& line : wrappedLines)
 		{
-			sf::Text lineText(font, line, characterSize);
+			sf::Text lineText(font, ToDisplayString(line), characterSize);
 			lineText.setFillColor(color);
 			lineText.setOutlineColor(outlineColor);
 			lineText.setOutlineThickness(outlineThickness);

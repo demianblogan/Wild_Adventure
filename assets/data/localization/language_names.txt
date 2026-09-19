@@ -1,0 +1,10 @@
+# Each language's own name, in its own script -- never translated. Format is
+# "code = value" (not "section.key = value" like the main catalogs), read
+# directly by LocalizationManager::GetLanguageDisplayName so all five names
+# are available at once, e.g. for the language picker/stepper.
+
+en = English
+de = Deutsch
+es = Español
+ru = Русский
+uk = Українська

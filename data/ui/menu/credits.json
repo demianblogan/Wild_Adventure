@@ -32,7 +32,7 @@
 					"color": [226, 210, 255, 255],
 					"outlineColor": [45, 30, 60, 255],
 					"outlineThickness": 1,
-					"text": "Made by Demian Blogan. This is my third portfolio project. I wanted to learn to build large, varied levels filled with all kinds of enemies, traps, and collectibles - and this is also my first platformer."
+					"textKey": "credits.bio"
 				}
 			},
 
@@ -51,7 +51,8 @@
 					"secondColor": [140, 200, 255, 255],
 					"secondOutlineColor": [30, 45, 60, 255],
 					"outlineThickness": 1,
-					"text": "My Email:\tdemianblogan@gmail.com"
+					"textKey": "credits.email_label",
+					"value": "demianblogan@gmail.com"
 				}
 			},
 			{
@@ -69,7 +70,8 @@
 					"secondColor": [140, 200, 255, 255],
 					"secondOutlineColor": [30, 45, 60, 255],
 					"outlineThickness": 1,
-					"text": "My LinkedIn:\tlinkedin.com/in/demianblogan"
+					"textKey": "credits.linkedin_label",
+					"value": "linkedin.com/in/demianblogan"
 				}
 			},
 			{
@@ -87,7 +89,8 @@
 					"secondColor": [140, 200, 255, 255],
 					"secondOutlineColor": [30, 45, 60, 255],
 					"outlineThickness": 1,
-					"text": "My Instagram:\tinstagram.com/demianblogan"
+					"textKey": "credits.instagram_label",
+					"value": "instagram.com/demianblogan"
 				}
 			},
 			{
@@ -105,7 +108,8 @@
 					"secondColor": [140, 200, 255, 255],
 					"secondOutlineColor": [30, 45, 60, 255],
 					"outlineThickness": 1,
-					"text": "My Portfolio:\tgithub.com/demianblogan"
+					"textKey": "credits.portfolio_label",
+					"value": "github.com/demianblogan"
 				}
 			},
 			{
@@ -123,7 +127,8 @@
 					"secondColor": [140, 200, 255, 255],
 					"secondOutlineColor": [30, 45, 60, 255],
 					"outlineThickness": 1,
-					"text": "Code of the Game:\tgithub.com/demianblogan/Wild_Adventure"
+					"textKey": "credits.code_label",
+					"value": "github.com/demianblogan/Wild_Adventure"
 				}
 			},
 			{
@@ -141,7 +146,8 @@
 					"secondColor": [140, 200, 255, 255],
 					"secondOutlineColor": [30, 45, 60, 255],
 					"outlineThickness": 1,
-					"text": "My Programming Channel:\tyoutube.com/@BloganProgrammer"
+					"textKey": "credits.programming_channel_label",
+					"value": "youtube.com/@BloganProgrammer"
 				}
 			},
 			{
@@ -159,7 +165,8 @@
 					"secondColor": [140, 200, 255, 255],
 					"secondOutlineColor": [30, 45, 60, 255],
 					"outlineThickness": 1,
-					"text": "My Gaming Channel:\tyoutube.com/@BloganGamer"
+					"textKey": "credits.gaming_channel_label",
+					"value": "youtube.com/@BloganGamer"
 				}
 			},
 
@@ -177,7 +184,7 @@
 						{
 							"Label":
 							{
-								"text": "Back"
+								"textKey": "common.back"
 							}
 						}
 					}

@@ -2,11 +2,13 @@
 
 #include "Context.h"
 #include "audio/Mixer.h"
+#include "core/AppDataPath.h"
 #include "core/GraphicsTarget.h"
 #include "core/Resources.h"
 #include "core/Settings.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "localization/LocalizationManager.h"
 #include "states/ConfirmState.h"
 #include "ui/Button.h"
 #include "ui/Checkbox.h"
@@ -25,8 +27,8 @@
 namespace
 {
 	const std::string MenuDirectory = "data/ui/menu/";
-	const std::string SettingsPath = "data/settings.json";
-	const std::string InputPath = "data/input.json";
+	const std::string SettingsPath = AppDataPath::Resolve("settings.json").string();
+	const std::string InputPath = AppDataPath::Resolve("input.json").string();
 }
 
 SettingsController::SettingsController(Context& context)
@@ -35,6 +37,7 @@ SettingsController::SettingsController(Context& context)
 	, settingsLoader(context.resources)
 {
 	settingsLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	settingsLoader.SetLocalization(context.localization);
 	RegisterActions();
 }
 
@@ -56,6 +59,7 @@ void SettingsController::RegisterActions()
 	settingsLoader.RegisterAction("menu_open_audio", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "audio"; });
 	settingsLoader.RegisterAction("menu_open_graphics", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "graphics"; });
 	settingsLoader.RegisterAction("menu_open_controls", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "controls"; });
+	settingsLoader.RegisterAction("menu_open_language", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "language"; });
 	settingsLoader.RegisterAction("menu_open_keyboard", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "keyboard"; });
 	settingsLoader.RegisterAction("menu_open_joystick", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "joystick"; });
 	settingsLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
@@ -100,6 +104,9 @@ void SettingsController::RegisterActions()
 		{
 			context.settings.SetShowFps(value); // applies immediately, nothing to re-create
 		});
+
+	settingsLoader.RegisterAction("language_prev", [this] { StepLanguage(-1); });
+	settingsLoader.RegisterAction("language_next", [this] { StepLanguage(1); });
 }
 
 void SettingsController::ShowPanel(const std::string& panelId)
@@ -131,7 +138,7 @@ void SettingsController::ShowPanel(const std::string& panelId)
 	if (activeFrame != "frame")
 	{
 		const bool hasOwnTitle = (panelId == "audio" || panelId == "graphics"
-			|| panelId == "keyboard" || panelId == "joystick");
+			|| panelId == "keyboard" || panelId == "joystick" || panelId == "language");
 
 		if (UI::Element* block = settingsInterface.FindByName("frame_title_block"))
 			block->isVisible = !hasOwnTitle;
@@ -140,9 +147,9 @@ void SettingsController::ShowPanel(const std::string& panelId)
 
 		if (!hasOwnTitle)
 		{
-			const std::string titleText = (panelId == "controls") ? "Controls" : "Options";
+			const std::string titleKey = (panelId == "controls") ? "settings.controls" : "pause.options";
 			if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("frame_title_label")))
-				label->SetText(titleText);
+				label->SetText(context.localization.GetText(titleKey));
 		}
 	}
 
@@ -152,6 +159,8 @@ void SettingsController::ShowPanel(const std::string& panelId)
 		SetupGraphicsPanel();
 	else if (panelId == "keyboard")
 		SetupKeyboardPanel();
+	else if (panelId == "language")
+		SetupLanguagePanel();
 
 	settingsInterface.ResetFocus();
 }
@@ -199,7 +208,7 @@ void SettingsController::BeginKeyCapture(Action action)
 	captureAction = action;
 
 	if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName(KeyLabelName(action))))
-		label->SetText("...");
+		label->SetText(context.localization.GetText("controls.capturing"));
 }
 
 void SettingsController::ApplyKeyCapture(sf::Keyboard::Key key)
@@ -324,13 +333,15 @@ void SettingsController::UpdateResolutionLabel()
 
 void SettingsController::UpdateScreenModeLabel()
 {
-	std::string text = "Borderless";
+	std::string key = "graphics.mode_borderless";
 	switch (context.settings.GetScreenMode())
 	{
-	case ScreenMode::Fullscreen: text = "Fullscreen"; break;
-	case ScreenMode::Borderless: text = "Borderless"; break;
-	case ScreenMode::Window:     text = "Window"; break;
+	case ScreenMode::Fullscreen: key = "graphics.mode_fullscreen"; break;
+	case ScreenMode::Borderless: key = "graphics.mode_borderless"; break;
+	case ScreenMode::Window:     key = "graphics.mode_window"; break;
 	}
+
+	const std::string text = context.localization.GetText(key);
 
 	if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("screenmode_value")))
 		label->SetText(text);
@@ -353,9 +364,35 @@ void SettingsController::UpdateResolutionRowEnabled()
 	}
 }
 
+void SettingsController::SetupLanguagePanel()
+{
+	UpdateLanguageLabel();
+}
+
+void SettingsController::StepLanguage(int direction)
+{
+	const Language order[5] = { Language::English, Language::German, Language::Spanish, Language::Russian, Language::Ukrainian };
+
+	int current = 0;
+	for (int i = 0; i < 5; i++)
+		if (order[i] == context.settings.GetLanguage())
+			current = i;
+
+	current = (current + direction + 5) % 5;
+	context.settings.SetLanguage(order[current]);
+
+	UpdateLanguageLabel();
+}
+
+void SettingsController::UpdateLanguageLabel()
+{
+	if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("language_value")))
+		label->SetText(context.localization.GetLanguageDisplayName(context.settings.GetLanguage()));
+}
+
 bool SettingsController::IsSettingsPanel(const std::string& panelId) const
 {
-	return panelId == "audio" || panelId == "graphics" || panelId == "keyboard";
+	return panelId == "audio" || panelId == "graphics" || panelId == "keyboard" || panelId == "language";
 }
 
 void SettingsController::ResetCurrentPanelToDefaults()
@@ -382,6 +419,11 @@ void SettingsController::ResetCurrentPanelToDefaults()
 	{
 		context.input.ResetToDefaults();
 		SetupKeyboardPanel();
+	}
+	else if (panel == "language")
+	{
+		context.settings.SetLanguage(Language::English);
+		UpdateLanguageLabel();
 	}
 
 	UpdateSaveButtonTint();
@@ -410,7 +452,8 @@ void SettingsController::UpdateSaveButtonTint()
 void SettingsController::OpenUnsavedChangesDialog()
 {
 	context.stateMachine.Push(std::make_unique<ConfirmState>(context,
-		"Warning!", "You have unsaved changes. Save them?",
+		context.localization.GetText("dialog.warning_title"),
+		context.localization.GetText("dialog.unsaved_changes_message"),
 		[this] { SaveAndGoBack(); },
 		[this] { RevertAndGoBack(); }));
 }
@@ -431,7 +474,7 @@ bool SettingsController::PanelIsDirty(const std::string& panel) const
 {
 	if (panel == "keyboard")
 		return context.input.IsDirty();
-	if (panel == "audio" || panel == "graphics")
+	if (panel == "audio" || panel == "graphics" || panel == "language")
 		return context.settings.IsDirty();
 	return false;
 }
@@ -446,10 +489,24 @@ void SettingsController::SavePanel(const std::string& panel)
 	{
 		context.input.SaveConfig(InputPath);
 	}
-	else if (panel == "audio" || panel == "graphics")
+	else if (panel == "audio" || panel == "graphics" || panel == "language")
 	{
 		context.settings.Save(SettingsPath);
 		context.graphics.ApplyGraphics();
+
+		// The chosen language only takes effect on Save (like resolution and
+		// screen mode), not while the stepper is still being cycled.
+		const bool languageChanged = context.localization.GetLanguage() != context.settings.GetLanguage();
+		context.localization.SetLanguage(context.settings.GetLanguage());
+
+		// A LocalizationManager revision bump does not retranslate anything by
+		// itself -- every Label/TextBox already holds its resolved sf::Text, not
+		// its textKey. Reloading the panel from JSON (same as opening it fresh)
+		// re-resolves every textKey against the new catalog, so the panel the
+		// player is looking at -- including its own title/buttons, not just the
+		// stepper value -- updates immediately instead of on the next visit.
+		if (languageChanged)
+			ShowPanel(panelStack.back());
 	}
 }
 
@@ -459,7 +516,7 @@ void SettingsController::RevertPanel(const std::string& panel)
 	{
 		context.input.Revert();
 	}
-	else if (panel == "audio" || panel == "graphics")
+	else if (panel == "audio" || panel == "graphics" || panel == "language")
 	{
 		context.settings.Revert();
 		context.audioMixer.SetSoundVolume(context.settings.GetSoundVolume() / 10.0f);

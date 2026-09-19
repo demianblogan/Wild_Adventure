@@ -6,7 +6,10 @@
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "localization/LocalizationManager.h"
 #include "states/GameState.h"
+#include "ui/Image.h"
+#include "ui/Label.h"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -15,6 +18,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/System/String.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include <cmath>
@@ -26,9 +30,12 @@ namespace
 	constexpr float ScreenWidth = static_cast<float>(VirtualScreen::Width);
 	constexpr float ScreenHeight = static_cast<float>(VirtualScreen::Height);
 
-	constexpr float TitleY = 22.0f;
-	constexpr float GridTop = 66.0f; // centers the 3x3 grid between the title and the hint
-	constexpr float HintY = 252.0f;
+	constexpr float GridTop = 66.0f; // centers the 3x3 grid between the title and the Back button
+
+	// Back button under the grid, styled like the one on Select Character.
+	constexpr float ButtonWidth = 90.0f;
+	constexpr float ButtonHeight = 26.0f;
+	constexpr float ButtonY = 234.0f;
 
 	// The star glyph sits in a 48x48 canvas with transparent padding; trim to its
 	// opaque bounds and scale by exactly 1/4 (44x40 -> 11x10) so nearest-neighbour
@@ -39,7 +46,6 @@ namespace
 
 	constexpr float LockDisplayHeight = 12.0f;
 
-	const sf::Color Gold(244, 199, 110, 255);
 	const sf::Color Outline(58, 42, 77, 255);
 	const sf::Color CellNormal(200, 200, 200, 255);     // slightly dimmed
 	const sf::Color CellSelected(255, 255, 255, 255);   // gentle highlight
@@ -51,7 +57,7 @@ namespace
 		const std::string& str, unsigned int charSize,
 		sf::Color fill, float cx, float cy)
 	{
-		sf::Text text(font, str, charSize);
+		sf::Text text(font, sf::String::fromUtf8(str.begin(), str.end()), charSize);
 		text.setFillColor(fill);
 		text.setOutlineColor(Outline);
 		text.setOutlineThickness(1.0f);
@@ -68,12 +74,27 @@ namespace
 
 SelectLevelController::SelectLevelController(Context& context)
 	: context(context)
-{}
+	, chromeLoader(context.resources)
+{
+	chromeLoader.SetLocalization(context.localization);
+	chrome = chromeLoader.LoadFromFile("data/ui/menu/select_level.json");
+	lastLocalizationRevision = context.localization.Revision();
+}
 
 void SelectLevelController::Open()
 {
 	wasCloseRequested = false;
+	focus = Focus::Grid;
 	RebuildCells();
+
+	// The language can only change while this screen is closed (it and
+	// Settings are mutually exclusive views inside MenuState), so it is
+	// enough to check for a stale chrome here rather than every frame.
+	if (context.localization.Revision() != lastLocalizationRevision)
+	{
+		lastLocalizationRevision = context.localization.Revision();
+		chrome = chromeLoader.LoadFromFile("data/ui/menu/select_level.json");
+	}
 
 	// Start on the next level to play (like Continue); fall back to the
 	// furthest completed one, then to the first level.
@@ -132,6 +153,15 @@ void SelectLevelController::MoveSelection(int deltaColumn, int deltaRow)
 	}
 }
 
+void SelectLevelController::SetFocus(Focus newFocus)
+{
+	if (focus == newFocus)
+		return;
+
+	focus = newFocus;
+	context.audioMixer.PlaySound("ui_hover");
+}
+
 void SelectLevelController::LaunchSelected()
 {
 	if (!cells[selected].isSelectable)
@@ -171,17 +201,34 @@ int SelectLevelController::CellAt(float x, float y) const
 	return -1;
 }
 
+sf::FloatRect SelectLevelController::BackRect() const
+{
+	return { { (ScreenWidth - ButtonWidth) / 2.0f, ButtonY }, { ButtonWidth, ButtonHeight } };
+}
+
 void SelectLevelController::HandleEvent(const sf::Event& event)
 {
 	if (event.is<sf::Event::MouseMoved>())
 	{
 		const sf::Vector2f mouse = context.virtualScreen.GetMousePosition();
+
+		if (BackRect().contains(mouse))
+		{
+			SetFocus(Focus::BackButton);
+			return;
+		}
+
 		const int index = CellAt(mouse.x, mouse.y);
 
-		if (index >= 0 && cells[index].isSelectable && index != selected)
+		if (index >= 0 && cells[index].isSelectable)
 		{
-			selected = index;
-			context.audioMixer.PlaySound("ui_hover");
+			SetFocus(Focus::Grid);
+
+			if (index != selected)
+			{
+				selected = index;
+				context.audioMixer.PlaySound("ui_hover");
+			}
 		}
 	}
 	else if (const auto* pressed = event.getIf<sf::Event::MouseButtonPressed>())
@@ -189,6 +236,14 @@ void SelectLevelController::HandleEvent(const sf::Event& event)
 		if (pressed->button == sf::Mouse::Button::Left)
 		{
 			const sf::Vector2f mouse = context.virtualScreen.GetMousePosition();
+
+			if (BackRect().contains(mouse))
+			{
+				context.audioMixer.PlaySound("ui_press");
+				wasCloseRequested = true;
+				return;
+			}
+
 			const int index = CellAt(mouse.x, mouse.y);
 
 			if (index >= 0 && cells[index].isSelectable)
@@ -210,17 +265,38 @@ void SelectLevelController::Update(float)
 		return;
 	}
 
-	if (input.WasPressed(Action::MenuLeft))
-		MoveSelection(-1, 0);
-	else if (input.WasPressed(Action::MenuRight))
-		MoveSelection(1, 0);
-	else if (input.WasPressed(Action::MenuUp))
-		MoveSelection(0, -1);
-	else if (input.WasPressed(Action::MenuDown))
-		MoveSelection(0, 1);
+	if (focus == Focus::Grid)
+	{
+		if (input.WasPressed(Action::MenuLeft))
+			MoveSelection(-1, 0);
+		else if (input.WasPressed(Action::MenuRight))
+			MoveSelection(1, 0);
+		else if (input.WasPressed(Action::MenuUp))
+			MoveSelection(0, -1);
+		else if (input.WasPressed(Action::MenuDown))
+		{
+			// The bottom row has nowhere further down to go: leave the grid
+			// for the Back button instead of doing nothing.
+			if (selected / Columns == Rows - 1)
+				SetFocus(Focus::BackButton);
+			else
+				MoveSelection(0, 1);
+		}
 
-	if (input.WasPressed(Action::MenuConfirm))
-		LaunchSelected();
+		if (input.WasPressed(Action::MenuConfirm))
+			LaunchSelected();
+	}
+	else // Focus::BackButton
+	{
+		if (input.WasPressed(Action::MenuUp))
+			SetFocus(Focus::Grid);
+
+		if (input.WasPressed(Action::MenuConfirm))
+		{
+			context.audioMixer.PlaySound("ui_press");
+			wasCloseRequested = true;
+		}
+	}
 }
 
 void SelectLevelController::Render(sf::RenderTarget& target)
@@ -234,7 +310,12 @@ void SelectLevelController::Render(sf::RenderTarget& target)
 
 	const sf::Font& font = context.resources.fonts.Get("main");
 
-	DrawCenteredText(target, font, "Select Level", 16, Gold, ScreenWidth / 2.0f, TitleY);
+	if (auto* backBackground = dynamic_cast<UI::Image*>(chrome->FindByName("back_background")))
+		backBackground->SetColor(focus == Focus::BackButton ? CellSelected : CellNormal);
+	if (auto* backLabel = dynamic_cast<UI::Label*>(chrome->FindByName("back_label")))
+		backLabel->SetColor(sf::Color::White);
+
+	chrome->Draw(target, { 0.0f, 0.0f }, { ScreenWidth, ScreenHeight });
 
 	Resources& resources = context.resources;
 	const sf::Texture& normalBox = resources.textures.Get("container_background");
@@ -307,5 +388,4 @@ void SelectLevelController::Render(sf::RenderTarget& target)
 		}
 	}
 
-	DrawCenteredText(target, font, "Back: Esc", 16, sf::Color(180, 180, 180, 255), ScreenWidth / 2.0f, HintY);
 }

@@ -55,7 +55,7 @@
 						{
 							"Label":
 							{
-								"text": "Continue"
+								"textKey": "common.continue"
 							}
 						}
 					}
@@ -112,7 +112,7 @@
 						{
 							"Label":
 							{
-								"text": "Restart"
+								"textKey": "level_complete.restart"
 							}
 						}
 					}
@@ -169,7 +169,7 @@
 						{
 							"Label":
 							{
-								"text": "Main Menu"
+								"textKey": "level_complete.main_menu"
 							}
 						}
 					}

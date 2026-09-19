@@ -129,8 +129,13 @@ TEST_SUITE("Input")
 		input.LoadConfig(path.string());
 		input.SetPrimaryKey(Action::Jump, sf::Keyboard::Key::LShift);
 
-		// The parent directory does not exist, so the write cannot succeed.
-		const std::string badPath = (dir.GetPath() / "missing_subdir" / "input.json").string();
+		// SaveConfig() creates missing parent directories on its own, so to
+		// force a genuine failure, a plain file (not a directory) sits where
+		// the parent directory needs to be -- create_directories can't
+		// replace it.
+		const std::filesystem::path blocker = dir.GetPath() / "blocked";
+		REQUIRE(SafeFileWrite::WriteFileAtomically(blocker, "not a directory"));
+		const std::string badPath = (blocker / "input.json").string();
 		CHECK_FALSE(input.SaveConfig(badPath));
 		CHECK(input.IsDirty()); // must not be mistaken for a successful save
 	}

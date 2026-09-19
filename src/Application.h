@@ -9,6 +9,7 @@
 #include "core/VirtualScreen.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
+#include "localization/LocalizationManager.h"
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Window/VideoMode.hpp>
@@ -53,6 +54,7 @@ private:
 	Input input;
 	Settings settings;
 	Campaign campaign;
+	LocalizationManager localization;
 	Context context;
 
 	int appliedWidth = 0;

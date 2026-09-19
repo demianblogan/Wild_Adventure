@@ -1,9 +1,14 @@
 #pragma once
 
 #include "core/Campaign.h"
+#include "ui/DataLoader.h"
+#include "ui/Element.h"
+
+#include <SFML/Graphics/Rect.hpp>
 
 #include <array>
 #include <functional>
+#include <memory>
 
 struct Context;
 
@@ -40,6 +45,8 @@ private:
 		int stars = 0;           // best stars when completed
 	};
 
+	enum class Focus { Grid, BackButton };
+
 	static constexpr int Columns = 3;
 	static constexpr int Rows = 3;
 
@@ -49,14 +56,23 @@ private:
 	void RebuildCells();
 	void MoveSelection(int deltaColumn, int deltaRow);
 	void LaunchSelected();
+	void SetFocus(Focus newFocus);
 
 	int CellAt(float x, float y) const;            // -1 when outside the grid
 	void CellTopLeft(int index, float& x, float& y) const;
+	sf::FloatRect BackRect() const;
 
 	Context& context;
 
+	// Title/Back are JSON-driven (textKey), like Character Select; the grid
+	// itself stays hand-drawn since it is generated from campaign data.
+	UI::DataLoader chromeLoader;
+	std::unique_ptr<UI::Element> chrome;
+	int lastLocalizationRevision = 0; // reload chrome if the language changed while this screen wasn't showing
+
 	std::array<Cell, Campaign::LevelCount> cells;
 	int selected = 0;
+	Focus focus = Focus::Grid;
 	bool wasCloseRequested = false;
 	std::function<void(int)> launchHandler;
 };

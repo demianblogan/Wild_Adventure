@@ -24,7 +24,7 @@
 						{
 							"Label":
 							{
-								"text": "Single Player"
+								"textKey": "play.single_player"
 							}
 						}
 					}
@@ -47,7 +47,7 @@
 						{
 							"Label":
 							{
-								"text": "Delete Saves"
+								"textKey": "play.delete_saves"
 							}
 						}
 					}
@@ -69,7 +69,7 @@
 						{
 							"Label":
 							{
-								"text": "Back"
+								"textKey": "common.back"
 							}
 						}
 					}

@@ -20,7 +20,10 @@ SplashState::SplashState(Context& context)
 {
 	if (!context.resources.fonts.Has("main"))
 	{
-		context.resources.fonts.Load("main", "assets/fonts/main.ttf");
+		// Shares the button font's file: it is the only one of the three UI
+		// fonts with Cyrillic glyphs, so "main" (used for most body text) has
+		// to be backed by it too for Russian/Ukrainian to render at all.
+		context.resources.fonts.Load("main", "assets/fonts/born2bsporty-fs.regular.otf");
 		context.resources.fonts.Get("main").setSmooth(false);
 	}
 
@@ -36,6 +39,7 @@ SplashState::SplashState(Context& context)
 		context.resources.fonts.Get("gameTitle").setSmooth(false);
 	}
 
+	interfaceLoader.SetLocalization(context.localization);
 	BuildInterface();
 
 	context.audioMixer.PlayMusic("menu_theme");

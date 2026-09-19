@@ -1,5 +1,7 @@
 #pragma once
 
+#include "localization/Language.h"
+
 #include <string>
 
 enum class ScreenMode
@@ -19,6 +21,9 @@ struct SettingsData
 	ScreenMode screenMode = ScreenMode::Borderless;
 	bool isVsyncEnabled = true;
 	bool isShowFpsEnabled = false;
+
+	Language language = Language::English;
+	bool isLanguageChosen = false; // false until the first-run language picker has been confirmed
 
 	bool operator==(const SettingsData& other) const = default;
 };
@@ -50,10 +55,16 @@ public:
 	bool IsVsyncEnabled() const { return current.isVsyncEnabled; }
 	bool IsShowFpsEnabled() const { return current.isShowFpsEnabled; }
 
+	Language GetLanguage() const { return current.language; }
+	bool IsLanguageChosen() const { return current.isLanguageChosen; }
+
 	void SetResolution(int width, int height);
 	void SetScreenMode(ScreenMode mode);
 	void SetVsync(bool value);
 	void SetShowFps(bool value);
+	void SetLanguage(Language value); // also marks the language as chosen
+
+
 
 private:
 	SettingsData current;

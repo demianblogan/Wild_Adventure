@@ -27,6 +27,7 @@ private:
 	SettingsController settings;
 
 	bool isInSettings = false;
+	int lastLocalizationRevision = 0; // detects a language change made while isInSettings was true
 	NavRequest pendingRequest = NavRequest::None;
 
 	std::string levelPath;

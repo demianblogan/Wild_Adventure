@@ -96,7 +96,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Move Left"
+								"textKey": "controls.move_left"
 							}
 						},
 						{
@@ -223,7 +223,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Move Right"
+								"textKey": "controls.move_right"
 							}
 						},
 						{
@@ -350,7 +350,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Jump"
+								"textKey": "controls.jump"
 							}
 						},
 						{
@@ -454,7 +454,7 @@
 									{
 										"Label":
 										{
-											"text": "Save"
+											"textKey": "common.save"
 										}
 									}
 								}
@@ -492,7 +492,7 @@
 									{
 										"Label":
 										{
-											"text": "Reset"
+											"textKey": "common.reset"
 										}
 									}
 								}
@@ -530,7 +530,7 @@
 									{
 										"Label":
 										{
-											"text": "Back"
+											"textKey": "common.back"
 										}
 									}
 								}

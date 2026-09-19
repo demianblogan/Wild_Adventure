@@ -99,7 +99,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Graphics"
+								"textKey": "settings.graphics"
 							}
 						}
 					]
@@ -193,7 +193,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Resolution:"
+								"textKey": "graphics.resolution"
 							}
 						},
 						{
@@ -309,7 +309,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Screen Mode:"
+								"textKey": "graphics.screen_mode"
 							}
 						},
 						{
@@ -425,7 +425,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "V-Sync:"
+								"textKey": "graphics.vsync"
 							}
 						},
 						{
@@ -542,7 +542,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Show FPS:"
+								"textKey": "graphics.show_fps"
 							}
 						},
 						{
@@ -637,7 +637,7 @@
 									{
 										"Label":
 										{
-											"text": "Save"
+											"textKey": "common.save"
 										}
 									}
 								}
@@ -675,7 +675,7 @@
 									{
 										"Label":
 										{
-											"text": "Reset"
+											"textKey": "common.reset"
 										}
 									}
 								}
@@ -713,7 +713,7 @@
 									{
 										"Label":
 										{
-											"text": "Back"
+											"textKey": "common.back"
 										}
 									}
 								}

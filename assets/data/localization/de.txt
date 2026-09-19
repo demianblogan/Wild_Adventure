@@ -1,0 +1,89 @@
+# German catalog. Any key missing here silently falls back to en.txt.
+
+common.back = Zurück
+common.save = Speichern
+common.reset = Zurücksetzen
+common.yes = Ja
+common.no = Nein
+common.continue = Fortsetzen
+
+settings.title = Einstellungen
+settings.audio = Audio
+settings.graphics = Grafik
+settings.controls = Steuerung
+settings.keyboard = Tastatur
+settings.joystick = Gamepad
+settings.language = Sprache
+
+graphics.resolution = Auflösung:
+graphics.screen_mode = Bildschirmmodus:
+graphics.vsync = V-Sync:
+graphics.show_fps = FPS anzeigen:
+graphics.mode_fullscreen = Vollbild
+graphics.mode_borderless = Randlos
+graphics.mode_window = Fenster
+
+audio.sounds = Geräusche
+audio.music = Musik
+
+controls.move_left = Nach links
+controls.move_right = Nach rechts
+controls.jump = Springen
+controls.pause = Pause
+controls.capturing = ...
+
+joystick.action_header = Aktion
+joystick.xbox_header = Xbox
+joystick.ps_header = PS
+
+main_menu.start_game = Spiel starten
+main_menu.credits = Mitwirkende
+main_menu.exit = Beenden
+
+pause.title = Pause
+pause.restart_level = Level neu starten
+pause.options = Optionen
+pause.quit_to_menu = Zum Hauptmenü
+
+play.single_player = Einzelspieler
+play.delete_saves = Saves löschen
+
+single.new_game = Neues Spiel
+single.select_level = Level wählen
+
+level_complete.title = Level {level} geschafft!
+level_complete.restart = Neu starten
+level_complete.main_menu = Hauptmenü
+level_complete.deaths = Tode: {count}
+level_complete.fruits = Früchte: {value}
+level_complete.enemies = Gegner: {value}
+
+campaign_victory.title = Sieg!
+campaign_victory.line_trap = Keine Falle konnte dich aufhalten.
+campaign_victory.line_enemy = Kein Gegner hat dich bezwungen.
+campaign_victory.complete = Kampagne abgeschlossen!
+campaign_victory.back_to_menu = Zurück zum Hauptmenü
+
+hud.health = Leben:
+hud.score = Punkte: {score}
+hud.level_banner = Level {level}
+
+splash.prompt = Beliebige Taste drücken, um zu starten
+
+dialog.warning_title = Achtung!
+dialog.unsaved_changes_message = Du hast ungespeicherte Änderungen. Jetzt speichern?
+dialog.quit_confirm_message = Möchtest du das Spiel beenden?
+dialog.delete_progress_message = Dadurch wird dein gesamter Kampagnen-\nfortschritt gelöscht und du musst von\nvorne beginnen. Möchtest du das?
+
+character_select.title = Charakter wählen
+character_select.play = Spielen
+character_select.locked_requirement = {required} Level mit 3 Sternen ({current}/{required})
+
+credits.bio = Erstellt von Demian Blogan. Dies ist mein drittes Portfolio-Projekt. Ich wollte lernen, große, abwechslungsreiche Level voller Gegner, Fallen und Sammelobjekte zu bauen - und es ist auch mein erstes Plattformspiel.
+credits.email_label = Meine E-Mail:
+credits.linkedin_label = Mein LinkedIn:
+credits.instagram_label = Mein Instagram:
+credits.portfolio_label = Mein Portfolio:
+credits.code_label = Code des Spiels:
+credits.programming_channel_label = Mein Programmier-Kanal:
+credits.gaming_channel_label = Mein Gaming-Kanal:

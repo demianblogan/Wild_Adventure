@@ -4,6 +4,7 @@
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/System/String.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -18,7 +19,11 @@ namespace UI
 
 	void Label::SetText(const std::string& text)
 	{
-		drawableText.setString(text);
+		// text is UTF-8 (JSON literals and every localization catalog are
+		// UTF-8); sf::Text::setString(std::string) instead assumes ANSI and
+		// mangles anything outside plain ASCII, so it has to go through
+		// fromUtf8 explicitly.
+		drawableText.setString(sf::String::fromUtf8(text.begin(), text.end()));
 		RecalculateSize();
 	}
 

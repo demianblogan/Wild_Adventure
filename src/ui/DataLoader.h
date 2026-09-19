@@ -8,6 +8,7 @@
 #include <unordered_map>
 
 struct Resources;
+class LocalizationManager;
 
 namespace Audio
 {
@@ -40,11 +41,18 @@ namespace UI
 
 		void SetButtonSounds(Audio::Mixer& mixer, const std::string& hoverSoundName, const std::string& pressSoundName);
 
+		// Lets Label/TextBox elements resolve a "textKey" field (instead of a
+		// literal "text") through the given catalog. Optional: a DataLoader with
+		// no localization set only understands literal "text" fields.
+		void SetLocalization(LocalizationManager& localizationManager) { localization = &localizationManager; }
+		LocalizationManager* GetLocalization() const { return localization; }
+
 	private:
 		void RegisterDefaultFactories();
 		const nlohmann::json& LoadPrefab(const std::string& name);
 
 		Resources& resources;
+		LocalizationManager* localization = nullptr;
 
 		Audio::Mixer* buttonSoundMixer = nullptr;
 		std::string buttonHoverSound;

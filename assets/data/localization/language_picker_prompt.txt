@@ -1,0 +1,9 @@
+# "Choose your language", in every language at once -- shown by the
+# first-run language picker, before any language has been selected. Format is
+# "code = value" like language_names.txt.
+
+en = Choose your language
+de = Wähle deine Sprache
+es = Elige tu idioma
+ru = Выберите язык
+uk = Оберіть мову

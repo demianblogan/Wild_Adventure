@@ -7,6 +7,7 @@
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "localization/LocalizationManager.h"
 #include "states/MenuState.h"
 
 #include <SFML/Graphics/Font.hpp>
@@ -33,6 +34,7 @@ CampaignVictoryState::CampaignVictoryState(Context& context)
 	, victoryLoader(context.resources)
 {
 	victoryLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	victoryLoader.SetLocalization(context.localization);
 	RegisterActions();
 	victoryInterface.SetContent(victoryLoader.LoadFromFile(VictoryUiPath));
 	victoryInterface.ResetFocus();
@@ -41,11 +43,12 @@ CampaignVictoryState::CampaignVictoryState(Context& context)
 	const sf::Color white(255, 255, 255, 255);
 
 	// The congratulation, typed out top to bottom. Blank lines are spacing only.
+	const auto toUtf8 = [](const std::string& text) { return sf::String::fromUtf8(text.begin(), text.end()); };
 	lines = {
-		{ "Victory!",                     24, gold,  58.f },
-		{ "No trap could stop you.",      16, white, 96.f },
-		{ "No enemy made you surrender.", 16, white, 116.f },
-		{ "Campaign complete!",           24, gold,  154.f },
+		{ toUtf8(context.localization.GetText("campaign_victory.title")),        24, gold,  58.f },
+		{ toUtf8(context.localization.GetText("campaign_victory.line_trap")),    16, white, 96.f },
+		{ toUtf8(context.localization.GetText("campaign_victory.line_enemy")),   16, white, 116.f },
+		{ toUtf8(context.localization.GetText("campaign_victory.complete")),     24, gold,  154.f },
 	};
 
 	// The campaign is over: silence the level music and play the victory jingle.

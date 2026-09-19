@@ -19,5 +19,5 @@ CMakeUserPresets.json
 libs/SFML/*
 !libs/SFML/README.md
 
-# Per-player campaign progress
-data/save.json
+# Per-player data (settings, campaign progress, key bindings) lives under
+# %LOCALAPPDATA%\Alone Bull Company\Wild Adventure\, never here.

@@ -24,7 +24,7 @@
 						{
 							"Label":
 							{
-								"text": "New Game"
+								"textKey": "single.new_game"
 							}
 						}
 					}
@@ -47,7 +47,7 @@
 						{
 							"Label":
 							{
-								"text": "Continue"
+								"textKey": "common.continue"
 							}
 						}
 					}
@@ -70,7 +70,7 @@
 						{
 							"Label":
 							{
-								"text": "Select Level"
+								"textKey": "single.select_level"
 							}
 						}
 					}
@@ -92,7 +92,7 @@
 						{
 							"Label":
 							{
-								"text": "Back"
+								"textKey": "common.back"
 							}
 						}
 					}

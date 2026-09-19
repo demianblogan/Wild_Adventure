@@ -1,0 +1,89 @@
+# Russian catalog. Any key missing here silently falls back to en.txt.
+
+common.back = Назад
+common.save = Сохранить
+common.reset = Сброс
+common.yes = Да
+common.no = Нет
+common.continue = Продолжить
+
+settings.title = Настройки
+settings.audio = Звук
+settings.graphics = Графика
+settings.controls = Управление
+settings.keyboard = Клавиатура
+settings.joystick = Геймпад
+settings.language = Язык
+
+graphics.resolution = Разрешение:
+graphics.screen_mode = Режим экрана:
+graphics.vsync = Вертикальная синхронизация:
+graphics.show_fps = Показывать FPS:
+graphics.mode_fullscreen = Полноэкранный
+graphics.mode_borderless = Без рамки
+graphics.mode_window = Оконный
+
+audio.sounds = Звуки
+audio.music = Музыка
+
+controls.move_left = Движение влево
+controls.move_right = Движение вправо
+controls.jump = Прыжок
+controls.pause = Пауза
+controls.capturing = ...
+
+joystick.action_header = Действие
+joystick.xbox_header = Xbox
+joystick.ps_header = PS
+
+main_menu.start_game = Начать игру
+main_menu.credits = Титры
+main_menu.exit = Выход
+
+pause.title = Пауза
+pause.restart_level = Начать уровень заново
+pause.options = Настройки
+pause.quit_to_menu = Выйти в главное меню
+
+play.single_player = Один игрок
+play.delete_saves = Удалить сейвы
+
+single.new_game = Новая игра
+single.select_level = Выбор уровня
+
+level_complete.title = Уровень {level} пройден!
+level_complete.restart = Заново
+level_complete.main_menu = Главное меню
+level_complete.deaths = Смертей: {count}
+level_complete.fruits = Фрукты: {value}
+level_complete.enemies = Враги: {value}
+
+campaign_victory.title = Победа!
+campaign_victory.line_trap = Ни одна ловушка не смогла тебя остановить.
+campaign_victory.line_enemy = Ни один враг не заставил тебя сдаться.
+campaign_victory.complete = Кампания завершена!
+campaign_victory.back_to_menu = Назад в главное меню
+
+hud.health = Здоровье:
+hud.score = Очки: {score}
+hud.level_banner = Уровень {level}
+
+splash.prompt = Нажмите любую клавишу, чтобы начать
+
+dialog.warning_title = Внимание!
+dialog.unsaved_changes_message = У вас есть несохранённые изменения. Сохранить их?
+dialog.quit_confirm_message = Вы хотите выйти из игры?
+dialog.delete_progress_message = Это удалит весь прогресс кампании,\nи вам придётся начать заново.\nВы уверены?
+
+character_select.title = Выбор персонажа
+character_select.play = Играть
+character_select.locked_requirement = {required} уровней с 3 звёздами ({current}/{required})
+
+credits.bio = Сделано Демьяном Блоганом. Это мой третий проект в портфолио. Я хотел научиться создавать большие разнообразные уровни, полные врагов, ловушек и предметов - и это также моя первая игра в жанре платформер.
+credits.email_label = Моя почта:
+credits.linkedin_label = Мой LinkedIn:
+credits.instagram_label = Мой Instagram:
+credits.portfolio_label = Моё портфолио:
+credits.code_label = Код игры:
+credits.programming_channel_label = Мой канал о программировании:
+credits.gaming_channel_label = Мой игровой канал:

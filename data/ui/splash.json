@@ -85,7 +85,7 @@
 						255
 					],
 					"outlineThickness": 1,
-					"text": "Press any key to start"
+					"textKey": "splash.prompt"
 				}
 			}
 		]

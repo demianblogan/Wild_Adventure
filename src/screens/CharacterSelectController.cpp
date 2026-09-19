@@ -9,7 +9,10 @@
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
 #include "graphics/NineSlice.h"
+#include "localization/LocalizationManager.h"
 #include "states/GameState.h"
+#include "ui/Image.h"
+#include "ui/Label.h"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -18,6 +21,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/System/String.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include <cmath>
@@ -28,11 +32,6 @@ namespace
 {
 	constexpr float ScreenWidth = static_cast<float>(VirtualScreen::Width);
 	constexpr float ScreenHeight = static_cast<float>(VirtualScreen::Height);
-
-	// Header label, styled like the settings panel headers ("Audio", ...).
-	constexpr float HeaderY = 38.0f;
-	constexpr float HeaderWidth = 200.0f;
-	constexpr float HeaderHeight = 30.0f;
 
 	// Carousel box with the arrows, the portrait, the skin name and, on
 	// locked skins, the unlock requirement line.
@@ -57,12 +56,7 @@ namespace
 	constexpr float ButtonY = 206.0f;
 	constexpr float ButtonSpacing = 110.0f; // center to center
 
-	constexpr float HintY = 252.0f;
-
-	// 9-slice borders in texture pixels, matching the menu UI configs
-	// (label_background uses [32, 2], container_background uses 15).
-	constexpr float LabelBorderX = 32.0f;
-	constexpr float LabelBorderY = 2.0f;
+	// 9-slice border in texture pixels, matching container_background elsewhere.
 	constexpr float ContainerBorder = 15.0f;
 
 	const sf::Color Gold(244, 199, 110, 255);
@@ -75,11 +69,23 @@ namespace
 	const sf::Color ArrowHighlighted(255, 255, 255, 255);
 	const sf::Color PortraitLocked(70, 70, 70, 255);
 
+	// Replaces every occurrence of "{token}" in text with value (GetText's
+	// resolved string might use the same token more than once).
+	std::string ReplaceAll(std::string text, const std::string& token, const std::string& value)
+	{
+		const std::string placeholder = "{" + token + "}";
+
+		for (std::size_t pos = text.find(placeholder); pos != std::string::npos; pos = text.find(placeholder, pos + value.length()))
+			text.replace(pos, placeholder.length(), value);
+
+		return text;
+	}
+
 	void DrawCenteredText(sf::RenderTarget& target, const sf::Font& font,
 		const std::string& str, unsigned int charSize,
 		sf::Color fill, float cx, float cy)
 	{
-		sf::Text text(font, str, charSize);
+		sf::Text text(font, sf::String::fromUtf8(str.begin(), str.end()), charSize);
 		text.setFillColor(fill);
 		text.setOutlineColor(Outline);
 		text.setOutlineThickness(1.0f);
@@ -97,13 +103,27 @@ namespace
 
 CharacterSelectController::CharacterSelectController(Context& context)
 	: context(context)
-{}
+	, chromeLoader(context.resources)
+{
+	chromeLoader.SetLocalization(context.localization);
+	chrome = chromeLoader.LoadFromFile("data/ui/menu/character_select.json");
+	lastLocalizationRevision = context.localization.Revision();
+}
 
 void CharacterSelectController::Open(int level)
 {
 	levelNumber = level;
 	wasCloseRequested = false;
 	focus = Focus::Carousel;
+
+	// The language can only change while this screen is closed (it and
+	// Settings are mutually exclusive views inside MenuState), so it is
+	// enough to check for a stale chrome here rather than every frame.
+	if (context.localization.Revision() != lastLocalizationRevision)
+	{
+		lastLocalizationRevision = context.localization.Revision();
+		chrome = chromeLoader.LoadFromFile("data/ui/menu/character_select.json");
+	}
 
 	// Start on the skin the player used last; fall back to the default when
 	// it is unknown or no longer unlocked (e.g. after deleting the saves).
@@ -282,11 +302,21 @@ void CharacterSelectController::Render(sf::RenderTarget& target)
 	const Skin& skin = AllSkins()[selectedSkin];
 	const bool unlocked = IsUnlocked(selectedSkin);
 
-	// Header, styled like the settings panel headers.
-	DrawNineSlice(target, resources.textures.Get("label_background"),
-		{ (ScreenWidth - HeaderWidth) / 2.0f, HeaderY - HeaderHeight / 2.0f }, { HeaderWidth, HeaderHeight },
-		LabelBorderX, LabelBorderY, LabelBorderX, LabelBorderY);
-	DrawCenteredText(target, font, "Select Character", 16, Gold, ScreenWidth / 2.0f, HeaderY);
+	// Title/Play/Back are pre-built from JSON (see the constructor); only
+	// their per-frame colors (highlight/disabled) need updating here.
+	const bool playEnabled = unlocked;
+
+	if (auto* playBackground = dynamic_cast<UI::Image*>(chrome->FindByName("play_background")))
+		playBackground->SetColor(!playEnabled ? BoxDisabled : (focus == Focus::PlayButton ? BoxSelected : BoxNormal));
+	if (auto* playLabel = dynamic_cast<UI::Label*>(chrome->FindByName("play_label")))
+		playLabel->SetColor(playEnabled ? sf::Color::White : TextDisabled);
+
+	if (auto* backBackground = dynamic_cast<UI::Image*>(chrome->FindByName("back_background")))
+		backBackground->SetColor(focus == Focus::BackButton ? BoxSelected : BoxNormal);
+	if (auto* backLabel = dynamic_cast<UI::Label*>(chrome->FindByName("back_label")))
+		backLabel->SetColor(sf::Color::White);
+
+	chrome->Draw(target, { 0.0f, 0.0f }, { ScreenWidth, ScreenHeight });
 
 	// Carousel box.
 	DrawNineSlice(target, resources.textures.Get("container_background"),
@@ -340,31 +370,10 @@ void CharacterSelectController::Render(sf::RenderTarget& target)
 
 	if (!unlocked)
 	{
-		const std::string requirement =
-			std::to_string(skin.requiredThreeStars) + " levels with 3 stars ("
-			+ std::to_string(context.campaign.CountThreeStarLevels()) + "/"
-			+ std::to_string(skin.requiredThreeStars) + ")";
+		std::string requirement = context.localization.GetText("character_select.locked_requirement");
+		requirement = ReplaceAll(requirement, "required", std::to_string(skin.requiredThreeStars));
+		requirement = ReplaceAll(requirement, "current", std::to_string(context.campaign.CountThreeStarLevels()));
 		DrawCenteredText(target, font, requirement, 16, TextDisabled, ScreenWidth / 2.0f, NameY + 16.0f);
 	}
 
-	// Play and Back buttons. Play goes gray while a locked skin is shown.
-	const bool playEnabled = unlocked;
-
-	const sf::Color playBoxColor = !playEnabled ? BoxDisabled
-		: (focus == Focus::PlayButton ? BoxSelected : BoxNormal);
-	DrawNineSlice(target, resources.textures.Get("container_background"),
-		PlayRect().position, PlayRect().size,
-		ContainerBorder, ContainerBorder, ContainerBorder, ContainerBorder, playBoxColor);
-	DrawCenteredText(target, font, "Play", 16,
-		playEnabled ? sf::Color::White : TextDisabled,
-		PlayRect().position.x + ButtonWidth / 2.0f, ButtonY + ButtonHeight / 2.0f);
-
-	const sf::Color backBoxColor = (focus == Focus::BackButton) ? BoxSelected : BoxNormal;
-	DrawNineSlice(target, resources.textures.Get("container_background"),
-		BackRect().position, BackRect().size,
-		ContainerBorder, ContainerBorder, ContainerBorder, ContainerBorder, backBoxColor);
-	DrawCenteredText(target, font, "Back", 16, sf::Color::White,
-		BackRect().position.x + ButtonWidth / 2.0f, ButtonY + ButtonHeight / 2.0f);
-
-	DrawCenteredText(target, font, "Back: Esc", 16, sf::Color(180, 180, 180, 255), ScreenWidth / 2.0f, HintY);
 }

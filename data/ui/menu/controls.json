@@ -35,7 +35,7 @@
 						{
 							"Label":
 							{
-								"text": "Keyboard"
+								"textKey": "settings.keyboard"
 							}
 						}
 					}
@@ -68,7 +68,7 @@
 						{
 							"Label":
 							{
-								"text": "Joystick"
+								"textKey": "settings.joystick"
 							}
 						}
 					}
@@ -101,7 +101,7 @@
 						{
 							"Label":
 							{
-								"text": "Back"
+								"textKey": "common.back"
 							}
 						}
 					}

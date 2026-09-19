@@ -1,0 +1,96 @@
+# English catalog. Loaded first for every language as the fallback, so keep
+# this file complete -- a key missing here shows up as its raw key in-game
+# no matter which language is active.
+#
+# Format: one "section.key = value" pair per line. Blank lines and lines
+# starting with '#' are ignored. "\n" inside a value becomes a real line
+# break (a dialog message can span several lines). "{token}" placeholders
+# are filled in by LocalizationManager::FormatText.
+
+common.back = Back
+common.save = Save
+common.reset = Reset
+common.yes = Yes
+common.no = No
+common.continue = Continue
+
+settings.title = Settings
+settings.audio = Audio
+settings.graphics = Graphics
+settings.controls = Controls
+settings.keyboard = Keyboard
+settings.joystick = Joystick
+settings.language = Language
+
+graphics.resolution = Resolution:
+graphics.screen_mode = Screen Mode:
+graphics.vsync = V-Sync:
+graphics.show_fps = Show FPS:
+graphics.mode_fullscreen = Fullscreen
+graphics.mode_borderless = Borderless
+graphics.mode_window = Window
+
+audio.sounds = Sounds
+audio.music = Music
+
+controls.move_left = Move Left
+controls.move_right = Move Right
+controls.jump = Jump
+controls.pause = Pause
+controls.capturing = ...
+
+joystick.action_header = Action
+joystick.xbox_header = Xbox
+joystick.ps_header = PS
+
+main_menu.start_game = Start Game
+main_menu.credits = Credits
+main_menu.exit = Exit
+
+pause.title = Pause
+pause.restart_level = Restart Level
+pause.options = Options
+pause.quit_to_menu = Quit to Main Menu
+
+play.single_player = Single Player
+play.delete_saves = Delete Saves
+
+single.new_game = New Game
+single.select_level = Select Level
+
+level_complete.title = Level {level} Complete!
+level_complete.restart = Restart
+level_complete.main_menu = Main Menu
+level_complete.deaths = Deaths: {count}
+level_complete.fruits = Fruits: {value}
+level_complete.enemies = Enemies: {value}
+
+campaign_victory.title = Victory!
+campaign_victory.line_trap = No trap could stop you.
+campaign_victory.line_enemy = No enemy made you surrender.
+campaign_victory.complete = Campaign complete!
+campaign_victory.back_to_menu = Back to Main Menu
+
+hud.health = Health:
+hud.score = Score: {score}
+hud.level_banner = Level {level}
+
+splash.prompt = Press any key to start
+
+dialog.warning_title = Warning!
+dialog.unsaved_changes_message = You have unsaved changes. Save them?
+dialog.quit_confirm_message = Do you want to quit the game?
+dialog.delete_progress_message = This will delete all your campaign\nprogress and you will have to\nstart over. Do you want this?
+
+character_select.title = Select Character
+character_select.play = Play
+character_select.locked_requirement = {required} levels with 3 stars ({current}/{required})
+
+credits.bio = Made by Demian Blogan. This is my third portfolio project. I wanted to learn to build large, varied levels filled with all kinds of enemies, traps, and collectibles - and this is also my first platformer.
+credits.email_label = My Email:
+credits.linkedin_label = My LinkedIn:
+credits.instagram_label = My Instagram:
+credits.portfolio_label = My Portfolio:
+credits.code_label = Code of the Game:
+credits.programming_channel_label = My Programming Channel:
+credits.gaming_channel_label = My Gaming Channel:
