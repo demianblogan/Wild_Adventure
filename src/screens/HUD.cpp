@@ -21,10 +21,10 @@ HUD::HUD(Context& context)
 	, loader(context.resources)
 {}
 
-void HUD::Build(int levelNumber, bool shouldShowLevelBanner)
+void HUD::Build(int levelNumber, bool isLevelBannerVisible)
 {
 	this->levelNumber = levelNumber;
-	this->shouldShowLevelBanner = shouldShowLevelBanner;
+	this->isLevelBannerVisible = isLevelBannerVisible;
 
 	interface.SetContent(loader.LoadFromFile("data/ui/hud.json"));
 }
@@ -53,7 +53,7 @@ void HUD::SetScore(int score)
 
 void HUD::StartBanner()
 {
-	if (shouldShowLevelBanner)
+	if (isLevelBannerVisible)
 		bannerPhase = BannerPhase::SlideIn;
 }
 
@@ -74,11 +74,11 @@ void HUD::UpdateHearts(int currentHealth, float deltaTime)
 		blinkingHeart = -1;
 	}
 
-	bool blinkOn = true;
+	bool isBlinkOn = true;
 	if (blinkingHeart >= 0)
 	{
 		blinkTimer -= deltaTime;
-		blinkOn = std::fmod(blinkTimer, 0.12f) < 0.06f; // fast on/off
+		isBlinkOn = std::fmod(blinkTimer, 0.12f) < 0.06f; // fast on/off
 
 		if (blinkTimer <= 0.0f)
 			blinkingHeart = -1; // fully gone now
@@ -93,7 +93,7 @@ void HUD::UpdateHearts(int currentHealth, float deltaTime)
 		if (i < displayedHealth)
 			heart->isVisible = true;       // settled, alive
 		else if (i == blinkingHeart)
-			heart->isVisible = blinkOn;    // blinking out
+			heart->isVisible = isBlinkOn;    // blinking out
 		else
 			heart->isVisible = false;      // gone
 	}

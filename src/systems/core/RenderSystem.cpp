@@ -102,7 +102,7 @@ namespace ECS
 
 				renderTarget.draw(drawable);
 
-				if (sprite.glow)
+				if (sprite.isGlowing)
 					virtualScreen.GetGlowTarget().draw(drawable,
 						virtualScreen.GlowSilhouetteStates(sprite.glowColor));
 			});

@@ -70,7 +70,7 @@ TEST_SUITE("Settings")
 		CHECK(reloaded.GetResolutionWidth() == 1280);
 		CHECK(reloaded.GetResolutionHeight() == 720);
 		CHECK(reloaded.GetScreenMode() == ScreenMode::Window);
-		CHECK_FALSE(reloaded.GetVsync());
+		CHECK_FALSE(reloaded.IsVsyncEnabled());
 		CHECK_FALSE(reloaded.IsDirty()); // Load must mark the freshly loaded state as saved
 	}
 

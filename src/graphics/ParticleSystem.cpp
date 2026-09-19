@@ -176,7 +176,7 @@ void ParticleSystem::Update(float deltaTime)
 			particle.position += particle.velocity * deltaTime;
 			particle.flyTimer += deltaTime;
 
-			bool landed = false;
+			bool hasLanded = false;
 			if (tilemap != nullptr)
 			{
 				const int column = static_cast<int>(std::floor(particle.position.x / tileSize));
@@ -192,7 +192,7 @@ void ParticleSystem::Update(float deltaTime)
 					particle.velocity = { 0.0f, 0.0f };
 					particle.phase = DebrisPhase::Resting;
 					particle.phaseTimer = DebrisRest;
-					landed = true;
+					hasLanded = true;
 				}
 				else if (inSolid)
 				{
@@ -206,8 +206,8 @@ void ParticleSystem::Update(float deltaTime)
 				}
 			}
 
-			if (!landed && particle.flyTimer >= DebrisMaxFly)
-				particle.isDead = true; // fell into a pit / never landed
+			if (!hasLanded && particle.flyTimer >= DebrisMaxFly)
+				particle.isDead = true; // fell into a pit / never hasLanded
 		}
 		else if (particle.phase == DebrisPhase::Resting)
 		{

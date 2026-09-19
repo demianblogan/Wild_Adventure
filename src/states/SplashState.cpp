@@ -18,8 +18,23 @@ SplashState::SplashState(Context& context)
 	, userInterface(context.virtualScreen)
 	, interfaceLoader(context.resources)
 {
-	context.resources.fonts.Load("main", "assets/fonts/main.ttf");
-	context.resources.fonts.Get("main").setSmooth(false);
+	if (!context.resources.fonts.Has("main"))
+	{
+		context.resources.fonts.Load("main", "assets/fonts/main.ttf");
+		context.resources.fonts.Get("main").setSmooth(false);
+	}
+
+	if (!context.resources.fonts.Has("title"))
+	{
+		context.resources.fonts.Load("title", "assets/fonts/born2bsporty-fs.regular.otf");
+		context.resources.fonts.Get("title").setSmooth(false);
+	}
+
+	if (!context.resources.fonts.Has("gameTitle"))
+	{
+		context.resources.fonts.Load("gameTitle", "assets/fonts/light-pixel-7.regular.ttf");
+		context.resources.fonts.Get("gameTitle").setSmooth(false);
+	}
 
 	BuildInterface();
 

@@ -27,7 +27,7 @@ namespace UI
 
 	void Root::CollectGlowingFrom(Element& element)
 	{
-		if (element.glow)
+		if (element.isGlowing)
 			glowingElements.push_back(&element);
 
 		for (Element* child : element.GetChildren())

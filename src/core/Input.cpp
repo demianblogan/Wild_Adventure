@@ -294,20 +294,20 @@ int Input::FindGamepad()
 	return -1;
 }
 
-bool Input::IsBindingDown(const Binding& binding, int gamepad, bool& fromGamepad) const
+bool Input::IsBindingDown(const Binding& binding, int gamepad, bool& isFromGamepad) const
 {
 	switch (binding.type)
 	{
 	case BindingType::Key:
-		fromGamepad = false;
+		isFromGamepad = false;
 		return sf::Keyboard::isKeyPressed(binding.key);
 
 	case BindingType::Button:
-		fromGamepad = true;
+		isFromGamepad = true;
 		return gamepad >= 0 && sf::Joystick::isButtonPressed(static_cast<unsigned int>(gamepad), binding.button);
 
 	case BindingType::Axis:
-		fromGamepad = true;
+		isFromGamepad = true;
 		if (gamepad < 0)
 			return false;
 		return sf::Joystick::getAxisPosition(static_cast<unsigned int>(gamepad), binding.axis) * binding.direction > axisThreshold;
@@ -320,37 +320,37 @@ void Input::Update()
 {
 	const int gamepad = FindGamepad();
 
-	bool anyNewPress = false;
+	bool hasNewPress = false;
 	InputDevice pressDevice = activeDevice;
 
 	for (int i = 0; i < ActionCount; i++)
 	{
 		previousDown[i] = currentDown[i];
 
-		bool down = false;
-		bool downFromGamepad = false;
+		bool isDown = false;
+		bool isDownFromGamepad = false;
 
 		for (const Binding& binding : bindings[i])
 		{
-			bool fromGamepad = false;
-			if (IsBindingDown(binding, gamepad, fromGamepad))
+			bool isFromGamepad = false;
+			if (IsBindingDown(binding, gamepad, isFromGamepad))
 			{
-				down = true;
-				if (fromGamepad)
-					downFromGamepad = true;
+				isDown = true;
+				if (isFromGamepad)
+					isDownFromGamepad = true;
 			}
 		}
 
-		currentDown[i] = down;
+		currentDown[i] = isDown;
 
-		if (down && !previousDown[i])
+		if (isDown && !previousDown[i])
 		{
-			anyNewPress = true;
-			pressDevice = downFromGamepad ? InputDevice::Gamepad : InputDevice::Keyboard;
+			hasNewPress = true;
+			pressDevice = isDownFromGamepad ? InputDevice::Gamepad : InputDevice::Keyboard;
 		}
 	}
 
-	if (anyNewPress)
+	if (hasNewPress)
 		activeDevice = pressDevice; // instant switch on the first press of either device
 }
 

@@ -27,7 +27,7 @@ void StateMachine::Update(float deltaTime)
 	{
 		stack[i - 1]->Update(deltaTime);
 
-		if (!stack[i - 1]->UpdatesStateBelow())
+		if (!stack[i - 1]->IsUpdatingStateBelow())
 			break;
 	}
 
@@ -42,7 +42,7 @@ void StateMachine::Render(float interpolationFactor)
 	// Phase 1: find the lowest state index that must be drawn
 	// (walk down while states are see-through to what's below them)
 	std::size_t bottomVisible = stack.size() - 1;
-	while (bottomVisible > 0 && stack[bottomVisible]->RendersStateBelow())
+	while (bottomVisible > 0 && stack[bottomVisible]->IsRenderingStateBelow())
 		bottomVisible--;
 
 	// Phase 2: draw from that lowest state upward, so higher states layer on top

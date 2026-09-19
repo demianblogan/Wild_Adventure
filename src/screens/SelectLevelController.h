@@ -15,14 +15,14 @@ namespace sf
 
 // Self-contained "Select Level" grid shown over the live main menu. The owner
 // calls Open(), then forwards events / update / render while the grid is shown;
-// when the user backs out (or launches a level) WantsClose() turns true.
+// when the user backs out (or launches a level) WasCloseRequested() turns true.
 class SelectLevelController
 {
 public:
 	SelectLevelController(Context& context);
 
 	void Open();
-	bool WantsClose() const { return wantsClose; }
+	bool WasCloseRequested() const { return wasCloseRequested; }
 
 	// Called with the level number instead of launching it directly; the
 	// owner routes the launch through the character select screen.
@@ -57,6 +57,6 @@ private:
 
 	std::array<Cell, Campaign::LevelCount> cells;
 	int selected = 0;
-	bool wantsClose = false;
+	bool wasCloseRequested = false;
 	std::function<void(int)> launchHandler;
 };

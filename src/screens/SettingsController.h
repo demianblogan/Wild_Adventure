@@ -22,14 +22,14 @@ namespace sf
 // Self-contained settings UI (graphics / audio / controls), shared by the main
 // menu and the pause menu. The owner calls Open(), then forwards events / update /
 // render while the settings are shown; when the user backs out of the root panel
-// WantsClose() turns true and the owner hides the settings again.
+// WasCloseRequested() turns true and the owner hides the settings again.
 class SettingsController
 {
 public:
 	SettingsController(Context& context);
 
 	void Open(const std::string& settingsFrame = "frame");
-	bool WantsClose() const { return wantsClose; }
+	bool WasCloseRequested() const { return wasCloseRequested; }
 
 	void HandleEvent(const sf::Event& event);
 	void Update(float deltaTime);
@@ -76,7 +76,7 @@ private:
 
 	std::vector<std::string> panelStack;
 	std::string activeFrame = "frame";
-	bool wantsClose = false;
+	bool wasCloseRequested = false;
 
 	NavRequest pendingRequest = NavRequest::None;
 	std::string pendingPanelId;

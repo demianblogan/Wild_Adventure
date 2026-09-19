@@ -40,7 +40,7 @@ SettingsController::SettingsController(Context& context)
 
 void SettingsController::Open(const std::string& settingsFrame)
 {
-	wantsClose = false;
+	wasCloseRequested = false;
 	isCapturingKey = false;
 	isWaitingForKeyRelease = false;
 	pendingRequest = NavRequest::None;
@@ -95,6 +95,11 @@ void SettingsController::RegisterActions()
 			context.settings.SetVsync(value);
 			context.graphics.ApplyVsync(); // vsync applies immediately
 		});
+
+	settingsLoader.RegisterBoolAction("set_show_fps", [this](bool value)
+		{
+			context.settings.SetShowFps(value); // applies immediately, nothing to re-create
+		});
 }
 
 void SettingsController::ShowPanel(const std::string& panelId)
@@ -104,6 +109,17 @@ void SettingsController::ShowPanel(const std::string& panelId)
 	UI::Element* slot = frame->FindByName("panel_slot");
 	if (slot == nullptr)
 		throw std::runtime_error("SettingsController: frame.json must contain 'panel_slot'");
+
+	// In main-menu context: the panels here already carry their own heading
+	// ("Graphics", "Audio", ...), so hide the frame's title and reclaim the
+	// space reserved above the panel slot for the extra row(s).
+	if (activeFrame == "frame")
+	{
+		if (UI::Element* title = frame->FindByName("title"))
+			title->isVisible = false;
+
+		slot->offset = { 0.0f, 0.0f };
+	}
 
 	slot->AddChild(settingsLoader.LoadFromFile(MenuDirectory + panelId + ".json"));
 
@@ -262,7 +278,10 @@ void SettingsController::SetupGraphicsPanel()
 	UpdateResolutionRowEnabled();
 
 	if (auto* vsync = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("vsync_checkbox")))
-		vsync->SetChecked(context.settings.GetVsync());
+		vsync->SetChecked(context.settings.IsVsyncEnabled());
+
+	if (auto* showFps = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("show_fps_checkbox")))
+		showFps->SetChecked(context.settings.IsShowFpsEnabled());
 }
 
 void SettingsController::StepResolution(int direction)
@@ -464,7 +483,7 @@ void SettingsController::ApplyPendingNavigation()
 		}
 		else
 		{
-			wantsClose = true; // backed out of the settings root: hand control back
+			wasCloseRequested = true; // backed out of the settings root: hand control back
 		}
 		break;
 

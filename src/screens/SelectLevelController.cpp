@@ -72,7 +72,7 @@ SelectLevelController::SelectLevelController(Context& context)
 
 void SelectLevelController::Open()
 {
-	wantsClose = false;
+	wasCloseRequested = false;
 	RebuildCells();
 
 	// Start on the next level to play (like Continue); fall back to the
@@ -140,7 +140,7 @@ void SelectLevelController::LaunchSelected()
 	const int number = selected + 1;
 
 	context.audioMixer.PlaySound("ui_press");
-	wantsClose = true;
+	wasCloseRequested = true;
 
 	if (launchHandler)
 		launchHandler(number);
@@ -206,7 +206,7 @@ void SelectLevelController::Update(float)
 
 	if (input.WasPressed(Action::MenuBack))
 	{
-		wantsClose = true;
+		wasCloseRequested = true;
 		return;
 	}
 

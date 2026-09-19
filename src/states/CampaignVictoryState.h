@@ -48,7 +48,7 @@ private:
 	float waitTimer        = 0.0f;
 	std::size_t revealed   = 0;      // letters currently visible across all lines
 
-	bool wantsToGoToMenu = false;
+	bool wasMenuRequested = false;
 
 	static constexpr float CharInterval = 0.03f;
 	static constexpr float ButtonDelay  = 2.0f;

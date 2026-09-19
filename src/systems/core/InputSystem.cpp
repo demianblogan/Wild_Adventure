@@ -57,7 +57,7 @@ namespace ECS
 				}
 
 				if (jumpPressed)
-					jump.wantsToJump = true;
+					jump.wasJumpRequested = true;
 			});
 	}
 }

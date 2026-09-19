@@ -34,7 +34,7 @@ namespace ECS
 		// Capture the player's position by value, not by reference: SpawnBullet adds
 		// components below, which can reallocate a component pool and dangle a held
 		// reference into it.
-		bool  playerFound = false;
+		bool  hasFoundPlayer = false;
 		float playerX     = 0.0f;
 		float playerCenterY = 0.0f;
 		registry.ForEach<Player, Transform, Collider>(
@@ -42,10 +42,10 @@ namespace ECS
 			{
 				playerX       = transform.x;
 				playerCenterY = transform.y - collider.height * 0.5f;
-				playerFound   = true;
+				hasFoundPlayer   = true;
 			});
 
-		if (!playerFound)
+		if (!hasFoundPlayer)
 			return;
 
 		registry.ForEach<TrunkAI, GroundPatrol, Transform, Collider, Velocity, AnimationState, Facing>(

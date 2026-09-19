@@ -48,7 +48,7 @@ namespace ECS
 				{
 					velocity.x = patrol.speed * static_cast<float>(patrol.direction);
 
-					bool shouldTurn = false;
+					bool isTurnTriggered = false;
 
 					if (registry.Has<CollisionState>(entity))
 					{
@@ -56,21 +56,21 @@ namespace ECS
 						// Only trigger on the wall the entity is actually walking toward;
 						// without the direction check it re-triggers immediately after turning.
 						if (cs.isOnWall && cs.wallDirection == patrol.direction)
-							shouldTurn = true;
+							isTurnTriggered = true;
 					}
 
-					if (!shouldTurn && !HasGroundAhead(transform, collider, patrol.direction))
-						shouldTurn = true;
+					if (!isTurnTriggered && !HasGroundAhead(transform, collider, patrol.direction))
+						isTurnTriggered = true;
 
-					if (shouldTurn)
+					if (isTurnTriggered)
 					{
 						patrol.state      = GroundPatrol::State::TurningIdle;
 						patrol.stateTimer = patrol.turnIdleDuration;
 						velocity.x        = 0.0f;
-						if (patrol.managesAnimation)
+						if (patrol.hasOwnAnimation)
 							animState.current = patrol.idleAnim;
 					}
-					else if (patrol.emitsDust && patrol.speed > 0.0f)
+					else if (patrol.hasDustTrail && patrol.speed > 0.0f)
 					{
 						// Same run dust as the player's, spaced by distance traveled so
 						// slow walkers don't pile the puffs up.
@@ -91,7 +91,7 @@ namespace ECS
 					{
 						patrol.direction  = -patrol.direction;
 						patrol.state      = GroundPatrol::State::Patrolling;
-						if (patrol.managesAnimation)
+						if (patrol.hasOwnAnimation)
 							animState.current = patrol.moveAnim;
 					}
 					break;

@@ -61,14 +61,14 @@
 						0,
 						18
 					],
-					"action": "menu_open_author",
+					"action": "menu_open_credits",
 					"foregrounds":
 					{
 						"Normal":
 						{
 							"Label":
 							{
-								"text": "Author"
+								"text": "Credits"
 							}
 						}
 					}

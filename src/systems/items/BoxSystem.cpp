@@ -95,7 +95,7 @@ namespace ECS
 					box.isBreaking = true;
 
 				// One fruit per hit (sturdy wood box).
-				if (box.dropsFruitPerHit)
+				if (box.hasFruitDropPerHit)
 				{
 					const int index = box.hitsTaken - 1;
 					if (index >= 0 && index < static_cast<int>(box.fruits.size()))
@@ -136,7 +136,7 @@ namespace ECS
 			Box& box = registry.Get<Box>(entity);
 
 			// All fruits at once on break (metal box).
-			if (!box.dropsFruitPerHit)
+			if (!box.hasFruitDropPerHit)
 			{
 				const std::vector<std::string> fruits = box.fruits;
 				const Transform& boxTransform = registry.Get<Transform>(entity);

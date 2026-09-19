@@ -51,7 +51,12 @@ void Settings::SetScreenMode(ScreenMode mode)
 
 void Settings::SetVsync(bool value)
 {
-	current.vsync = value;
+	current.isVsyncEnabled = value;
+}
+
+void Settings::SetShowFps(bool value)
+{
+	current.isShowFpsEnabled = value;
 }
 
 void Settings::Load(const std::string& path)
@@ -81,7 +86,8 @@ void Settings::Load(const std::string& path)
 			current.resolutionWidth = graphics.value("width", current.resolutionWidth);
 			current.resolutionHeight = graphics.value("height", current.resolutionHeight);
 			current.screenMode = ScreenModeFromString(graphics.value("screenMode", ScreenModeToString(current.screenMode)));
-			current.vsync = graphics.value("vsync", current.vsync);
+			current.isVsyncEnabled = graphics.value("vsync", current.isVsyncEnabled);
+			current.isShowFpsEnabled = graphics.value("showFps", current.isShowFpsEnabled);
 		}
 	}
 	catch (const nlohmann::json::exception&)
@@ -108,7 +114,8 @@ void Settings::Save(const std::string& path)
 	data["graphics"]["width"] = current.resolutionWidth;
 	data["graphics"]["height"] = current.resolutionHeight;
 	data["graphics"]["screenMode"] = ScreenModeToString(current.screenMode);
-	data["graphics"]["vsync"] = current.vsync;
+	data["graphics"]["vsync"] = current.isVsyncEnabled;
+	data["graphics"]["showFps"] = current.isShowFpsEnabled;
 
 	static_cast<void>(SafeFileWrite::WriteFileAtomically(path, data.dump(1, '\t')));
 
@@ -128,5 +135,6 @@ void Settings::ResetGraphicsToDefaults()
 	current.resolutionWidth = defaults.resolutionWidth;
 	current.resolutionHeight = defaults.resolutionHeight;
 	current.screenMode = defaults.screenMode;
-	current.vsync = defaults.vsync;
+	current.isVsyncEnabled = defaults.isVsyncEnabled;
+	current.isShowFpsEnabled = defaults.isShowFpsEnabled;
 }

@@ -7,10 +7,10 @@ struct Context;
 class State
 {
 public:
-	State(Context& context, bool rendersStateBelow = false, bool updatesStateBelow = false)
+	State(Context& context, bool isRenderingStateBelow = false, bool isUpdatingStateBelow = false)
 		: context(context)
-		, rendersStateBelow(rendersStateBelow)
-		, updatesStateBelow(updatesStateBelow)
+		, isRenderingStateBelow(isRenderingStateBelow)
+		, isUpdatingStateBelow(isUpdatingStateBelow)
 	{}
 
 	virtual ~State() = default;
@@ -19,20 +19,20 @@ public:
 	virtual void Update(float deltaTime) = 0;
 	virtual void Render(float interpolationFactor) = 0;
 
-	bool RendersStateBelow() const
+	bool IsRenderingStateBelow() const
 	{
-		return rendersStateBelow;
+		return isRenderingStateBelow;
 	}
 
-	bool UpdatesStateBelow() const
+	bool IsUpdatingStateBelow() const
 	{
-		return updatesStateBelow;
+		return isUpdatingStateBelow;
 	}
 
 protected:
 	Context& context;
 
 private:
-	bool rendersStateBelow;
-	bool updatesStateBelow;
+	bool isRenderingStateBelow;
+	bool isUpdatingStateBelow;
 };

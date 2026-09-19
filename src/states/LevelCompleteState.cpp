@@ -68,7 +68,7 @@ namespace
 LevelCompleteState::LevelCompleteState(Context& context, std::string levelPath, int levelNumber,
 	int deathCount, int fruitsCollected, int maxFruits,
 	int enemiesKilled, int maxEnemies)
-	: State(context, /*rendersStateBelow=*/true, /*updatesStateBelow=*/false)
+	: State(context, /*isRenderingStateBelow=*/true, /*isUpdatingStateBelow=*/false)
 	, completeInterface(context.virtualScreen)
 	, completeLoader(context.resources)
 	, levelPath(std::move(levelPath))

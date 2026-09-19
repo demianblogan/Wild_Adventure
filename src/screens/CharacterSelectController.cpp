@@ -102,7 +102,7 @@ CharacterSelectController::CharacterSelectController(Context& context)
 void CharacterSelectController::Open(int level)
 {
 	levelNumber = level;
-	wantsClose = false;
+	wasCloseRequested = false;
 	focus = Focus::Carousel;
 
 	// Start on the skin the player used last; fall back to the default when
@@ -150,7 +150,7 @@ void CharacterSelectController::Activate()
 
 	case Focus::BackButton:
 		context.audioMixer.PlaySound("ui_press");
-		wantsClose = true;
+		wasCloseRequested = true;
 		break;
 	}
 }
@@ -159,7 +159,7 @@ void CharacterSelectController::Launch()
 {
 	context.campaign.SetSelectedSkin(AllSkins()[selectedSkin].id);
 	context.audioMixer.PlaySound("ui_press");
-	wantsClose = true;
+	wasCloseRequested = true;
 
 	context.stateMachine.Push(std::make_unique<GameState>(
 		context, Campaign::LevelPath(levelNumber), levelNumber));
@@ -234,7 +234,7 @@ void CharacterSelectController::Update(float)
 
 	if (input.WasPressed(Action::MenuBack))
 	{
-		wantsClose = true;
+		wasCloseRequested = true;
 		return;
 	}
 

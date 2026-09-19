@@ -133,28 +133,28 @@ namespace ECS
 				case RockHead::State::Moving:
 				{
 					// Did PhysicsSystem stop us against the terrain in our travel direction?
-					bool        hit     = false;
+					bool        wasHit     = false;
 					const char* hitAnim = "Idle";
 					if (rock.axis == RockHead::Axis::Horizontal)
 					{
 						if (collisionState.isOnWall && collisionState.wallDirection == rock.direction)
 						{
-							hit     = true;
+							wasHit     = true;
 							hitAnim = (rock.direction > 0) ? "RightHit" : "LeftHit";
 						}
 					}
 					else if (rock.direction > 0 && collisionState.isOnGround)
 					{
-						hit     = true;
+						wasHit     = true;
 						hitAnim = "BottomHit";
 					}
 					else if (rock.direction < 0 && collisionState.isOnCeiling)
 					{
-						hit     = true;
+						wasHit     = true;
 						hitAnim = "TopHit";
 					}
 
-					if (hit)
+					if (wasHit)
 					{
 						rock.state        = RockHead::State::Stopped;
 						rock.speed        = 0.0f;
@@ -199,7 +199,7 @@ namespace ECS
 					velocity.x = 0.0f;
 					velocity.y = 0.0f;
 
-					// Once the wall-hit animation finishes, set off the other way.
+					// Once the wall-wasHit animation finishes, set off the other way.
 					if (registry.Has<Animation>(entity))
 					{
 						const Animation& anim = registry.Get<Animation>(entity);

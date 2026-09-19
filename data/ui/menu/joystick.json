@@ -238,7 +238,7 @@
 						18,
 						16
 					],
-					"textureName": "xbox_controller_spritesheet",
+					"textureName": "playstation_controller_spritesheet",
 					"textureRect":
 					[
 						197,
@@ -370,7 +370,7 @@
 						18,
 						16
 					],
-					"textureName": "xbox_controller_spritesheet",
+					"textureName": "playstation_controller_spritesheet",
 					"textureRect":
 					[
 						233,
@@ -664,8 +664,8 @@
 					],
 					"size":
 					[
-						8,
-						11
+						9,
+						12
 					],
 					"textureName": "playstation_controller_spritesheet",
 					"textureRect":

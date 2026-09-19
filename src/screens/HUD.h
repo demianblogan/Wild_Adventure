@@ -20,7 +20,7 @@ public:
 	HUD(Context& context);
 
 	// Loads data/ui/hud.json. Call after the fonts are loaded.
-	void Build(int levelNumber, bool shouldShowLevelBanner);
+	void Build(int levelNumber, bool isLevelBannerVisible);
 
 	// The hearts row is sized to the player's maximum health, known only once the
 	// player has spawned.
@@ -70,7 +70,7 @@ private:
 
 	BannerPhase bannerPhase = BannerPhase::Hidden;
 	float bannerTimer = 0.0f;
-	bool shouldShowLevelBanner = true; // false on checkpoint respawns
+	bool isLevelBannerVisible = true; // false on checkpoint respawns
 
 	static constexpr float BannerSlideTime = 0.45f; // slide in/out duration
 	static constexpr float BannerHoldTime = 2.0f;   // time fully visible

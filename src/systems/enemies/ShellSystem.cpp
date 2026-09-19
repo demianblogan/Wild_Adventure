@@ -59,26 +59,26 @@ namespace ECS
 				if (shell.kickGrace > 0.0f)
 					shell.kickGrace -= deltaTime;
 
-				// Player overlap (AABB); both origins are bottom-centre.
-				bool overlap        = false;
-				bool playerHittable = false;
+				// Player isOverlapping (AABB); both origins are bottom-centre.
+				bool isOverlapping        = false;
+				bool isPlayerHittable = false;
 				if (playerTransform && playerHealth->current > 0)
 				{
 					const float mHalfW = collider.width / 2.0f;
 					const float pHalfW = playerCollider->width / 2.0f;
-					overlap =
+					isOverlapping =
 						(transform.x - mHalfW) < (playerTransform->x + pHalfW) &&
 						(transform.x + mHalfW) > (playerTransform->x - pHalfW) &&
 						(transform.y - collider.height) < playerTransform->y &&
 						transform.y > (playerTransform->y - playerCollider->height);
-					playerHittable = playerHealth->invulnerabilityTimer <= 0.0f;
+					isPlayerHittable = playerHealth->invulnerabilityTimer <= 0.0f;
 				}
 
 				switch (shell.state)
 				{
 				case Shell::State::Resting:
 					velocity.x = 0.0f;
-					if (overlap && shell.kickGrace <= 0.0f && playerHittable)
+					if (isOverlapping && shell.kickGrace <= 0.0f && isPlayerHittable)
 					{
 						// Roll away from the player at once (touched on its right -> rolls
 						// left); the impact flash plays while it already moves.
@@ -109,10 +109,10 @@ namespace ECS
 					}
 
 					// The shell becomes dangerous to the kicker only once they step clear.
-					if (!overlap)
+					if (!isOverlapping)
 						shell.isHarmlessToKicker = false;
 
-					if (overlap && playerHittable)
+					if (isOverlapping && isPlayerHittable)
 					{
 						const float playerCenterY = playerTransform->y - playerCollider->height / 2.0f;
 						const float shellCenterY  = transform.y - collider.height / 2.0f;

@@ -55,7 +55,7 @@ namespace UI
 
 		// When true, the element is redrawn into the bloom layer every frame
 		// and gets a pulsing aura in its own colors (e.g. the golden title).
-		bool glow = false;
+		bool isGlowing = false;
 
 		// When true, this element's interactive descendants form one navigation row
 		// (left/right move between them, up/down leave the row).

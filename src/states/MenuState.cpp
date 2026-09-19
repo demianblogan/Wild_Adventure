@@ -45,6 +45,18 @@ MenuState::MenuState(Context& context)
 		resources.fonts.Get("main").setSmooth(false);
 	}
 
+	if (!resources.fonts.Has("title"))
+	{
+		resources.fonts.Load("title", "assets/fonts/born2bsporty-fs.regular.otf");
+		resources.fonts.Get("title").setSmooth(false);
+	}
+
+	if (!resources.fonts.Has("gameTitle"))
+	{
+		resources.fonts.Load("gameTitle", "assets/fonts/light-pixel-7.regular.ttf");
+		resources.fonts.Get("gameTitle").setSmooth(false);
+	}
+
 	interfaceLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
 
 	RegisterActions();
@@ -64,7 +76,7 @@ void MenuState::RegisterActions()
 {
 	interfaceLoader.RegisterAction("menu_open_play", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "play"; });
 	interfaceLoader.RegisterAction("menu_open_single", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "single"; });
-	interfaceLoader.RegisterAction("menu_open_author", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "author"; });
+	interfaceLoader.RegisterAction("menu_open_credits", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "credits"; });
 	interfaceLoader.RegisterAction("menu_open_settings", [this] { isInSettings = true; settings.Open(); });
 	interfaceLoader.RegisterAction("menu_select_level", [this] { isInSelectLevel = true; selectLevel.Open(); });
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
@@ -81,6 +93,16 @@ void MenuState::ShowPanel(const std::string& panelId)
 	UI::Element* slot = frame->FindByName("panel_slot");
 	if (slot == nullptr)
 		throw std::runtime_error("MenuState: frame.json must contain 'panel_slot'");
+
+	// Credits needs the full screen height for its block of text, so it hides
+	// the frame's title and reclaims the space reserved above the panel slot.
+	if (panelId == "credits")
+	{
+		if (UI::Element* title = frame->FindByName("title"))
+			title->isVisible = false;
+
+		slot->offset = { 0.0f, 0.0f };
+	}
 
 	slot->AddChild(interfaceLoader.LoadFromFile(MenuDirectory + panelId + ".json"));
 
@@ -251,7 +273,7 @@ void MenuState::Update(float deltaTime)
 	{
 		settings.Update(deltaTime);
 
-		if (settings.WantsClose())
+		if (settings.WasCloseRequested())
 		{
 			isInSettings = false;
 			userInterface.ResetFocus();
@@ -264,7 +286,7 @@ void MenuState::Update(float deltaTime)
 	{
 		characterSelect.Update(deltaTime);
 
-		if (characterSelect.WantsClose())
+		if (characterSelect.WasCloseRequested())
 		{
 			isInCharacterSelect = false;
 			userInterface.ResetFocus();
@@ -277,7 +299,7 @@ void MenuState::Update(float deltaTime)
 	{
 		selectLevel.Update(deltaTime);
 
-		if (selectLevel.WantsClose())
+		if (selectLevel.WasCloseRequested())
 		{
 			isInSelectLevel = false;
 			userInterface.ResetFocus();

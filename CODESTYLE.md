@@ -6,6 +6,10 @@
 - Variables, parameters, fields: `camelCase`
 - Compile-time / true constants (one fixed value for the whole program or object lifetime): `PascalCase`
 - Local `const` variables that receive a new value each call/iteration are still variables: `camelCase`
+- Boolean fields, variables, and parameters: prefix with `is`/`has`/`was`
+  - `is`/`has` for an ongoing state or property (`isVisible`, `hasProgress`)
+  - `was` only for a single-frame edge-triggered signal: set on the frame something happened, consumed and reset soon after (`wasJumpRequested`), not a persistent state
+  - Getters returning a boolean follow the same prefix instead of `Get` (`IsVisible()`, `WasCloseRequested()`)
 
 ## Files
 - Headers: `.h`, sources: `.cpp`

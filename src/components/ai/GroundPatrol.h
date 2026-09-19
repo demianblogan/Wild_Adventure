@@ -21,8 +21,8 @@ namespace ECS
 		std::string moveAnim = "Run";
 		std::string idleAnim = "Idle";
 
-		bool emitsDust = true;        // leave a trail of run dust on the floor
-		bool managesAnimation = true; // false when another system owns the animation (e.g. the ghost)
+		bool hasDustTrail = true;    // leave a trail of run dust on the floor
+		bool hasOwnAnimation = true; // false when another system owns the animation (e.g. the ghost)
 
 		static constexpr float TurnIdleDuration = 0.5f;
 		static constexpr float DustSpacing = 14.0f; // distance (px) between dust puffs

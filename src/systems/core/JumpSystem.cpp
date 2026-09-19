@@ -33,7 +33,7 @@ namespace ECS
 				if (collisionState.isOnGround)
 					jump.jumpsRemaining = jump.maxJumps;
 
-				if (jump.wantsToJump)
+				if (jump.wasJumpRequested)
 				{
 					if (collisionState.isOnWall && !collisionState.isOnGround)
 					{
@@ -54,7 +54,7 @@ namespace ECS
 					}
 				}
 
-				jump.wantsToJump = false;
+				jump.wasJumpRequested = false;
 			});
 	}
 }

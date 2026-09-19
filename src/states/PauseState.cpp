@@ -19,7 +19,7 @@ namespace
 }
 
 PauseState::PauseState(Context& context, std::string levelPath, int levelNumber)
-	: State(context, /*rendersStateBelow=*/true, /*updatesStateBelow=*/false)
+	: State(context, /*isRenderingStateBelow=*/true, /*isUpdatingStateBelow=*/false)
 	, pauseInterface(context.virtualScreen)
 	, pauseLoader(context.resources)
 	, settings(context)
@@ -58,7 +58,7 @@ void PauseState::Update(float deltaTime)
 	{
 		settings.Update(deltaTime);
 
-		if (settings.WantsClose())
+		if (settings.WasCloseRequested())
 		{
 			isInSettings = false;
 			pauseInterface.ResetFocus();

@@ -61,7 +61,7 @@ CampaignVictoryState::CampaignVictoryState(Context& context)
 
 void CampaignVictoryState::RegisterActions()
 {
-	victoryLoader.RegisterAction("cv_menu", [this] { wantsToGoToMenu = true; });
+	victoryLoader.RegisterAction("cv_menu", [this] { wasMenuRequested = true; });
 }
 
 std::size_t CampaignVictoryState::TotalCharacters() const
@@ -142,9 +142,9 @@ void CampaignVictoryState::Update(float deltaTime)
 		else if (input.WasReleased(Action::MenuConfirm))
 			victoryInterface.Confirm(false);
 
-		if (wantsToGoToMenu)
+		if (wasMenuRequested)
 		{
-			wantsToGoToMenu = false;
+			wasMenuRequested = false;
 			context.stateMachine.Clear();
 			context.stateMachine.Push(std::make_unique<MenuState>(context));
 		}
