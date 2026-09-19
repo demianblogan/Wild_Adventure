@@ -44,13 +44,13 @@ namespace ECS
 						if (registry.Has<Gravity>(entity)
 							&& registry.Get<Gravity>(entity).acceleration <= 0.0f)
 						{
-							registry.Get<Gravity>(entity) = { EnemyDeath::FALL_GRAVITY, EnemyDeath::MAX_FALL_SPEED };
+							registry.Get<Gravity>(entity) = { EnemyDeath::FallGravity, EnemyDeath::MaxFallSpeed };
 						}
 
-						velocity.y = -EnemyDeath::DEATH_BOUNCE_SPEED;
+						velocity.y = -EnemyDeath::DeathBounceSpeed;
 
 						const int   spinDir   = (Random::Int(0, 1) == 0) ? 1 : -1;
-						const float spinSpeed = 270.0f + Random::Float(0.0f, 90.0f);
+						const float spinSpeed = EnemyDeath::SpinBaseSpeed + Random::Float(0.0f, EnemyDeath::SpinSpeedVariance);
 						registry.Add<Rotation>(entity, { 0.0f, static_cast<float>(spinDir) * spinSpeed });
 					}
 					break;

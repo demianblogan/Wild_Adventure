@@ -4,8 +4,6 @@
 #include "components/items/Box.h"
 #include "components/items/Collectible.h"
 #include "components/combat/Enemy.h"
-#include "components/combat/EnemyDeath.h"
-#include "components/ai/GroundPatrol.h"
 #include "components/physics/CollisionState.h"
 #include "components/combat/Health.h"
 #include "components/physics/Jump.h"
@@ -19,12 +17,9 @@
 #include "components/physics/PreviousTransform.h"
 #include "components/physics/Solid.h"
 #include "components/render/Sprite.h"
-#include "components/render/AnimationSet.h"
-#include "components/items/StartPlatform.h"	
+#include "components/items/StartPlatform.h"
 #include "components/items/Finish.h"
-#include "components/items/Checkpoint.h"
-#include "components/physics/Hitbox.h"
-#include "core/AABB.h"
+#include "core/Campaign.h"
 #include "core/Random.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
@@ -36,7 +31,6 @@
 #include "tilemap/TilemapRenderer.h"
 #include "audio/Mixer.h"
 #include "states/LevelCompleteState.h"
-#include "states/MenuState.h"
 #include "states/PauseState.h"
 
 #include <SFML/Graphics/Color.hpp>
@@ -49,17 +43,6 @@
 #include <cstdint>
 #include <cmath>
 #include <memory>
-
-namespace
-{
-	// Camera shake trauma: taking a hit rattles the screen, friendly touches
-	// (start platform, checkpoint, finish) just nudge it.
-	constexpr float SHAKE_HIT   = 0.75f;
-	constexpr float SHAKE_TOUCH = 0.45f;
-
-	// Confetti bursts this many pixels above the touched object's base.
-	constexpr float CONFETTI_RISE = 40.0f;
-}
 
 GameState::GameState(Context& context, const std::string& levelPath, int levelNumber,
 	std::optional<sf::Vector2f> respawnAt, int initialScore,
@@ -98,6 +81,8 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, playerAnimationSystem(registry)
 	, renderSystem(registry, context.resources, context.virtualScreen)
 	, hud(context)
+	, levelSequencer(registry, sceneLoader, camera, confetti, context.audioMixer, transition, hud)
+	, playerFeedback(camera, particles, context.audioMixer)
 	, levelPath(levelPath)
 	, levelNumber(levelNumber)
 	, respawnOverride(respawnAt)
@@ -133,8 +118,8 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	// A water level is floatier and trickles ambient bubbles.
 	if (levelTheme == "water")
 	{
-		waterLevel = true;
-		physicsSystem.SetGravityScale(WATER_GRAVITY_SCALE);
+		isWaterLevel = true;
+		physicsSystem.SetGravityScale(WaterGravityScale);
 	}
 
 	tilemap = LoadTilemap(mapJSON, "terrain", 22);
@@ -155,7 +140,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	transition.StartReveal();
 }
 
-void GameState::HandleEvent(const sf::Event& event)
+void GameState::HandleEvent(const sf::Event&)
 {}
 
 void GameState::InitScene(const nlohmann::json& mapJSON, std::optional<ProgressSnapshot> progressSnapshot)
@@ -226,19 +211,24 @@ void GameState::InitScene(const nlohmann::json& mapJSON, std::optional<ProgressS
 	// The hero spawns above the start platform, so a level only needs a single
 	// "start" marker in the "marks" object layer.
 	registry.ForEach<ECS::StartPlatform>(
-		[this](ECS::Entity entity, ECS::StartPlatform&) { startPlatformEntity = entity; });
+		[this](ECS::Entity entity, ECS::StartPlatform&)
+		{
+			startPlatformEntity = entity;
+			levelSequencer.SetStartPlatform(entity);
+		});
 
 	registry.ForEach<ECS::Finish>(
-		[this](ECS::Entity entity, ECS::Finish&) { finishEntity = entity; });
+		[this](ECS::Entity entity, ECS::Finish&) { levelSequencer.SetFinish(entity); });
 }
 
 void GameState::SpawnPlayer()
 {
-	if (startPlatformEntity == ECS::INVALID_ENTITY && !respawnOverride.has_value())
+	if (startPlatformEntity == ECS::InvalidEntity && !respawnOverride.has_value())
 		return;
 
 	playerEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/player.json");
 	LevelSetup::ApplySkin(registry, playerEntity, context.campaign.GetSelectedSkin());
+	levelSequencer.SetPlayer(playerEntity);
 
 	registry.Add<ECS::Transform>(playerEntity, {});
 	registry.Add<ECS::PreviousTransform>(playerEntity, {});
@@ -259,10 +249,10 @@ void GameState::SpawnPlayer()
 		feetY = startTransform.y + startSolid.offsetY - startSolid.height; // platform surface
 	}
 
-	respawnPoint = { feetX, feetY };
+	levelSequencer.SetRespawnPoint({ feetX, feetY });
 
 	const float airX = feetX;
-	const float airY = feetY - APPEAR_HEIGHT;
+	const float airY = feetY - AppearHeight;
 
 	ECS::Transform& playerTransform = registry.Get<ECS::Transform>(playerEntity);
 	playerTransform.x = airX;
@@ -274,271 +264,10 @@ void GameState::SpawnPlayer()
 
 	const ECS::Health& health = registry.Get<ECS::Health>(playerEntity);
 	hud.SetMaxHearts(health.maximum);
-	previousPlayerHealth = health.maximum;
+	playerFeedback.ResetHealthBaseline(health.maximum);
 
 	registry.Add<ECS::Frozen>(playerEntity, {});
 	camera.SnapTo({ airX, airY });
-}
-
-void GameState::UpdateLevelFlow(float deltaTime)
-{
-	if (playerEntity == ECS::INVALID_ENTITY)
-		return;
-
-	if (levelPhase == LevelPhase::Revealing)
-	{
-		// Wait for the wipe to clear, then spawn the appear effect so it is visible.
-		if (transition.GetMode() != Transition::Mode::Idle)
-			return;
-
-		// Copy the position by value: SpawnFromPrefab can reallocate the pools and
-		// invalidate any reference into them.
-		const float playerX = registry.Get<ECS::Transform>(playerEntity).x;
-		const float playerY = registry.Get<ECS::Transform>(playerEntity).y;
-
-		appearEffectEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/appear_effect.json");
-
-		ECS::Transform& effectTransform = registry.Get<ECS::Transform>(appearEffectEntity);
-		effectTransform.x = playerX;
-		effectTransform.y = playerY;
-
-		// Initialise the animation now so the very first rendered frame is one cell
-		// wide; otherwise AnimationSystem only sets it next tick and frame 0 shows
-		// the whole sheet.
-		ECS::Animation& animation = registry.Get<ECS::Animation>(appearEffectEntity);
-		const ECS::AnimationSet& set = registry.Get<ECS::AnimationSet>(appearEffectEntity);
-		animation.data = set.animations.at("appear");
-		animation.playingState = "appear";
-
-		context.audioMixer.PlaySound("player_appear");
-
-		hud.StartBanner();
-
-		levelPhase = LevelPhase::Appearing;
-		return;
-	}
-
-	if (levelPhase == LevelPhase::Appearing)
-	{
-		const bool finished = appearEffectEntity != ECS::INVALID_ENTITY
-			&& registry.Has<ECS::Animation>(appearEffectEntity)
-			&& registry.Get<ECS::Animation>(appearEffectEntity).isFinished;
-
-		if (finished)
-		{
-			registry.DestroyEntity(appearEffectEntity);
-			appearEffectEntity = ECS::INVALID_ENTITY;
-
-			if (registry.Has<ECS::Frozen>(playerEntity))
-				registry.RemoveFrom<ECS::Frozen>(playerEntity);
-
-			levelPhase = LevelPhase::Playing;
-		}
-
-		return;
-	}
-
-	if (levelPhase == LevelPhase::Finishing)
-	{
-		// The hero bounced off the cup and rises for a moment, then vanishes mid-air.
-		finishTimer -= deltaTime;
-		if (finishTimer > 0.0f)
-			return;
-
-		const float playerX = registry.Get<ECS::Transform>(playerEntity).x;
-		const float playerY = registry.Get<ECS::Transform>(playerEntity).y;
-
-		registry.Add<ECS::Frozen>(playerEntity, {}); // hide and hold the hero in place
-
-		disappearEffectEntity = sceneLoader.SpawnFromPrefab(registry, "data/prefabs/disappear_effect.json");
-
-		ECS::Transform& effectTransform = registry.Get<ECS::Transform>(disappearEffectEntity);
-		effectTransform.x = playerX;
-		effectTransform.y = playerY;
-
-		ECS::Animation& animation = registry.Get<ECS::Animation>(disappearEffectEntity);
-		const ECS::AnimationSet& set = registry.Get<ECS::AnimationSet>(disappearEffectEntity);
-		animation.data = set.animations.at("disappear");
-		animation.playingState = "disappear";
-
-		levelPhase = LevelPhase::Disappearing;
-		return;
-	}
-
-	if (levelPhase == LevelPhase::Disappearing)
-	{
-		const bool finished = disappearEffectEntity != ECS::INVALID_ENTITY
-			&& registry.Has<ECS::Animation>(disappearEffectEntity)
-			&& registry.Get<ECS::Animation>(disappearEffectEntity).isFinished;
-
-		if (finished)
-		{
-			registry.DestroyEntity(disappearEffectEntity);
-			disappearEffectEntity = ECS::INVALID_ENTITY;
-
-			// Freeze interpolation so the level doesn't jitter while the complete menu shows.
-			camera.SnapTo(camera.GetRenderCenter(1.0f));
-			registry.ForEach<ECS::Transform, ECS::PreviousTransform>(
-				[](ECS::Entity, ECS::Transform& t, ECS::PreviousTransform& pt) { pt.x = t.x; pt.y = t.y; });
-
-			levelPhase = LevelPhase::Complete;
-
-			if (!levelCompleteShown)
-			{
-				levelCompleteShown = true;
-				context.stateMachine.Push(std::make_unique<LevelCompleteState>(
-					context, levelPath, levelNumber,
-					deathCount, fruitsCollected, maxFruits, enemiesKilled, maxEnemies));
-			}
-		}
-
-		return;
-	}
-
-	if (levelPhase == LevelPhase::Complete)
-		return;
-
-	// Playing.
-
-	// The start platform plays its "moving" animation once the hero lands on it,
-	// then returns to idle.
-	if (startPlatformEntity != ECS::INVALID_ENTITY)
-	{
-		if (!startMovingPlayed && IsPlayerOnStartPlatform())
-		{
-			registry.Get<ECS::AnimationState>(startPlatformEntity).current = "moving";
-			startMovingPlayed = true;
-
-			// Confetti bursts above the platform itself, not wherever the player is.
-			const ECS::Transform& start = registry.Get<ECS::Transform>(startPlatformEntity);
-			confetti.Emit({ start.x, start.y - CONFETTI_RISE });
-
-			camera.Shake(SHAKE_TOUCH);
-		}
-		else if (startMovingPlayed)
-		{
-			const ECS::Animation& animation = registry.Get<ECS::Animation>(startPlatformEntity);
-			if (animation.playingState == "moving" && animation.isFinished)
-				registry.Get<ECS::AnimationState>(startPlatformEntity).current = "idle";
-		}
-	}
-
-	UpdateCheckpoints();
-
-	// Touching the top of the finish cup bounces the hero and ends the level.
-	if (finishEntity != ECS::INVALID_ENTITY && IsPlayerOnFinish())
-	{
-		registry.Get<ECS::AnimationState>(finishEntity).current = "pressed";
-		context.audioMixer.PlaySound("level_complete");
-
-		const ECS::Transform& finish = registry.Get<ECS::Transform>(finishEntity);
-		confetti.Emit({ finish.x, finish.y - CONFETTI_RISE });
-
-		camera.Shake(SHAKE_TOUCH);
-
-		// The Solid's bounceSpeed already launched the hero upward this frame; he
-		// rises for FINISH_RISE_TIME, then vanishes.
-		finishTimer = FINISH_RISE_TIME;
-		levelPhase = LevelPhase::Finishing;
-	}
-}
-
-void GameState::UpdateCheckpoints()
-{
-	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
-	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
-
-	const AABB playerBox = FeetAABB(player.x, player.y, collider.width, collider.height);
-
-	// Touching an inactive checkpoint activates it: raise the flag, save the respawn
-	// point and play the sound. Already-active checkpoints can't be re-triggered.
-	registry.ForEach<ECS::Checkpoint, ECS::Transform, ECS::Hitbox, ECS::AnimationState>(
-		[&](ECS::Entity, ECS::Checkpoint& checkpoint, ECS::Transform& transform,
-			ECS::Hitbox& hitbox, ECS::AnimationState& state)
-		{
-			if (checkpoint.activated)
-				return;
-
-			const AABB checkpointBox = FeetAABB(transform.x, transform.y, hitbox.width, hitbox.height);
-			if (!playerBox.Overlaps(checkpointBox))
-				return;
-
-			checkpoint.activated = true;
-			state.current = "flag_out";
-			respawnPoint = { transform.x, transform.y };
-
-			// Touching a checkpoint refills the hero's lives, so reaching one is a
-			// genuine reprieve rather than just a respawn marker.
-			if (registry.Has<ECS::Health>(playerEntity))
-			{
-				ECS::Health& health = registry.Get<ECS::Health>(playerEntity);
-				health.current = health.maximum;
-			}
-
-			context.audioMixer.PlaySound("checkpoint");
-			confetti.Emit({ transform.x, transform.y - CONFETTI_RISE });
-			camera.Shake(SHAKE_TOUCH);
-
-			// Freeze the score and snapshot all alive collectibles and unbroken boxes
-			// so we can restore this exact state if the player dies here.
-			checkpointScore = score;
-			checkpointFruitsCollected = fruitsCollected;
-			checkpointEnemiesKilled = enemiesKilled;
-
-			ProgressSnapshot snap;
-			registry.ForEach<ECS::Collectible, ECS::Transform>(
-				[&snap](ECS::Entity, ECS::Collectible&, ECS::Transform& t)
-				{
-					snap.aliveCollectibles.push_back({ t.x, t.y });
-				});
-			registry.ForEach<ECS::Box, ECS::Transform>(
-				[&snap](ECS::Entity, ECS::Box& box, ECS::Transform& t)
-				{
-					if (!box.isBreaking)
-						snap.aliveBoxes.push_back({ t.x, t.y });
-				});
-			registry.ForEach<ECS::Enemy, ECS::Health>(
-				[&](ECS::Entity entity, ECS::Enemy& enemy, ECS::Health& health)
-				{
-					if (health.current > 0 && !registry.Has<ECS::EnemyDeath>(entity))
-						snap.aliveEnemies.push_back({ enemy.spawnX, enemy.spawnY });
-				});
-			checkpointSnapshot = std::move(snap);
-		});
-
-	// Once the flag has finished raising, loop the idle waving animation.
-	registry.ForEach<ECS::Checkpoint, ECS::Animation, ECS::AnimationState>(
-		[](ECS::Entity, ECS::Checkpoint& checkpoint, ECS::Animation& animation,
-			ECS::AnimationState& state)
-		{
-			if (checkpoint.activated && animation.playingState == "flag_out" && animation.isFinished)
-				state.current = "flag_idle";
-		});
-}
-
-bool GameState::IsPlayerOnFinish()
-{
-	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
-	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
-	const ECS::Transform& finish = registry.Get<ECS::Transform>(finishEntity);
-	const ECS::Solid& solid = registry.Get<ECS::Solid>(finishEntity);
-
-	const float playerHalf = collider.width / 2.0f;
-	const float playerLeft = player.x - playerHalf;
-	const float playerRight = player.x + playerHalf;
-	const float playerBottom = player.y;
-
-	const float solidHalf = solid.width / 2.0f;
-	const float solidCenterX = finish.x + solid.offsetX;
-	const float solidBottom = finish.y + solid.offsetY;
-	const float solidLeft = solidCenterX - solidHalf;
-	const float solidRight = solidCenterX + solidHalf;
-	const float solidTop = solidBottom - solid.height;
-
-	const bool horizontalOverlap = playerLeft < solidRight && playerRight > solidLeft;
-	const bool restingOnTop = std::fabs(playerBottom - solidTop) < 4.0f;
-
-	return horizontalOverlap && restingOnTop;
 }
 
 bool GameState::IsPlayerOnDeathTile()
@@ -566,35 +295,6 @@ bool GameState::IsPlayerOnDeathTile()
 	return false;
 }
 
-bool GameState::IsPlayerOnStartPlatform()
-{
-	if (!registry.Has<ECS::CollisionState>(playerEntity)
-		|| !registry.Get<ECS::CollisionState>(playerEntity).isOnGround)
-		return false;
-
-	const ECS::Transform& player = registry.Get<ECS::Transform>(playerEntity);
-	const ECS::Collider& collider = registry.Get<ECS::Collider>(playerEntity);
-	const ECS::Transform& platform = registry.Get<ECS::Transform>(startPlatformEntity);
-	const ECS::Solid& solid = registry.Get<ECS::Solid>(startPlatformEntity);
-
-	const float playerHalf = collider.width / 2.0f;
-	const float playerLeft = player.x - playerHalf;
-	const float playerRight = player.x + playerHalf;
-	const float playerBottom = player.y;
-
-	const float solidHalf = solid.width / 2.0f;
-	const float solidCenterX = platform.x + solid.offsetX;
-	const float solidBottom = platform.y + solid.offsetY;
-	const float solidLeft = solidCenterX - solidHalf;
-	const float solidRight = solidCenterX + solidHalf;
-	const float solidTop = solidBottom - solid.height;
-
-	const bool horizontalOverlap = playerLeft < solidRight && playerRight > solidLeft;
-	const bool restingOnTop = std::fabs(playerBottom - solidTop) < 2.0f;
-
-	return horizontalOverlap && restingOnTop;
-}
-
 void GameState::Update(float deltaTime)
 {
 	transition.Update(deltaTime);
@@ -605,7 +305,7 @@ void GameState::Update(float deltaTime)
 	if (deathFlashTimer > 0.0f)
 		deathFlashTimer -= deltaTime;
 
-	if (levelPhase == LevelPhase::Complete)
+	if (levelSequencer.GetPhase() == LevelSequencer::Phase::Complete)
 		return;
 
 	if (isRestarting)
@@ -614,13 +314,15 @@ void GameState::Update(float deltaTime)
 		{
 			context.stateMachine.Pop();
 			context.stateMachine.Push(std::make_unique<GameState>(context, levelPath, levelNumber,
-				respawnPoint, checkpointScore, checkpointSnapshot,
-				deathCount, checkpointFruitsCollected, checkpointEnemiesKilled));
+				levelSequencer.GetRespawnPoint(), levelSequencer.GetCheckpointScore(),
+				levelSequencer.GetCheckpointSnapshot(),
+				deathCount, levelSequencer.GetCheckpointFruitsCollected(),
+				levelSequencer.GetCheckpointEnemiesKilled()));
 		}
 		return;
 	}
 
-	if (levelPhase == LevelPhase::Playing && context.input.WasPressed(Action::Pause))
+	if (levelSequencer.GetPhase() == LevelSequencer::Phase::Playing && context.input.WasPressed(Action::Pause))
 	{
 		// Freeze interpolation so the level doesn't jitter while paused.
 		camera.SnapTo(camera.GetRenderCenter(1.0f));
@@ -634,19 +336,19 @@ void GameState::Update(float deltaTime)
 	// Hit stop: hold the whole world still for a few steps. Sounds keep playing.
 	if (hitStopTimer > 0.0f)
 	{
-		if (!hitStopFrozen)
+		if (!isHitStopFrozen)
 		{
 			// Pin interpolation once so the frozen frames show one still picture.
 			camera.SnapTo(camera.GetRenderCenter(1.0f));
 			registry.ForEach<ECS::Transform, ECS::PreviousTransform>(
 				[](ECS::Entity, ECS::Transform& t, ECS::PreviousTransform& pt) { pt.x = t.x; pt.y = t.y; });
-			hitStopFrozen = true;
+			isHitStopFrozen = true;
 		}
 
 		hitStopTimer -= deltaTime;
 
 		if (hitStopTimer <= 0.0f)
-			hitStopFrozen = false;
+			isHitStopFrozen = false;
 
 		return;
 	}
@@ -664,7 +366,7 @@ void GameState::Update(float deltaTime)
 	const int enemiesBeforeStomp = enemiesKilled;
 	enemySystem.Update();
 	if (enemiesKilled > enemiesBeforeStomp)
-		hitStopTimer = HIT_STOP_DURATION;
+		hitStopTimer = HitStopDuration;
 	trunkSystem.Update(deltaTime);
 	plantSystem.Update(deltaTime);
 	beeSystem.Update(deltaTime);
@@ -691,21 +393,27 @@ void GameState::Update(float deltaTime)
 	playerAnimationSystem.Update();
 	animationSystem.Update(deltaTime);
 
-	UpdateLevelFlow(deltaTime);
+	const bool levelJustCompleted = levelSequencer.Update(deltaTime, score, fruitsCollected, enemiesKilled);
+	if (levelJustCompleted)
+	{
+		context.stateMachine.Push(std::make_unique<LevelCompleteState>(
+			context, levelPath, levelNumber,
+			deathCount, fruitsCollected, maxFruits, enemiesKilled, maxEnemies));
+	}
 
 	camera.Update(deltaTime);
 
 	// Ambient bubbles: spawn across the bottom of the view and let them rise.
-	if (waterLevel)
+	if (isWaterLevel)
 	{
 		bubbleTimer -= deltaTime;
 		if (bubbleTimer <= 0.0f)
 		{
-			bubbleTimer = WATER_BUBBLE_INTERVAL;
+			bubbleTimer = WaterBubbleInterval;
 
 			const sf::Vector2f center = camera.GetRenderCenter(1.0f);
-			const float x = center.x + Random::Float(-0.5f, 0.5f) * VirtualScreen::WIDTH;
-			const float y = center.y + Random::Float(-0.5f, 0.5f) * VirtualScreen::HEIGHT;
+			const float x = center.x + Random::Float(-0.5f, 0.5f) * VirtualScreen::Width;
+			const float y = center.y + Random::Float(-0.5f, 0.5f) * VirtualScreen::Height;
 			particles.EmitBubble({ x, y });
 		}
 	}
@@ -729,91 +437,22 @@ void GameState::UpdatePlayer(float deltaTime)
 			hud.UpdateHearts(health.current, deltaTime);
 
 			const sf::Vector2f feet = { transform.x, transform.y };
-			const bool onGround = collisionState.isOnGround;
-
 			camera.MoveTo(feet);
 
-			// Spring the squash scale back toward normal; the triggers below
-			// re-deform it with fresh full values.
-			const float squashReturn = std::min(1.0f, SQUASH_RETURN_SPEED * deltaTime);
-			squashX += (1.0f - squashX) * squashReturn;
-			squashY += (1.0f - squashY) * squashReturn;
-
-			if (onGround && std::abs(velocity.x) > 5.0f)
-			{
-				runDustTimer -= deltaTime;
-				if (runDustTimer <= 0.0f)
-				{
-					const int runDirection = (velocity.x > 0.0f) ? 1 : -1;
-					particles.EmitRunDust(feet, runDirection);
-					runDustTimer = RUN_DUST_INTERVAL;
-				}
-			}
-			else
-			{
-				runDustTimer = 0.0f;
-			}
-
-			// Looping wall-slide sound only while actually sliding down a wall.
-			const bool isWallSliding = collisionState.isOnWall && !onGround && velocity.y > 0.0f;
-			if (isWallSliding)
-				context.audioMixer.StartLoop("player_wall_slide");
-			else
-				context.audioMixer.StopLoop("player_wall_slide");
-
-			if (previousLockTimer <= 0.0f && jump.lockTimer > 0.0f)
-			{
-				const int pushDirection = (velocity.x > 0.0f) ? 1 : -1;
-				particles.Emit("wall_jump", feet, pushDirection);
-				context.audioMixer.PlaySound("player_jump");
-				squashX = SQUASH_JUMP.x;
-				squashY = SQUASH_JUMP.y;
-			}
-			else if (jump.jumpsRemaining < previousJumpsRemaining)
-			{
-				const bool isDoubleJump = (jump.jumpsRemaining == 0);
-				particles.Emit("jump", feet);
-				context.audioMixer.PlaySound(isDoubleJump ? "player_double_jump" : "player_jump");
-				squashX = SQUASH_JUMP.x;
-				squashY = SQUASH_JUMP.y;
-			}
-
-			if (!wasOnGround && onGround)
-			{
-				particles.Emit("land", feet);
-				squashX = SQUASH_LAND.x;
-				squashY = SQUASH_LAND.y;
-			}
-
-			wasOnGround = onGround;
-			previousJumpsRemaining = jump.jumpsRemaining;
-			previousLockTimer = jump.lockTimer;
+			ECS::Sprite* sprite = registry.Has<ECS::Sprite>(playerEntity)
+				? &registry.Get<ECS::Sprite>(playerEntity)
+				: nullptr;
+			playerFeedback.Update(deltaTime, feet, velocity, collisionState, jump, health, sprite);
 
 			// Death tiles short-circuit the fall: pits on tall maps kill on touch
 			// instead of after a long drop to the world's bottom edge.
 			const bool fellIntoPit = transform.y > fallLimit || IsPlayerOnDeathTile();
 
-			if (health.current < previousPlayerHealth)
-			{
-				camera.Shake(SHAKE_HIT);
-
-				// Compress along the impact axis. The knockback applied by the
-				// damage systems reveals it: side hits launch diagonally
-				// (velocity.x != 0), hits from above/below push straight up or down.
-				const bool sideHit = std::abs(velocity.x) > 1.0f;
-				squashX = sideHit ? SQUASH_HIT_SIDE.x : SQUASH_HIT_VERTICAL.x;
-				squashY = sideHit ? SQUASH_HIT_SIDE.y : SQUASH_HIT_VERTICAL.y;
-
-				if (health.current > 0)
-					context.audioMixer.PlaySound("player_hurt");
-			}
-			previousPlayerHealth = health.current;
-
-			if (!isRestarting && (health.current <= 0 || fellIntoPit) && !deathSoundPlayed)
+			if (!isRestarting && (health.current <= 0 || fellIntoPit) && !hasPlayedDeathSound)
 			{
 				context.audioMixer.PlaySound("player_death");
-				deathSoundPlayed = true;
-				deathFlashTimer = DEATH_FLASH_TIME;
+				hasPlayedDeathSound = true;
+				deathFlashTimer = DeathFlashTime;
 				deathCount++;
 			}
 
@@ -822,17 +461,10 @@ void GameState::UpdatePlayer(float deltaTime)
 			if (health.current <= 0)
 				deathFallTimer += deltaTime;
 
-			if (fellIntoPit || deathFallTimer >= DEATH_FALL_TIME)
+			if (fellIntoPit || deathFallTimer >= DeathFallTime)
 			{
 				transition.StartCover();
 				isRestarting = true;
-			}
-
-			if (registry.Has<ECS::Sprite>(playerEntity))
-			{
-				ECS::Sprite& sprite = registry.Get<ECS::Sprite>(playerEntity);
-				sprite.scaleX = squashX;
-				sprite.scaleY = squashY;
 			}
 		});
 }
@@ -847,14 +479,14 @@ void GameState::Render(float interpolationFactor)
 
 	// Background fills the screen but is anchored to the world, so running
 	// around never changes its apparent scroll speed.
-	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
 	background.Draw(renderTarget, worldCenter);
 
 	// Death "lightning": briefly wash the background white, fading back to normal.
 	if (deathFlashTimer > 0.0f)
 	{
-		const float intensity = deathFlashTimer / DEATH_FLASH_TIME;
-		sf::RectangleShape flash({ static_cast<float>(VirtualScreen::WIDTH), static_cast<float>(VirtualScreen::HEIGHT) });
+		const float intensity = deathFlashTimer / DeathFlashTime;
+		sf::RectangleShape flash({ static_cast<float>(VirtualScreen::Width), static_cast<float>(VirtualScreen::Height) });
 		flash.setFillColor(sf::Color(255, 255, 255, static_cast<std::uint8_t>(intensity * 255.0f)));
 		renderTarget.draw(flash);
 	}
@@ -873,7 +505,7 @@ void GameState::Render(float interpolationFactor)
 
 	// Cave levels: darkness outside the player's lamp circle, interpolated
 	// like the sprites so the light never lags behind the player.
-	if (lighting.enabled)
+	if (lighting.isEnabled)
 	{
 		registry.ForEach<ECS::Player, ECS::Transform, ECS::PreviousTransform, ECS::Collider>(
 			[&](ECS::Entity, ECS::Player&, ECS::Transform& transform,
@@ -887,7 +519,7 @@ void GameState::Render(float interpolationFactor)
 			});
 	}
 
-	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
 	hud.Draw(renderTarget);
 	transition.Draw(renderTarget);
 }

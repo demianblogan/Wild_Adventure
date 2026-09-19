@@ -25,7 +25,7 @@ namespace ECS
 	void PickupSystem::Update(float deltaTime)
 	{
 		const Entity playerEntity = FindPlayer(registry);
-		if (playerEntity == INVALID_ENTITY)
+		if (playerEntity == InvalidEntity)
 			return;
 
 		const Transform& playerTransform = registry.Get<Transform>(playerEntity);

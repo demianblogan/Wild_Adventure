@@ -18,8 +18,23 @@ SplashState::SplashState(Context& context)
 	, userInterface(context.virtualScreen)
 	, interfaceLoader(context.resources)
 {
-	context.resources.fonts.Load("main", "assets/fonts/main.ttf");
-	context.resources.fonts.Get("main").setSmooth(false);
+	if (!context.resources.fonts.Has("main"))
+	{
+		context.resources.fonts.Load("main", "assets/fonts/main.ttf");
+		context.resources.fonts.Get("main").setSmooth(false);
+	}
+
+	if (!context.resources.fonts.Has("title"))
+	{
+		context.resources.fonts.Load("title", "assets/fonts/born2bsporty-fs.regular.otf");
+		context.resources.fonts.Get("title").setSmooth(false);
+	}
+
+	if (!context.resources.fonts.Has("gameTitle"))
+	{
+		context.resources.fonts.Load("gameTitle", "assets/fonts/light-pixel-7.regular.ttf");
+		context.resources.fonts.Get("gameTitle").setSmooth(false);
+	}
 
 	BuildInterface();
 
@@ -96,11 +111,11 @@ void SplashState::Render(float interpolationFactor)
 	context.virtualScreen.CompositeGlow();
 
 	// UI and transition: screen space, on top.
-	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
 	userInterface.Draw(context.virtualScreen.GetRenderTarget());
 
 	// Bloom the golden title.
-	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
+	context.virtualScreen.CompositeGlow(VirtualScreen::GlowUiStrength);
 
 	transition.Draw(context.virtualScreen.GetRenderTarget());
 }

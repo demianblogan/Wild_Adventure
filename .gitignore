@@ -3,7 +3,8 @@
 [Bb]in/
 [Oo]bj/
 
-.vs/
+.vs/*
+!.vs/launch.vs.json
 *.user
 
 vcpkg_installed/
@@ -13,6 +14,10 @@ vcpkg_installed/
 *.pdb
 
 CMakeUserPresets.json
+
+# Vendored SFML: built locally per libs/SFML/README.md, not tracked
+libs/SFML/*
+!libs/SFML/README.md
 
 # Per-player campaign progress
 data/save.json

@@ -82,12 +82,12 @@ void SceneLoader::RegisterLoaders()
 
 				if (glow.is_array())
 				{
-					sprite.glow = true;
+					sprite.isGlowing = true;
 					sprite.glowColor = sf::Color(glow.at(0), glow.at(1), glow.at(2));
 				}
 				else
 				{
-					sprite.glow = glow.get<bool>();
+					sprite.isGlowing = glow.get<bool>();
 				}
 			}
 
@@ -355,8 +355,8 @@ void SceneLoader::RegisterLoaders()
 			patrol.turnIdleDuration = data.value("turnIdleDuration", patrol.turnIdleDuration);
 			patrol.moveAnim         = data.value("moveAnim", patrol.moveAnim);
 			patrol.idleAnim         = data.value("idleAnim", patrol.idleAnim);
-			patrol.emitsDust        = data.value("emitsDust", patrol.emitsDust);
-			patrol.managesAnimation = data.value("managesAnimation", patrol.managesAnimation);
+			patrol.hasDustTrail    = data.value("emitsDust", patrol.hasDustTrail);
+			patrol.hasOwnAnimation = data.value("managesAnimation", patrol.hasOwnAnimation);
 			registry.Add<ECS::GroundPatrol>(entity, patrol);
 		};
 
@@ -364,7 +364,7 @@ void SceneLoader::RegisterLoaders()
 		{
 			ECS::Box box;
 			box.hitsToBreak = data.at("hitsToBreak");
-			box.dropFruitPerHit = data.at("dropFruitPerHit");
+			box.hasFruitDropPerHit = data.at("dropFruitPerHit");
 
 			for (const auto& fruit : data.at("fruits"))
 				box.fruits.push_back(fruit.get<std::string>());

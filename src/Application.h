@@ -32,8 +32,17 @@ private:
 	void Render(float interpolationFactor);
 	void DrawCursor();
 
-	static constexpr float FIXED_DELTA_TIME = 1.0f / 60.0f;
-	static constexpr float MAX_FRAME_TIME = 0.25f;
+	void UpdateFpsCounter(float frameTime);
+	void DrawFpsCounter();
+
+	static constexpr float FixedDeltaTime = 1.0f / 60.0f;
+	static constexpr float MaxFrameTime = 0.25f;
+	static constexpr float UnfocusedSleepInterval = 0.1f; // seconds to idle per loop while unfocused
+
+	static constexpr float FpsUpdateInterval = 0.5f; // seconds between FPS label refreshes
+	static constexpr unsigned int FpsTextSize = 40;
+	static constexpr float FpsTextMargin = 12.0f;
+	static constexpr float FpsTextOutlineThickness = 4.0f;
 
 	sf::VideoMode desktopMode;
 	sf::RenderWindow window;
@@ -50,5 +59,10 @@ private:
 	int appliedHeight = 0;
 	ScreenMode appliedMode = ScreenMode::Borderless;
 
-	bool cursorVisible = true;
+	bool isCursorVisible = true;
+	bool isWindowFocused = true;
+
+	float fpsUpdateTimer = 0.0f;
+	int fpsFrameCount = 0;
+	int displayedFps = 0;
 };

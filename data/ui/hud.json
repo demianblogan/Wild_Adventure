@@ -135,18 +135,18 @@
 					"name": "score",
 					"anchor":
 					[
-						1,
-						0
+						0,
+						1
 					],
 					"pivot":
 					[
-						1,
-						0
+						0,
+						1
 					],
 					"offset":
 					[
-						-8,
-						8
+						8,
+						-8
 					],
 					"fontName": "main",
 					"characterSize": 16,

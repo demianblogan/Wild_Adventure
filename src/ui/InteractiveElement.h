@@ -16,7 +16,11 @@ namespace UI
 		Pressed
 	};
 
-	constexpr std::size_t INTERACTION_STATE_COUNT = 3;
+	constexpr std::size_t InteractionStateCount = 3;
+
+	// Maps a state to its slot in a per-state array (backgrounds/handles/colors
+	// indexed by InteractionState in Button, Checkbox, Slider and Stepper).
+	int StateToIndex(InteractionState state);
 
 	class InteractiveElement : public Element
 	{
@@ -49,10 +53,10 @@ namespace UI
 
 		InteractionState GetState() const { return state; }
 
-		virtual void OnDragStart(sf::Vector2f mousePosition) {}
-		virtual void OnDragMove(sf::Vector2f mousePosition) {}
+		virtual void OnDragStart(sf::Vector2f) {}
+		virtual void OnDragMove(sf::Vector2f) {}
 		virtual void OnDragEnd() {}
-		virtual void OnNavigate(int direction) {}
+		virtual void OnNavigate(int) {}
 
 	protected:
 		virtual void OnStateChanged() {}

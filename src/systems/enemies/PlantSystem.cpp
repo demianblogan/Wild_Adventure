@@ -18,6 +18,11 @@
 
 namespace ECS
 {
+	namespace
+	{
+		constexpr float BulletSpawnSideGap = 6.0f; // clears the plant's own collider
+	}
+
 	PlantSystem::PlantSystem(Registry& registry)
 		: registry(registry)
 	{}
@@ -27,7 +32,7 @@ namespace ECS
 		// Capture the player's position by value, not by reference: SpawnBullet adds
 		// components below, which can reallocate a component pool and dangle a held
 		// reference into it.
-		bool  playerFound = false;
+		bool  hasFoundPlayer = false;
 		float playerX     = 0.0f;
 		float playerCenterY = 0.0f;
 		registry.ForEach<Player, Transform, Collider>(
@@ -35,10 +40,10 @@ namespace ECS
 			{
 				playerX       = transform.x;
 				playerCenterY = transform.y - collider.height * 0.5f;
-				playerFound   = true;
+				hasFoundPlayer   = true;
 			});
 
-		if (!playerFound)
+		if (!hasFoundPlayer)
 			return;
 
 		registry.ForEach<PlantAI, Transform, Collider, AnimationState, Facing>(
@@ -52,8 +57,8 @@ namespace ECS
 				const int   facingDir     = facing.isLookingRight ? 1 : -1;
 				const float plantCenterY   = transform.y - collider.height * 0.5f;
 				const float dx             = playerX - transform.x;
-				const bool  sameLevel      = std::abs(playerCenterY - plantCenterY) < PlantAI::SIGHT_TOLERANCE;
-				const bool  inRange        = std::abs(dx) < PlantAI::SIGHT_RANGE;
+				const bool  sameLevel      = std::abs(playerCenterY - plantCenterY) < PlantAI::SightTolerance;
+				const bool  inRange        = std::abs(dx) < PlantAI::SightRange;
 				const bool  playerInFront  = (dx * static_cast<float>(facingDir)) > 0.0f;
 				const bool  playerVisible  = sameLevel && inRange && playerInFront;
 
@@ -62,19 +67,19 @@ namespace ECS
 				case PlantAI::State::Idle:
 					if (playerVisible)
 					{
-						plant.state         = PlantAI::State::Attacking;
-						plant.shootCooldown = 0.0f;
-						plant.bulletFired   = false;
-						animState.current   = "Attack";
+						plant.state          = PlantAI::State::Attacking;
+						plant.shootCooldown  = 0.0f;
+						plant.hasFiredBullet = false;
+						animState.current    = "Attack";
 					}
 					break;
 
 				case PlantAI::State::Attacking:
 					if (!playerVisible)
 					{
-						plant.state       = PlantAI::State::Idle;
-						plant.bulletFired = false;
-						animState.current = "Idle";
+						plant.state          = PlantAI::State::Idle;
+						plant.hasFiredBullet = false;
+						animState.current    = "Idle";
 						break;
 					}
 
@@ -84,9 +89,9 @@ namespace ECS
 						plant.shootCooldown -= deltaTime;
 						if (plant.shootCooldown <= 0.0f)
 						{
-							plant.shootCooldown = 0.0f;
-							plant.bulletFired   = false;
-							animState.current   = "Attack";
+							plant.shootCooldown  = 0.0f;
+							plant.hasFiredBullet = false;
+							animState.current    = "Attack";
 						}
 						break;
 					}
@@ -97,16 +102,16 @@ namespace ECS
 						const Animation& anim = registry.Get<Animation>(entity);
 						if (anim.playingState == "Attack")
 						{
-							if (!plant.bulletFired && anim.currentFrame >= PlantAI::FIRE_FRAME)
+							if (!plant.hasFiredBullet && anim.currentFrame >= PlantAI::FireFrame)
 							{
 								SpawnBullet(transform, collider, facingDir);
-								plant.bulletFired = true;
+								plant.hasFiredBullet = true;
 							}
 							if (anim.isFinished)
 							{
-								plant.shootCooldown = PlantAI::SHOOT_INTERVAL;
-								plant.bulletFired   = false;
-								animState.current   = "Idle";
+								plant.shootCooldown  = PlantAI::ShootInterval;
+								plant.hasFiredBullet = false;
+								animState.current    = "Idle";
 							}
 						}
 					}
@@ -117,14 +122,14 @@ namespace ECS
 
 	void PlantSystem::SpawnBullet(const Transform& transform, const Collider& collider, int direction)
 	{
-		const float spawnX = transform.x + static_cast<float>(direction) * (collider.width / 2.0f + 6.0f);
+		const float spawnX = transform.x + static_cast<float>(direction) * (collider.width / 2.0f + BulletSpawnSideGap);
 		// Bullet exits the plant's mouth, a fixed height above its base.
-		const float spawnY = transform.y - PlantAI::BULLET_HEIGHT;
+		const float spawnY = transform.y - PlantAI::BulletHeight;
 
 		Entity bullet = registry.CreateEntity();
 		registry.Add<Transform>(bullet, {spawnX, spawnY});
 		registry.Add<PreviousTransform>(bullet, {spawnX, spawnY});
-		registry.Add<Velocity>(bullet, {PlantAI::BULLET_SPEED * static_cast<float>(direction), 0.0f});
+		registry.Add<Velocity>(bullet, {PlantAI::BulletSpeed * static_cast<float>(direction), 0.0f});
 
 		Sprite sprite;
 		sprite.textureName = "plant_bullet";

@@ -42,7 +42,7 @@ namespace ECS
 						if (anim.playingState == "SpikesOut" && anim.isFinished)
 						{
 							turtle.phase      = TurtleAI::Phase::Spiked;
-							turtle.phaseTimer = TurtleAI::SPIKED_DURATION;
+							turtle.phaseTimer = TurtleAI::SpikedDuration;
 							animState.current = "Idle1";
 						}
 					}
@@ -66,7 +66,7 @@ namespace ECS
 							// Spikes fully retracted: vulnerable to a stomp again.
 							registry.RemoveFrom<Spiky>(entity);
 							turtle.phase      = TurtleAI::Phase::Safe;
-							turtle.phaseTimer = TurtleAI::SAFE_DURATION;
+							turtle.phaseTimer = TurtleAI::SafeDuration;
 							animState.current = "Idle2";
 						}
 					}

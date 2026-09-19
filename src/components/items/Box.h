@@ -8,7 +8,7 @@ namespace ECS
 	struct Box
 	{
 		int hitsToBreak = 1;
-		bool dropFruitPerHit = false;
+		bool hasFruitDropPerHit = false;
 		std::vector<std::string> fruits;
 		std::string debrisTexture; // texture id of this box's Break sheet
 

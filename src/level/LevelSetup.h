@@ -18,7 +18,7 @@ namespace ECS
 // everything outside is dark. Loaded from data/levels/lighting.json.
 struct LevelLighting
 {
-	bool enabled = false;
+	bool isEnabled = false;
 	float radius = 90.0f;   // fully dark at this distance from the player, in pixels
 	float darkness = 0.95f; // shade outside the circle, 0..1 (1 = pure black)
 };

@@ -19,6 +19,11 @@
 
 namespace ECS
 {
+	namespace
+	{
+		constexpr float StompBounceSpeed = 200.0f; // upward speed the player gets from a successful stomp
+	}
+
 	EnemySystem::EnemySystem(Registry& registry, int& score, Audio::Mixer& mixer, int& enemiesKilled)
 		: registry(registry)
 		, score(score)
@@ -29,7 +34,7 @@ namespace ECS
 	void EnemySystem::Update()
 	{
 		const Entity playerEntity = FindPlayer(registry);
-		if (playerEntity == INVALID_ENTITY)
+		if (playerEntity == InvalidEntity)
 			return;
 
 		Transform&      playerTransform = registry.Get<Transform>(playerEntity);
@@ -84,7 +89,7 @@ namespace ECS
 						registry.Get<AnimationState>(entity).current = "Hit";
 
 					mixer.PlaySound("jump_on_enemy");
-					playerVelocity.y = -200.0f;
+					playerVelocity.y = -StompBounceSpeed;
 					score += enemy.scoreValue;
 					enemiesKilled++;
 

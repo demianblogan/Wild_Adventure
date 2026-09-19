@@ -59,7 +59,7 @@ namespace UI
 
 		// Only Normal and Highlighted tints are used; Pressed is shown by swapping
 		// to the pressed image instead of tinting.
-		std::array<sf::Color, INTERACTION_STATE_COUNT> arrowColors =
+		std::array<sf::Color, InteractionStateCount> arrowColors =
 		{
 			sf::Color::White,
 			sf::Color::White,

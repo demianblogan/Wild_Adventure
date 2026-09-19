@@ -14,7 +14,7 @@ namespace Audio
 		struct MusicConfig
 		{
 			std::string path;
-			bool loop = true;
+			bool isLooping = true;
 		};
 
 		void Register(const std::string& name, const std::string& path, bool loop = true);

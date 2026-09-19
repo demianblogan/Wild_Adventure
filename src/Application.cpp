@@ -3,9 +3,12 @@
 #include "states/CompanySplashState.h"
 
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Clock.hpp>
+#include <SFML/System/Sleep.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Mouse.hpp>
@@ -29,8 +32,10 @@ Application::Application()
 	audioMixer.SetSoundVolume(settings.GetSoundVolume() / 10.0f);
 	audioMixer.SetMusicVolume(settings.GetMusicVolume() / 10.0f);
 
-	input.LoadConfig("data/input.json");
+	// Defaults load first: LoadConfig falls back to them if the saved
+	// bindings file turns out to be missing or corrupt.
 	input.LoadDefaults("data/input_default.json");
+	input.LoadConfig("data/input.json");
 
 	resources.textures.Load("cursor", "assets/textures/cursor/pointer.png");
 	resources.textures.Get("cursor").setSmooth(false);
@@ -59,7 +64,7 @@ void Application::CreateWindow()
 		window.create(desktopMode, "2D Platformer", sf::Style::None, sf::State::Windowed);
 	}
 
-	window.setVerticalSyncEnabled(settings.GetVsync());
+	window.setVerticalSyncEnabled(settings.IsVsyncEnabled());
 	window.setMouseCursorVisible(false);
 
 	appliedWidth = settings.GetResolutionWidth();
@@ -81,12 +86,12 @@ void Application::ApplyGraphics()
 
 void Application::ApplyVsync()
 {
-	window.setVerticalSyncEnabled(settings.GetVsync());
+	window.setVerticalSyncEnabled(settings.IsVsyncEnabled());
 }
 
 void Application::SetCursorVisible(bool visible)
 {
-	cursorVisible = visible;
+	isCursorVisible = visible;
 }
 
 void Application::RegisterInitialState()
@@ -103,17 +108,30 @@ void Application::Run()
 	while (window.isOpen())
 	{
 		float frameTime = clock.restart().asSeconds();
-		if (frameTime > MAX_FRAME_TIME)
-			frameTime = MAX_FRAME_TIME;
+		UpdateFpsCounter(frameTime);
 
-		remainderTime += frameTime;
+		if (frameTime > MaxFrameTime)
+			frameTime = MaxFrameTime;
 
 		ProcessEvents();
 
-		while (remainderTime >= FIXED_DELTA_TIME)
+		if (isWindowFocused)
 		{
-			Update(FIXED_DELTA_TIME);
-			remainderTime -= FIXED_DELTA_TIME;
+			remainderTime += frameTime;
+
+			while (remainderTime >= FixedDeltaTime)
+			{
+				Update(FixedDeltaTime);
+				remainderTime -= FixedDeltaTime;
+			}
+		}
+		else
+		{
+			// Unfocused: freeze gameplay instead of accumulating a catch-up
+			// burst of updates for whenever the window regains focus, and
+			// avoid busy-spinning the loop while there is nothing to do.
+			remainderTime = 0.0f;
+			sf::sleep(sf::seconds(UnfocusedSleepInterval));
 		}
 
 		if (!stateMachine.IsEmpty())
@@ -124,7 +142,7 @@ void Application::Run()
 			break;
 		}
 
-		const float interpolationFactor = remainderTime / FIXED_DELTA_TIME;
+		const float interpolationFactor = remainderTime / FixedDeltaTime;
 		Render(interpolationFactor);
 	}
 }
@@ -152,7 +170,13 @@ void Application::ProcessEvents()
 		if (event->is<sf::Event::Closed>())
 			window.close();
 
-		stateMachine.HandleEvent(*event);
+		if (event->is<sf::Event::FocusLost>())
+			isWindowFocused = false;
+		else if (event->is<sf::Event::FocusGained>())
+			isWindowFocused = true;
+
+		if (isWindowFocused)
+			stateMachine.HandleEvent(*event);
 	}
 }
 
@@ -170,20 +194,67 @@ void Application::Render(float interpolationFactor)
 
 	window.clear(sf::Color::Black);
 	virtualScreen.RenderToWindow(window);
+
+	if (settings.IsShowFpsEnabled())
+		DrawFpsCounter();
+
 	DrawCursor();
 
 	window.display();
 }
 
+void Application::UpdateFpsCounter(float frameTime)
+{
+	if (frameTime <= 0.0f)
+		return;
+
+	fpsFrameCount++;
+	fpsUpdateTimer += frameTime;
+
+	if (fpsUpdateTimer >= FpsUpdateInterval)
+	{
+		displayedFps = static_cast<int>(std::round(static_cast<float>(fpsFrameCount) / fpsUpdateTimer));
+		fpsFrameCount = 0;
+		fpsUpdateTimer = 0.0f;
+	}
+}
+
+void Application::DrawFpsCounter()
+{
+	if (!resources.fonts.Has("main"))
+	{
+		resources.fonts.Load("main", "assets/fonts/main.ttf");
+		resources.fonts.Get("main").setSmooth(false);
+	}
+
+	sf::Text text(resources.fonts.Get("main"), std::to_string(displayedFps) + " FPS", FpsTextSize);
+	text.setFillColor(sf::Color::White);
+	text.setOutlineColor(sf::Color::Black);
+	text.setOutlineThickness(FpsTextOutlineThickness);
+
+	// getLocalBounds() excludes the glyphs' own bearing/overshoot, so anchoring
+	// by size alone gives an inconsistent visual margin: correct for that
+	// offset to keep the top and right margins visually equal.
+	const sf::FloatRect textBounds = text.getLocalBounds();
+	const float windowWidth = static_cast<float>(window.getSize().x);
+	text.setPosition(
+	{
+		windowWidth - FpsTextMargin - (textBounds.position.x + textBounds.size.x),
+		FpsTextMargin - textBounds.position.y
+	});
+
+	window.draw(text);
+}
+
 void Application::DrawCursor()
 {
-	if (!cursorVisible || input.GetActiveDevice() != InputDevice::Mouse)
+	if (!isCursorVisible || input.GetActiveDevice() != InputDevice::Mouse)
 		return;
 
 	const sf::Vector2u windowSize = window.getSize();
 	const float scale = std::min(
-		static_cast<float>(windowSize.x) / VirtualScreen::WIDTH,
-		static_cast<float>(windowSize.y) / VirtualScreen::HEIGHT);
+		static_cast<float>(windowSize.x) / VirtualScreen::Width,
+		static_cast<float>(windowSize.y) / VirtualScreen::Height);
 
 	const sf::Vector2i mouse = sf::Mouse::getPosition(window);
 

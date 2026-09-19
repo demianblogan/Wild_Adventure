@@ -24,9 +24,9 @@
 
 namespace
 {
-	const std::string MENU_DIRECTORY = "data/ui/menu/";
-	const std::string SETTINGS_PATH = "data/settings.json";
-	const std::string INPUT_PATH = "data/input.json";
+	const std::string MenuDirectory = "data/ui/menu/";
+	const std::string SettingsPath = "data/settings.json";
+	const std::string InputPath = "data/input.json";
 }
 
 SettingsController::SettingsController(Context& context)
@@ -40,9 +40,9 @@ SettingsController::SettingsController(Context& context)
 
 void SettingsController::Open(const std::string& settingsFrame)
 {
-	wantsClose = false;
-	capturingKey = false;
-	waitForKeyRelease = false;
+	wasCloseRequested = false;
+	isCapturingKey = false;
+	isWaitingForKeyRelease = false;
 	pendingRequest = NavRequest::None;
 	activeFrame = settingsFrame;
 
@@ -95,17 +95,33 @@ void SettingsController::RegisterActions()
 			context.settings.SetVsync(value);
 			context.graphics.ApplyVsync(); // vsync applies immediately
 		});
+
+	settingsLoader.RegisterBoolAction("set_show_fps", [this](bool value)
+		{
+			context.settings.SetShowFps(value); // applies immediately, nothing to re-create
+		});
 }
 
 void SettingsController::ShowPanel(const std::string& panelId)
 {
-	std::unique_ptr<UI::Element> frame = settingsLoader.LoadFromFile(MENU_DIRECTORY + activeFrame + ".json");
+	std::unique_ptr<UI::Element> frame = settingsLoader.LoadFromFile(MenuDirectory + activeFrame + ".json");
 
 	UI::Element* slot = frame->FindByName("panel_slot");
 	if (slot == nullptr)
 		throw std::runtime_error("SettingsController: frame.json must contain 'panel_slot'");
 
-	slot->AddChild(settingsLoader.LoadFromFile(MENU_DIRECTORY + panelId + ".json"));
+	// In main-menu context: the panels here already carry their own heading
+	// ("Graphics", "Audio", ...), so hide the frame's title and reclaim the
+	// space reserved above the panel slot for the extra row(s).
+	if (activeFrame == "frame")
+	{
+		if (UI::Element* title = frame->FindByName("title"))
+			title->isVisible = false;
+
+		slot->offset = { 0.0f, 0.0f };
+	}
+
+	slot->AddChild(settingsLoader.LoadFromFile(MenuDirectory + panelId + ".json"));
 
 	settingsInterface.SetContent(std::move(frame));
 
@@ -179,7 +195,7 @@ std::string SettingsController::KeyLabelName(Action action)
 
 void SettingsController::BeginKeyCapture(Action action)
 {
-	capturingKey = true;
+	isCapturingKey = true;
 	captureAction = action;
 
 	if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName(KeyLabelName(action))))
@@ -192,8 +208,8 @@ void SettingsController::ApplyKeyCapture(sf::Keyboard::Key key)
 	// and can never be bound to a game action.
 	if (key == sf::Keyboard::Key::Escape)
 	{
-		capturingKey = false;
-		waitForKeyRelease = true;
+		isCapturingKey = false;
+		isWaitingForKeyRelease = true;
 		SetupKeyboardPanel();
 		return;
 	}
@@ -213,8 +229,8 @@ void SettingsController::ApplyKeyCapture(sf::Keyboard::Key key)
 
 	context.input.SetPrimaryKey(captureAction, key);
 
-	capturingKey = false;
-	waitForKeyRelease = true;
+	isCapturingKey = false;
+	isWaitingForKeyRelease = true;
 
 	SetupKeyboardPanel();
 	UpdateSaveButtonTint();
@@ -248,12 +264,12 @@ void SettingsController::SetupGraphicsPanel()
 	const auto found = std::find(resolutions.begin(), resolutions.end(), current);
 	resolutionIndex = static_cast<int>(std::distance(resolutions.begin(), found));
 
-	if (!resolutionCaptionColorKnown)
+	if (!isResolutionCaptionColorKnown)
 	{
 		if (auto* caption = dynamic_cast<UI::Label*>(settingsInterface.FindByName("resolution_caption")))
 		{
 			resolutionCaptionColor = caption->GetColor();
-			resolutionCaptionColorKnown = true;
+			isResolutionCaptionColorKnown = true;
 		}
 	}
 
@@ -262,7 +278,10 @@ void SettingsController::SetupGraphicsPanel()
 	UpdateResolutionRowEnabled();
 
 	if (auto* vsync = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("vsync_checkbox")))
-		vsync->SetChecked(context.settings.GetVsync());
+		vsync->SetChecked(context.settings.IsVsyncEnabled());
+
+	if (auto* showFps = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("show_fps_checkbox")))
+		showFps->SetChecked(context.settings.IsShowFpsEnabled());
 }
 
 void SettingsController::StepResolution(int direction)
@@ -421,11 +440,11 @@ void SettingsController::SavePanel(const std::string& panel)
 {
 	if (panel == "keyboard")
 	{
-		context.input.SaveConfig(INPUT_PATH);
+		context.input.SaveConfig(InputPath);
 	}
 	else if (panel == "audio" || panel == "graphics")
 	{
-		context.settings.Save(SETTINGS_PATH);
+		context.settings.Save(SettingsPath);
 		context.graphics.ApplyGraphics();
 	}
 }
@@ -464,7 +483,7 @@ void SettingsController::ApplyPendingNavigation()
 		}
 		else
 		{
-			wantsClose = true; // backed out of the settings root: hand control back
+			wasCloseRequested = true; // backed out of the settings root: hand control back
 		}
 		break;
 
@@ -481,7 +500,7 @@ void SettingsController::ApplyPendingNavigation()
 
 void SettingsController::HandleEvent(const sf::Event& event)
 {
-	if (capturingKey)
+	if (isCapturingKey)
 	{
 		if (const auto* key = event.getIf<sf::Event::KeyPressed>())
 			ApplyKeyCapture(key->code);
@@ -498,19 +517,19 @@ void SettingsController::Update(float deltaTime)
 
 	Input& input = context.input;
 
-	if (waitForKeyRelease && !capturingKey)
+	if (isWaitingForKeyRelease && !isCapturingKey)
 	{
 		const bool anyMenuKeyDown = input.IsDown(Action::MenuUp) || input.IsDown(Action::MenuDown)
 			|| input.IsDown(Action::MenuLeft) || input.IsDown(Action::MenuRight)
 			|| input.IsDown(Action::MenuConfirm) || input.IsDown(Action::MenuBack);
 		if (!anyMenuKeyDown)
-			waitForKeyRelease = false;
+			isWaitingForKeyRelease = false;
 	}
 
 	// While capturing a key (or until the keys from a finished capture are
 	// released) menu navigation is suppressed, so the rebound key does not also
 	// trigger a navigation action.
-	if (!capturingKey && !waitForKeyRelease)
+	if (!isCapturingKey && !isWaitingForKeyRelease)
 	{
 		if (input.WasPressed(Action::MenuBack))
 		{
@@ -545,6 +564,6 @@ void SettingsController::Update(float deltaTime)
 
 void SettingsController::Render(sf::RenderTarget& target)
 {
-	context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
 	settingsInterface.Draw(target);
 }

@@ -21,7 +21,7 @@ namespace ECS
 		, particles(particles)
 	{}
 
-	void BulletSystem::Update(float deltaTime)
+	void BulletSystem::Update(float)
 	{
 		// Locate the player for collision checks.
 		const Entity playerEntity = FindPlayer(registry);
@@ -32,7 +32,7 @@ namespace ECS
 		Velocity*       playerVelocity  = nullptr;
 		AnimationState* playerAnimState = nullptr;
 
-		if (playerEntity != INVALID_ENTITY)
+		if (playerEntity != InvalidEntity)
 		{
 			playerTransform = &registry.Get<Transform>(playerEntity);
 			playerCollider  = &registry.Get<Collider>(playerEntity);

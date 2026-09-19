@@ -27,6 +27,10 @@ namespace ECS
 			return state == "BottomHit" || state == "TopHit"
 				|| state == "LeftHit" || state == "RightHit";
 		}
+
+		constexpr float RideSnapTolerance = 3.0f; // how close the rider's feet must be to the rock's top
+		constexpr float EdgeEpsilon = 0.001f;      // nudges a tile-boundary sample inward, see PhysicsSystem
+		constexpr float CrushInset = 2.0f;         // shrinks the crush check so standing on top isn't a crush
 	}
 
 	RockHeadSystem::RockHeadSystem(Registry& registry, const Tilemap& tilemap)
@@ -43,7 +47,7 @@ namespace ECS
 		Health*         playerHealth    = nullptr;
 		Velocity*       playerVelocity  = nullptr;
 		AnimationState* playerAnimState = nullptr;
-		if (playerEntity != INVALID_ENTITY)
+		if (playerEntity != InvalidEntity)
 		{
 			playerTransform = &registry.Get<Transform>(playerEntity);
 			playerCollider  = &registry.Get<Collider>(playerEntity);
@@ -75,7 +79,7 @@ namespace ECS
 					// Riding on top of a horizontal rock: carry the player along. (Vertical
 					// carrying happens for free as the player snaps to the Solid's top.)
 					if (rock.axis == RockHead::Axis::Horizontal && horizontallyOver
-						&& std::abs(playerTransform->y - rockTop) < 3.0f && deltaX != 0.0f)
+						&& std::abs(playerTransform->y - rockTop) < RideSnapTolerance && deltaX != 0.0f)
 					{
 						playerTransform->x += deltaX;
 
@@ -85,7 +89,7 @@ namespace ECS
 						const float tileSize = static_cast<float>(tilemap.tileSize);
 						const float pHalf    = playerCollider->width / 2.0f;
 						const int   firstRow = static_cast<int>(std::floor((playerTransform->y - playerCollider->height) / tileSize));
-						const int   lastRow  = static_cast<int>(std::floor((playerTransform->y - 0.001f) / tileSize));
+						const int   lastRow  = static_cast<int>(std::floor((playerTransform->y - EdgeEpsilon) / tileSize));
 
 						if (deltaX > 0.0f)
 						{
@@ -103,7 +107,7 @@ namespace ECS
 
 					// Crush: the player's body is wedged inside the rock (the inset excludes
 					// merely standing on top), so it has them pinned against the terrain.
-					const float inset = 2.0f;
+					const float inset = CrushInset;
 					const bool crushed =
 						(playerTransform->x - pHalfWidth) < (rockRight - inset) &&
 						(playerTransform->x + pHalfWidth) > (rockLeft + inset) &&
@@ -129,28 +133,28 @@ namespace ECS
 				case RockHead::State::Moving:
 				{
 					// Did PhysicsSystem stop us against the terrain in our travel direction?
-					bool        hit     = false;
+					bool        wasHit     = false;
 					const char* hitAnim = "Idle";
 					if (rock.axis == RockHead::Axis::Horizontal)
 					{
 						if (collisionState.isOnWall && collisionState.wallDirection == rock.direction)
 						{
-							hit     = true;
+							wasHit     = true;
 							hitAnim = (rock.direction > 0) ? "RightHit" : "LeftHit";
 						}
 					}
 					else if (rock.direction > 0 && collisionState.isOnGround)
 					{
-						hit     = true;
+						wasHit     = true;
 						hitAnim = "BottomHit";
 					}
 					else if (rock.direction < 0 && collisionState.isOnCeiling)
 					{
-						hit     = true;
+						wasHit     = true;
 						hitAnim = "TopHit";
 					}
 
-					if (hit)
+					if (wasHit)
 					{
 						rock.state        = RockHead::State::Stopped;
 						rock.speed        = 0.0f;
@@ -179,7 +183,7 @@ namespace ECS
 						if (rock.blinkTimer <= 0.0f)
 						{
 							animState.current = "Blink";
-							rock.blinkTimer   = RockHead::BLINK_INTERVAL;
+							rock.blinkTimer   = RockHead::BlinkInterval;
 						}
 						else if (animState.current == "Blink" && registry.Has<Animation>(entity))
 						{
@@ -195,7 +199,7 @@ namespace ECS
 					velocity.x = 0.0f;
 					velocity.y = 0.0f;
 
-					// Once the wall-hit animation finishes, set off the other way.
+					// Once the wall-wasHit animation finishes, set off the other way.
 					if (registry.Has<Animation>(entity))
 					{
 						const Animation& anim = registry.Get<Animation>(entity);
@@ -204,7 +208,7 @@ namespace ECS
 							rock.direction    = -rock.direction;
 							rock.state        = RockHead::State::Moving;
 							rock.speed        = 0.0f;
-							rock.blinkTimer   = RockHead::BLINK_INTERVAL;
+							rock.blinkTimer   = RockHead::BlinkInterval;
 							animState.current = "Idle";
 						}
 					}

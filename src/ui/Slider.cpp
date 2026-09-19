@@ -6,24 +6,6 @@
 
 namespace UI
 {
-	namespace
-	{
-		int StateToIndex(InteractionState state)
-		{
-			switch (state)
-			{
-			case InteractionState::Normal:
-				return 0;
-			case InteractionState::Highlighted:
-				return 1;
-			case InteractionState::Pressed:
-				return 2;
-			default:
-				return 0;
-			}
-		}
-	}
-
 	void Slider::SetTrack(std::unique_ptr<Element> element)
 	{
 		Element& added = AddChild(std::move(element));

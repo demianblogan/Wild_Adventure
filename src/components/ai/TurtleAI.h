@@ -10,9 +10,9 @@ namespace ECS
 		enum class Phase { Safe, SpikesEmerging, Spiked, SpikesRetracting };
 
 		Phase phase = Phase::Safe;
-		float phaseTimer = SAFE_DURATION;
+		float phaseTimer = SafeDuration;
 
-		static constexpr float SAFE_DURATION = 0.5f;   // Idle2, spikes in: short window to stomp it
-		static constexpr float SPIKED_DURATION = 2.0f; // Idle1, spikes out: armored for longer
+		static constexpr float SafeDuration = 0.5f;   // Idle2, spikes in: short window to stomp it
+		static constexpr float SpikedDuration = 2.0f; // Idle1, spikes out: armored for longer
 	};
 }

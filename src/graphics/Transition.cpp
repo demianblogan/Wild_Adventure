@@ -33,7 +33,7 @@ void Transition::Update(float deltaTime)
 
 	elapsedTime += deltaTime;
 
-	const float total = (COLUMN_COUNT - 1) * COLUMN_DELAY + COLUMN_DURATION;
+	const float total = (ColumnCount - 1) * ColumnDelay + ColumnDuration;
 
 	if (elapsedTime >= total)
 	{
@@ -46,8 +46,8 @@ void Transition::Update(float deltaTime)
 
 float Transition::ColumnFillFactor(int column) const
 {
-	const float start = column * COLUMN_DELAY;
-	const float localProgress = std::clamp((elapsedTime - start) / COLUMN_DURATION, 0.0f, 1.0f);
+	const float start = column * ColumnDelay;
+	const float localProgress = std::clamp((elapsedTime - start) / ColumnDuration, 0.0f, 1.0f);
 
 	// Reveal: diamonds shrink (1 -> 0). Cover/Done: diamonds grow (0 -> 1).
 	if (mode == Mode::Cover || mode == Mode::Done)
@@ -61,15 +61,15 @@ void Transition::Draw(sf::RenderTarget& target)
 	if (mode == Mode::Idle)
 		return;
 
-	const float cellSize = static_cast<float>(VirtualScreen::WIDTH) / COLUMN_COUNT;
-	const int rowCount = static_cast<int>(std::ceil(static_cast<float>(VirtualScreen::HEIGHT) / cellSize));
+	const float cellSize = static_cast<float>(VirtualScreen::Width) / ColumnCount;
+	const int rowCount = static_cast<int>(std::ceil(static_cast<float>(VirtualScreen::Height) / cellSize));
 	const float maxRadius = cellSize; // half-diagonal == spacing -> diamonds meet, full coverage
 
 	sf::ConvexShape diamond;
 	diamond.setPointCount(4);
 	diamond.setFillColor(sf::Color::Black);
 
-	for (int column = 0; column < COLUMN_COUNT; ++column)
+	for (int column = 0; column < ColumnCount; ++column)
 	{
 		const float factor = ColumnFillFactor(column);
 

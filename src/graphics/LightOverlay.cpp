@@ -23,19 +23,19 @@ LightOverlay::LightOverlay()
 	// Black disc whose alpha rises smoothly from 0 (lit center) to full
 	// (darkness) toward the edge; the square's corners are fully dark, so the
 	// sprite blends seamlessly into the filler rectangles around it.
-	sf::Image image(sf::Vector2u{ TEXTURE_SIZE, TEXTURE_SIZE }, sf::Color::Transparent);
+	sf::Image image(sf::Vector2u{ TextureSize, TextureSize }, sf::Color::Transparent);
 
-	const float half = TEXTURE_SIZE / 2.0f;
+	const float half = TextureSize / 2.0f;
 
-	for (unsigned int y = 0; y < TEXTURE_SIZE; y++)
+	for (unsigned int y = 0; y < TextureSize; y++)
 	{
-		for (unsigned int x = 0; x < TEXTURE_SIZE; x++)
+		for (unsigned int x = 0; x < TextureSize; x++)
 		{
 			const float dx = (static_cast<float>(x) + 0.5f - half) / half;
 			const float dy = (static_cast<float>(y) + 0.5f - half) / half;
 			const float distance = std::sqrt(dx * dx + dy * dy);
 
-			const float shade = SmoothStep(INNER_FRACTION, 1.0f, distance);
+			const float shade = SmoothStep(InnerFraction, 1.0f, distance);
 			const auto alpha = static_cast<std::uint8_t>(shade * 255.0f);
 
 			image.setPixel(sf::Vector2u{ x, y }, sf::Color(0, 0, 0, alpha));
@@ -58,8 +58,8 @@ void LightOverlay::Draw(sf::RenderTarget& target, sf::Vector2f lightCenter, floa
 	// The gradient sprite over the circle's bounding box. Its own alpha is
 	// scaled by the overall darkness through the sprite color.
 	sf::Sprite sprite(gradientTexture);
-	sprite.setOrigin({ TEXTURE_SIZE / 2.0f, TEXTURE_SIZE / 2.0f });
-	const float scale = (radius * 2.0f) / static_cast<float>(TEXTURE_SIZE);
+	sprite.setOrigin({ TextureSize / 2.0f, TextureSize / 2.0f });
+	const float scale = (radius * 2.0f) / static_cast<float>(TextureSize);
 	sprite.setScale({ scale, scale });
 	sprite.setPosition(lightCenter);
 	sprite.setColor(sf::Color(255, 255, 255, alpha));

@@ -18,8 +18,8 @@ namespace ECS
 		float acceleration = 450.0f; // keeps building speed across the whole pass
 		float speed = 0.0f;          // current ramped speed
 		State state = State::Moving;
-		float blinkTimer = BLINK_INTERVAL;
+		float blinkTimer = BlinkInterval;
 
-		static constexpr float BLINK_INTERVAL = 3.0f; // how often the idle blink plays while moving
+		static constexpr float BlinkInterval = 3.0f; // how often the idle blink plays while moving
 	};
 }

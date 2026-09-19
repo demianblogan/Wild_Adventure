@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.25)
 
 project(Platformer LANGUAGES CXX)
 
@@ -6,25 +6,74 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(SFML 3 COMPONENTS Graphics Window System Audio CONFIG REQUIRED)
+# SFML 3.1.0, built from source into libs/SFML (see libs/SFML/README.md):
+# vcpkg's own sfml port has not been updated past 3.0.2 yet.
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/libs/SFML")
+find_package(SFML 3.1 COMPONENTS Graphics Window System Audio CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-add_executable(Platformer
-    src/main.cpp
-    src/Application.h
-    src/Application.cpp
-	src/Context.h
-	src/core/State.h
-	src/core/StateMachine.h
-	src/core/StateMachine.cpp
- "src/core/AABB.h" "src/core/ResourceManager.h" "src/core/Resources.h" "src/core/ecs/Entity.h" "src/core/ecs/IComponentPool.h" "src/core/ecs/ComponentPool.h" "src/core/ecs/ComponentTypeId.h" "src/core/ecs/Registry.h" "src/components/physics/Transform.h" "src/components/render/Sprite.h" "src/systems/core/PlayerQuery.h" "src/systems/core/RenderSystem.h" "src/systems/core/RenderSystem.cpp" "src/components/physics/Velocity.h" "src/components/physics/PreviousTransform.h" "src/systems/core/MovementSystem.h" "src/systems/core/MovementSystem.cpp" "src/components/render/Animation.h" "src/systems/core/AnimationSystem.h" "src/systems/core/AnimationSystem.cpp" "src/components/render/AnimationData.h" "src/components/render/AnimationSet.h" "src/components/render/AnimationState.h" "src/components/physics/Facing.h" "src/core/VirtualScreen.h" "src/core/VirtualScreen.cpp" "src/core/SceneLoader.h" "src/core/SceneLoader.cpp" "src/ui/Element.h" "src/ui/Element.cpp"   "src/ui/Label.h" "src/ui/Label.cpp" "src/ui/Image.h" "src/ui/Image.cpp" "src/ui/InteractiveElement.h" "src/ui/InteractiveElement.cpp" "src/ui/Root.h" "src/ui/Root.cpp"   "src/ui/Button.h" "src/ui/Button.cpp" "src/ui/Checkbox.h" "src/ui/Checkbox.cpp" "src/ui/Slider.h" "src/ui/Slider.cpp" "src/ui/Animation.h" "src/ui/Animation.cpp" "src/ui/DataLoader.h" "src/ui/DataLoader.cpp" "src/audio/MusicPlayer.h" "src/audio/MusicPlayer.cpp" "src/audio/SoundPlayer.h" "src/audio/SoundPlayer.cpp" "src/audio/Mixer.h" "src/audio/Mixer.cpp" "src/tilemap/Tilemap.h" "src/tilemap/TilemapLoader.h" "src/tilemap/TilemapLoader.cpp" "src/tilemap/TilemapRenderer.h" "src/tilemap/TilemapRenderer.cpp" "src/graphics/AnimatedBackground.h" "src/graphics/AnimatedBackground.cpp" "src/core/Camera.h" "src/core/Camera.cpp" "src/core/Random.h" "src/core/Random.cpp" "src/components/ai/Patrol.h" "src/systems/enemies/PatrolSystem.h" "src/systems/enemies/PatrolSystem.cpp" "src/states/SplashState.h" "src/states/SplashState.cpp" "src/core/Resources.cpp" "src/graphics/Transition.h" "src/graphics/Transition.cpp" "src/screens/MenuBackdrop.h" "src/screens/MenuBackdrop.cpp" "src/states/MenuState.h" "src/states/MenuState.cpp" "src/components/physics/Collider.h" "src/components/physics/Gravity.h" "src/components/tags/Player.h" "src/components/physics/CollisionState.h" "src/systems/core/InputSystem.h" "src/systems/core/InputSystem.cpp" "src/systems/core/PhysicsSystem.h" "src/systems/core/PhysicsSystem.cpp" "src/systems/core/PlayerAnimationSystem.h" "src/systems/core/PlayerAnimationSystem.cpp" "src/states/GameState.h" "src/states/GameState.cpp" "src/screens/HUD.h" "src/screens/HUD.cpp" "src/level/LevelSetup.h" "src/level/LevelSetup.cpp" "src/components/physics/Jump.h" "src/systems/core/JumpSystem.h" "src/systems/core/JumpSystem.cpp" "src/components/physics/WallSlide.h"   "src/components/combat/Health.h" "src/components/combat/Hazard.h" "src/components/physics/Hitbox.h" "src/systems/core/DamageSystem.h" "src/systems/core/DamageSystem.cpp" "src/components/physics/Rotation.h" "src/systems/core/DeathSystem.h" "src/systems/core/DeathSystem.cpp" "src/components/items/Collectible.h" "src/components/tags/Despawning.h" "src/systems/items/PickupSystem.h" "src/systems/items/PickupSystem.cpp" "src/components/physics/Solid.h" "src/components/items/Box.h" "src/components/items/BoxHit.h" "src/systems/items/BoxSystem.h" "src/systems/items/BoxSystem.cpp" "src/components/items/PickupDelay.h" "src/graphics/ParticleSystem.h" "src/graphics/ParticleSystem.cpp" "src/core/Input.h" "src/core/Input.cpp" "src/core/Settings.h" "src/core/Settings.cpp" "src/states/ConfirmState.h" "src/states/ConfirmState.cpp" "src/core/GraphicsTarget.h" "src/ui/Stepper.h" "src/ui/Stepper.cpp"  "src/states/CompanySplashState.h" "src/states/CompanySplashState.cpp" "src/components/items/Finish.h" "src/graphics/ConfettiSystem.h" "src/graphics/ConfettiSystem.cpp" "src/screens/SettingsController.h" "src/screens/SettingsController.cpp" "src/states/PauseState.h" "src/states/PauseState.cpp" "src/states/LevelCompleteState.h" "src/states/LevelCompleteState.cpp" "src/components/combat/Enemy.h" "src/components/ai/GroundPatrol.h" "src/components/combat/EnemyDeath.h" "src/components/ai/TrunkAI.h" "src/components/ai/PlantAI.h" "src/components/ai/BeeAI.h" "src/components/ai/SnailAI.h" "src/components/combat/StompCustomDeath.h" "src/components/combat/Stomped.h" "src/components/ai/Shell.h" "src/components/ai/GhostAI.h" "src/components/render/Hidden.h" "src/components/ai/TurtleAI.h" "src/components/combat/Spiky.h" "src/components/combat/Bullet.h" "src/systems/enemies/EnemySystem.h" "src/systems/enemies/EnemySystem.cpp" "src/systems/enemies/GroundPatrolSystem.h" "src/systems/enemies/GroundPatrolSystem.cpp" "src/systems/enemies/EnemyDeathSystem.h" "src/systems/enemies/EnemyDeathSystem.cpp" "src/systems/enemies/TrunkSystem.h" "src/systems/enemies/TrunkSystem.cpp" "src/systems/enemies/PlantSystem.h" "src/systems/enemies/PlantSystem.cpp" "src/systems/enemies/BeeSystem.h" "src/systems/enemies/BeeSystem.cpp" "src/systems/enemies/SnailSystem.h" "src/systems/enemies/SnailSystem.cpp" "src/systems/enemies/ShellSystem.h" "src/systems/enemies/ShellSystem.cpp" "src/systems/enemies/GhostSystem.h" "src/systems/enemies/GhostSystem.cpp" "src/systems/enemies/TurtleSystem.h" "src/systems/enemies/TurtleSystem.cpp" "src/systems/enemies/BulletSystem.h" "src/systems/enemies/BulletSystem.cpp" "src/components/traps/Trampoline.h" "src/systems/traps/TrampolineSystem.h" "src/systems/traps/TrampolineSystem.cpp" "src/components/traps/Arrow.h" "src/systems/traps/ArrowSystem.h" "src/systems/traps/ArrowSystem.cpp" "src/components/traps/Fire.h" "src/systems/traps/FireSystem.h" "src/systems/traps/FireSystem.cpp" "src/components/traps/RockHead.h" "src/systems/traps/RockHeadSystem.h" "src/systems/traps/RockHeadSystem.cpp" "src/core/Campaign.h" "src/core/Campaign.cpp" "src/screens/SelectLevelController.h" "src/screens/SelectLevelController.cpp" "src/states/CampaignVictoryState.h" "src/states/CampaignVictoryState.cpp" "src/graphics/ColorGrading.h" "src/graphics/ColorGrading.cpp" "src/components/ai/ChickenAI.h" "src/systems/enemies/ChickenSystem.h" "src/systems/enemies/ChickenSystem.cpp" "src/graphics/LightOverlay.h" "src/graphics/LightOverlay.cpp" "src/core/Skins.h" "src/screens/CharacterSelectController.h" "src/screens/CharacterSelectController.cpp" "src/graphics/NineSlice.h" "src/graphics/NineSlice.cpp")
+# The project is feature-complete, so new source files are not expected; a
+# recursive glob is far easier to keep correct than a hand-maintained list of
+# ~200 paths. CONFIGURE_DEPENDS still re-runs it on the next configure if a
+# file is ever added or removed.
+file(GLOB_RECURSE PLATFORMER_LIB_SOURCES CONFIGURE_DEPENDS
+	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+)
+list(REMOVE_ITEM PLATFORMER_LIB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+list(SORT PLATFORMER_LIB_SOURCES)
 
-target_link_libraries(Platformer PRIVATE
-    SFML::Graphics
-    SFML::Window
-    SFML::System
-    SFML::Audio
-    nlohmann_json::nlohmann_json
+# Everything except main() lives in a library, so the test executable below
+# can link the whole game without also pulling in a competing main().
+add_library(PlatformerLib STATIC ${PLATFORMER_LIB_SOURCES})
+
+target_link_libraries(PlatformerLib PUBLIC
+	SFML::Graphics
+	SFML::Window
+	SFML::System
+	SFML::Audio
+	nlohmann_json::nlohmann_json
 )
 
-target_include_directories(Platformer PRIVATE src)
+target_include_directories(PlatformerLib PUBLIC src)
+
+if (MSVC)
+	# C4458: a constructor/setter parameter deliberately shares a name with the
+	# member it initializes (e.g. `SetColor(sf::Color color) { this->color =
+	# color; }`). That is an idiomatic, safe pattern used throughout this
+	# codebase, not a real hazard, so the warning is noise.
+	target_compile_options(PlatformerLib PRIVATE /W4 /WX /wd4458)
+else()
+	target_compile_options(PlatformerLib PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+
+add_executable(Platformer src/main.cpp)
+target_link_libraries(Platformer PRIVATE PlatformerLib)
+
+# assets/ and data/ are loaded with paths relative to the current working
+# directory. Some launch paths (Visual Studio's CMake integration among them)
+# don't honour VS_DEBUGGER_WORKING_DIRECTORY below and run the executable
+# with its own output directory as the working directory instead of the
+# project root, which would otherwise leave it unable to find either folder.
+# Mirroring both next to the built executable makes it work either way,
+# exactly like the shipped release build (exe sitting next to assets/data).
+set_target_properties(Platformer PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
+add_custom_command(TARGET Platformer POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+		"${CMAKE_SOURCE_DIR}/assets" "$<TARGET_FILE_DIR:Platformer>/assets"
+	COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+		"${CMAKE_SOURCE_DIR}/data" "$<TARGET_FILE_DIR:Platformer>/data"
+)
+
+# SFML is vendored as shared libraries (see libs/SFML/README.md); copy the
+# DLLs it and its own dependencies need next to every executable that links
+# it, matching what vcpkg's toolchain used to do automatically.
+add_custom_command(TARGET Platformer POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		"$<TARGET_RUNTIME_DLLS:Platformer>" "$<TARGET_FILE_DIR:Platformer>"
+	COMMAND_EXPAND_LISTS
+)
+
+enable_testing()
+add_subdirectory(tests)

@@ -25,10 +25,10 @@ namespace UI
 	private:
 		void RefreshVisibility();
 
-		Element* GetVariant(const std::array<Element*, INTERACTION_STATE_COUNT>& variants, InteractionState state) const;
+		Element* GetVariant(const std::array<Element*, InteractionStateCount>& variants, InteractionState state) const;
 
-		std::array<Element*, INTERACTION_STATE_COUNT> backgrounds = { nullptr, nullptr, nullptr };
-		std::array<Element*, INTERACTION_STATE_COUNT> foregrounds = { nullptr, nullptr, nullptr };
-		std::array<std::optional<sf::Color>, INTERACTION_STATE_COUNT> foregroundColors = { std::nullopt, std::nullopt, std::nullopt };
+		std::array<Element*, InteractionStateCount> backgrounds = { nullptr, nullptr, nullptr };
+		std::array<Element*, InteractionStateCount> foregrounds = { nullptr, nullptr, nullptr };
+		std::array<std::optional<sf::Color>, InteractionStateCount> foregroundColors = { std::nullopt, std::nullopt, std::nullopt };
 	};
 }

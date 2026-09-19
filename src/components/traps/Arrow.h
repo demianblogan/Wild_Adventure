@@ -7,6 +7,6 @@ namespace ECS
 	struct Arrow
 	{
 		float boostSpeed = 700.0f;
-		bool  triggered  = false; // true once used; it plays Hit then despawns
+		bool  hasTriggered = false; // true once used; it plays Hit then despawns
 	};
 }

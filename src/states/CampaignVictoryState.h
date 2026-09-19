@@ -48,10 +48,10 @@ private:
 	float waitTimer        = 0.0f;
 	std::size_t revealed   = 0;      // letters currently visible across all lines
 
-	bool goToMenu = false;
+	bool wasMenuRequested = false;
 
-	static constexpr float CHAR_INTERVAL = 0.03f;
-	static constexpr float BUTTON_DELAY  = 2.0f;
+	static constexpr float CharInterval = 0.03f;
+	static constexpr float ButtonDelay  = 2.0f;
 
 	UI::Root       victoryInterface;
 	UI::DataLoader victoryLoader;

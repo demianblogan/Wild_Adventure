@@ -25,25 +25,25 @@
 
 namespace
 {
-	const std::string LEVEL_COMPLETE_UI_PATH = "data/ui/menu/level_complete.json";
+	const std::string LevelCompleteUiPath = "data/ui/menu/level_complete.json";
 
-	constexpr float W = static_cast<float>(VirtualScreen::WIDTH);
-	constexpr float H = static_cast<float>(VirtualScreen::HEIGHT);
+	constexpr float ScreenWidth = static_cast<float>(VirtualScreen::Width);
+	constexpr float ScreenHeight = static_cast<float>(VirtualScreen::Height);
 
 	// Panel geometry (centered on screen).
-	constexpr float PANEL_W = 460.f;
-	constexpr float PANEL_H = 200.f;
-	constexpr float PANEL_X = (W - PANEL_W) / 2.f;
-	constexpr float PANEL_Y = (H - PANEL_H) / 2.f;  // 35
+	constexpr float PanelW = 460.f;
+	constexpr float PanelH = 200.f;
+	constexpr float PanelX = (ScreenWidth - PanelW) / 2.f;
+	constexpr float PanelY = (ScreenHeight - PanelH) / 2.f;  // 35
 
 	// Vertical positions. All text sizes are multiples of 8 for pixel-sharp rendering.
-	constexpr float Y_TITLE   = PANEL_Y + 18.f;   // 53
-	constexpr float Y_STARS   = PANEL_Y + 50.f;   // 85  — 28-px stars centered here
-	constexpr float Y_DEATHS  = PANEL_Y + 88.f;   // 123
-	constexpr float Y_FRUITS  = PANEL_Y + 112.f;  // 147
-	constexpr float Y_ENEMIES = PANEL_Y + 136.f;  // 171
+	constexpr float YTitle   = PanelY + 18.f;   // 53
+	constexpr float YStars   = PanelY + 50.f;   // 85  — 28-px stars centered here
+	constexpr float YDeaths  = PanelY + 88.f;   // 123
+	constexpr float YFruits  = PanelY + 112.f;  // 147
+	constexpr float YEnemies = PanelY + 136.f;  // 171
 
-	constexpr float CX = W / 2.f;
+	constexpr float CenterX = ScreenWidth / 2.f;
 
 	void DrawCenteredText(sf::RenderTarget& rt, const sf::Font& font,
 		const std::string& str, unsigned int charSize,
@@ -68,7 +68,7 @@ namespace
 LevelCompleteState::LevelCompleteState(Context& context, std::string levelPath, int levelNumber,
 	int deathCount, int fruitsCollected, int maxFruits,
 	int enemiesKilled, int maxEnemies)
-	: State(context, /*rendersStateBelow=*/true, /*updatesStateBelow=*/false)
+	: State(context, /*isRenderingStateBelow=*/true, /*isUpdatingStateBelow=*/false)
 	, completeInterface(context.virtualScreen)
 	, completeLoader(context.resources)
 	, levelPath(std::move(levelPath))
@@ -81,7 +81,7 @@ LevelCompleteState::LevelCompleteState(Context& context, std::string levelPath, 
 {
 	completeLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
 	RegisterActions();
-	completeInterface.SetContent(completeLoader.LoadFromFile(LEVEL_COMPLETE_UI_PATH));
+	completeInterface.SetContent(completeLoader.LoadFromFile(LevelCompleteUiPath));
 	completeInterface.ResetFocus();
 
 	// Persist campaign progress as soon as the menu appears, using the same star
@@ -139,10 +139,10 @@ void LevelCompleteState::Update(float deltaTime)
 
 	// Animate the star sprite continuously.
 	starAnimTimer += deltaTime;
-	if (starAnimTimer >= STAR_FRAME_DURATION)
+	if (starAnimTimer >= StarFrameDuration)
 	{
-		starAnimTimer -= STAR_FRAME_DURATION;
-		starFrame = (starFrame + 1) % STAR_FRAME_COUNT;
+		starAnimTimer -= StarFrameDuration;
+		starFrame = (starFrame + 1) % StarFrameCount;
 	}
 
 	phaseTimer += deltaTime;
@@ -150,9 +150,9 @@ void LevelCompleteState::Update(float deltaTime)
 	switch (phase)
 	{
 	case Phase::Title:
-		if (phaseTimer >= TITLE_WAIT)
+		if (phaseTimer >= TitleWait)
 		{
-			showDeaths = true;
+			hasRevealedDeaths = true;
 			phaseTimer = 0.f;
 			phase = Phase::CountDeaths;
 		}
@@ -160,12 +160,12 @@ void LevelCompleteState::Update(float deltaTime)
 
 	case Phase::CountDeaths:
 	{
-		const float t = std::min(phaseTimer / COUNT_DURATION, 1.f);
+		const float t = std::min(phaseTimer / CountDuration, 1.f);
 		displayedDeaths = t * static_cast<float>(deathCount);
-		if (phaseTimer >= COUNT_DURATION)
+		if (phaseTimer >= CountDuration)
 		{
 			displayedDeaths = static_cast<float>(deathCount);
-			star1Earned = (deathCount == 0);
+			hasEarnedStar1 = (deathCount == 0);
 			phaseTimer = 0.f;
 			phase = Phase::StarDeaths;
 		}
@@ -173,9 +173,9 @@ void LevelCompleteState::Update(float deltaTime)
 	}
 
 	case Phase::StarDeaths:
-		if (phaseTimer >= STAR_PAUSE)
+		if (phaseTimer >= StarPause)
 		{
-			showFruits = true;
+			hasRevealedFruits = true;
 			phaseTimer = 0.f;
 			phase = Phase::CountFruits;
 		}
@@ -183,12 +183,12 @@ void LevelCompleteState::Update(float deltaTime)
 
 	case Phase::CountFruits:
 	{
-		const float t = std::min(phaseTimer / COUNT_DURATION, 1.f);
+		const float t = std::min(phaseTimer / CountDuration, 1.f);
 		displayedFruits = t * static_cast<float>(fruitsCollected);
-		if (phaseTimer >= COUNT_DURATION)
+		if (phaseTimer >= CountDuration)
 		{
 			displayedFruits = static_cast<float>(fruitsCollected);
-			star2Earned = (maxFruits > 0 && fruitsCollected >= maxFruits);
+			hasEarnedStar2 = (maxFruits > 0 && fruitsCollected >= maxFruits);
 			phaseTimer = 0.f;
 			phase = Phase::StarFruits;
 		}
@@ -196,9 +196,9 @@ void LevelCompleteState::Update(float deltaTime)
 	}
 
 	case Phase::StarFruits:
-		if (phaseTimer >= STAR_PAUSE)
+		if (phaseTimer >= StarPause)
 		{
-			showEnemies = true;
+			hasRevealedEnemies = true;
 			phaseTimer = 0.f;
 			phase = Phase::CountEnemies;
 		}
@@ -206,12 +206,12 @@ void LevelCompleteState::Update(float deltaTime)
 
 	case Phase::CountEnemies:
 	{
-		const float t = std::min(phaseTimer / COUNT_DURATION, 1.f);
+		const float t = std::min(phaseTimer / CountDuration, 1.f);
 		displayedEnemies = t * static_cast<float>(enemiesKilled);
-		if (phaseTimer >= COUNT_DURATION)
+		if (phaseTimer >= CountDuration)
 		{
 			displayedEnemies = static_cast<float>(enemiesKilled);
-			star3Earned = (maxEnemies > 0 && enemiesKilled >= maxEnemies);
+			hasEarnedStar3 = (maxEnemies > 0 && enemiesKilled >= maxEnemies);
 			phaseTimer = 0.f;
 			phase = Phase::StarEnemies;
 		}
@@ -219,7 +219,7 @@ void LevelCompleteState::Update(float deltaTime)
 	}
 
 	case Phase::StarEnemies:
-		if (phaseTimer >= STAR_PAUSE)
+		if (phaseTimer >= StarPause)
 			AdvancePhase();
 		break;
 
@@ -230,15 +230,15 @@ void LevelCompleteState::Update(float deltaTime)
 
 void LevelCompleteState::SkipToEnd()
 {
-	showDeaths  = true;
-	showFruits  = true;
-	showEnemies = true;
+	hasRevealedDeaths  = true;
+	hasRevealedFruits  = true;
+	hasRevealedEnemies = true;
 	displayedDeaths   = static_cast<float>(deathCount);
 	displayedFruits   = static_cast<float>(fruitsCollected);
 	displayedEnemies  = static_cast<float>(enemiesKilled);
-	star1Earned = (deathCount == 0);
-	star2Earned = (maxFruits > 0 && fruitsCollected >= maxFruits);
-	star3Earned = (maxEnemies > 0 && enemiesKilled >= maxEnemies);
+	hasEarnedStar1 = (deathCount == 0);
+	hasEarnedStar2 = (maxFruits > 0 && fruitsCollected >= maxFruits);
+	hasEarnedStar3 = (maxEnemies > 0 && enemiesKilled >= maxEnemies);
 	AdvancePhase();
 }
 
@@ -296,16 +296,16 @@ void LevelCompleteState::ApplyPendingNavigation()
 void LevelCompleteState::Render(float /*interpolationFactor*/)
 {
 	sf::RenderTarget& rt = context.virtualScreen.GetRenderTarget();
-	context.virtualScreen.SetCameraCenter(W / 2.f, H / 2.f);
+	context.virtualScreen.SetCameraCenter(ScreenWidth / 2.f, ScreenHeight / 2.f);
 
 	// Dim the level behind the menu.
-	sf::RectangleShape overlay({ W, H });
+	sf::RectangleShape overlay({ ScreenWidth, ScreenHeight });
 	overlay.setFillColor(sf::Color(0, 0, 0, 150));
 	rt.draw(overlay);
 
 	// Dark panel background.
-	sf::RectangleShape panel({ PANEL_W, PANEL_H });
-	panel.setPosition({ PANEL_X, PANEL_Y });
+	sf::RectangleShape panel({ PanelW, PanelH });
+	panel.setPosition({ PanelX, PanelY });
 	panel.setFillColor(sf::Color(18, 12, 38, 220));
 	panel.setOutlineColor(sf::Color(80, 55, 120, 200));
 	panel.setOutlineThickness(1.5f);
@@ -318,29 +318,29 @@ void LevelCompleteState::Render(float /*interpolationFactor*/)
 
 	// Title — always visible.
 	const std::string titleStr = "Level " + std::to_string(levelNumber) + " Complete!";
-	DrawCenteredText(rt, font, titleStr, 16, gold, outline, 1.f, CX, Y_TITLE);
+	DrawCenteredText(rt, font, titleStr, 16, gold, outline, 1.f, CenterX, YTitle);
 
 	// Stars row — always visible; filled in as stars are earned.
 	DrawStars(rt);
 
-	if (showDeaths)
+	if (hasRevealedDeaths)
 	{
 		const std::string s = "Deaths: " + std::to_string(static_cast<int>(displayedDeaths));
-		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CX, Y_DEATHS);
+		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CenterX, YDeaths);
 	}
 
-	if (showFruits)
+	if (hasRevealedFruits)
 	{
 		const std::string s = "Fruits: " +
 			std::to_string(static_cast<int>(displayedFruits)) + "/" + std::to_string(maxFruits);
-		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CX, Y_FRUITS);
+		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CenterX, YFruits);
 	}
 
-	if (showEnemies)
+	if (hasRevealedEnemies)
 	{
 		const std::string s = "Enemies: " +
 			std::to_string(static_cast<int>(displayedEnemies)) + "/" + std::to_string(maxEnemies);
-		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CX, Y_ENEMIES);
+		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CenterX, YEnemies);
 	}
 
 	// Bloom the earned stars at world strength, then the highlighted button
@@ -350,7 +350,7 @@ void LevelCompleteState::Render(float /*interpolationFactor*/)
 	if (phase == Phase::Done)
 		completeInterface.Draw(rt);
 
-	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
+	context.virtualScreen.CompositeGlow(VirtualScreen::GlowUiStrength);
 }
 
 void LevelCompleteState::DrawStars(sf::RenderTarget& rt) const
@@ -360,32 +360,32 @@ void LevelCompleteState::DrawStars(sf::RenderTarget& rt) const
 
 	const sf::Texture& starTex = context.resources.textures.Get("star");
 
-	constexpr float DISPLAY_SIZE = 28.f;
-	constexpr float SPACING      = 44.f;
-	const float scale = DISPLAY_SIZE / static_cast<float>(STAR_FRAME_SIZE);
+	constexpr float DisplaySize = 28.f;
+	constexpr float Spacing      = 44.f;
+	const float scale = DisplaySize / static_cast<float>(StarFrameSize);
 
-	const bool earned[3] = { star1Earned, star2Earned, star3Earned };
+	const bool earned[3] = { hasEarnedStar1, hasEarnedStar2, hasEarnedStar3 };
 
 	for (int i = 0; i < 3; ++i)
 	{
-		const float starCX = CX + static_cast<float>(i - 1) * SPACING;
-		const float starX  = starCX - DISPLAY_SIZE / 2.f;
-		const float starY  = Y_STARS - DISPLAY_SIZE / 2.f;
+		const float starCX = CenterX + static_cast<float>(i - 1) * Spacing;
+		const float starX  = starCX - DisplaySize / 2.f;
+		const float starY  = YStars - DisplaySize / 2.f;
 
 		sf::Sprite sprite(starTex);
 
 		if (earned[i])
 		{
 			sprite.setTextureRect(sf::IntRect(
-				{ starFrame * STAR_FRAME_SIZE, 0 },
-				{ STAR_FRAME_SIZE, STAR_FRAME_SIZE }));
+				{ starFrame * StarFrameSize, 0 },
+				{ StarFrameSize, StarFrameSize }));
 			sprite.setColor(sf::Color::White);
 		}
 		else
 		{
 			sprite.setTextureRect(sf::IntRect(
 				{ 0, 0 },
-				{ STAR_FRAME_SIZE, STAR_FRAME_SIZE }));
+				{ StarFrameSize, StarFrameSize }));
 			sprite.setColor(sf::Color(80, 80, 80, 200));
 		}
 

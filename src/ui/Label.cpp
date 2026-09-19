@@ -4,7 +4,6 @@
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
-#include <SFML/Graphics/Text.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -12,19 +11,20 @@
 namespace UI
 {
 	Label::Label(Resources& resources, const std::string& fontName)
-		: resources(resources)
-		, fontName(fontName)
-	{}
+		: drawableText(resources.fonts.Get(fontName))
+	{
+		drawableText.setCharacterSize(16); // matches this project's old Label default
+	}
 
 	void Label::SetText(const std::string& text)
 	{
-		this->text = text;
+		drawableText.setString(text);
 		RecalculateSize();
 	}
 
 	void Label::SetCharacterSize(unsigned int characterSize)
 	{
-		this->characterSize = characterSize;
+		drawableText.setCharacterSize(characterSize);
 		RecalculateSize();
 	}
 
@@ -53,23 +53,16 @@ namespace UI
 
 	void Label::RecalculateSize()
 	{
-		const sf::Font& font = resources.fonts.Get(fontName);
+		drawableText.setOutlineThickness(outlineThickness);
 
-		sf::Text measuredText(font, text, characterSize);
-		measuredText.setOutlineThickness(outlineThickness);
-		const sf::FloatRect bounds = measuredText.getLocalBounds();
-
+		const sf::FloatRect bounds = drawableText.getLocalBounds();
 		size = { std::ceil(bounds.size.x), std::ceil(bounds.size.y) };
 	}
 
 	void Label::DrawSelf(sf::RenderTarget& target, sf::Vector2f absolutePosition) const
 	{
-		const sf::Font& font = resources.fonts.Get(fontName);
-
-		sf::Text drawableText(font, text, characterSize);
 		drawableText.setFillColor(color);
 		drawableText.setOutlineColor(outlineColor);
-		drawableText.setOutlineThickness(outlineThickness);
 
 		const sf::FloatRect bounds = drawableText.getLocalBounds();
 		sf::Vector2f finalPosition = absolutePosition - bounds.position;

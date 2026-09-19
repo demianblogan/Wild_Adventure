@@ -9,6 +9,7 @@
 #include "ui/Label.h"
 #include "ui/Slider.h"
 #include "ui/Stepper.h"
+#include "ui/TextBox.h"
 
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -35,7 +36,7 @@ namespace UI
 			if (data.contains("isVisible"))
 				element.isVisible = data["isVisible"];
 			if (data.contains("glow"))
-				element.glow = data["glow"];
+				element.isGlowing = data["glow"];
 			if (data.contains("row"))
 				element.isNavigationRow = data["row"];
 		}
@@ -200,6 +201,45 @@ namespace UI
 					label->SetText(data["text"]);
 
 				return label;
+			};
+
+		factories["TextBox"] = [](DataLoader& loader, const nlohmann::json& data) -> std::unique_ptr<Element>
+			{
+				const std::string fontName = data.at("fontName");
+
+				auto textBox = std::make_unique<TextBox>(loader.GetResources(), fontName);
+				ApplyCommonFields(*textBox, data);
+
+				if (data.contains("characterSize"))
+					textBox->SetCharacterSize(data["characterSize"]);
+				if (data.contains("color"))
+					textBox->SetColor(ParseColor(data["color"]));
+				if (data.contains("outlineColor"))
+					textBox->SetOutlineColor(ParseColor(data["outlineColor"]));
+				if (data.contains("outlineThickness"))
+					textBox->SetOutlineThickness(data["outlineThickness"]);
+				if (data.contains("secondColor"))
+					textBox->SetSecondColor(ParseColor(data["secondColor"]));
+				if (data.contains("secondOutlineColor"))
+					textBox->SetSecondOutlineColor(ParseColor(data["secondOutlineColor"]));
+				if (data.contains("alignment"))
+				{
+					const std::string alignment = data["alignment"];
+					if (alignment == "Left")
+						textBox->SetAlignment(TextBox::Alignment::Left);
+					else if (alignment == "Right")
+						textBox->SetAlignment(TextBox::Alignment::Right);
+					else if (alignment == "Center")
+						textBox->SetAlignment(TextBox::Alignment::Center);
+					else
+						throw std::runtime_error("DataLoader: unknown TextBox alignment '" + alignment + "'");
+				}
+				// Text is applied last: wrapping depends on the size and
+				// character size already being set.
+				if (data.contains("text"))
+					textBox->SetText(data["text"]);
+
+				return textBox;
 			};
 
 		factories["Image"] = [](DataLoader& loader, const nlohmann::json& data) -> std::unique_ptr<Element>

@@ -49,16 +49,16 @@ private:
 	Resources& resources;
 	std::vector<Confetto> confetti;
 
-	static constexpr int FRAME_SIZE = 16;
-	static constexpr float SCALE = 0.3f;       // visual size of each piece (1.0 = native 16px)
+	static constexpr int FrameSize = 16;
+	static constexpr float Scale = 0.3f;       // visual size of each piece (1.0 = native 16px)
 
-	static constexpr int FRAME_COUNT = 6;
-	static constexpr int PIECES_PER_BURST = 16;
+	static constexpr int FrameCount = 6;
+	static constexpr int PiecesPerBurst = 16;
 	
-	static constexpr float SPAWN_WIDTH = 30.0f; // horizontal half-extent of the spawn band
-	static constexpr float SPAWN_RISE = 40.0f;  // how far above the point they start
-	static constexpr float SPAWN_BAND = 12.0f;  // vertical spread of the starting band
+	static constexpr float SpawnWidth = 30.0f; // horizontal half-extent of the spawn band
+	static constexpr float SpawnRise = 40.0f;  // how far above the point they start
+	static constexpr float SpawnBand = 12.0f;  // vertical spread of the starting band
 
-	static constexpr float LIFETIME = 5.0f;
-	static constexpr float FADE_TIME = 1.5f;  // fade-out window at the end of life
+	static constexpr float Lifetime = 5.0f;
+	static constexpr float FadeTime = 1.5f;  // fade-out window at the end of life
 };

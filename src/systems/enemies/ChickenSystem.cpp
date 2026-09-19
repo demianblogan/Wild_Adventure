@@ -25,7 +25,7 @@ namespace ECS
 	void ChickenSystem::Update(float deltaTime)
 	{
 		const Entity playerEntity = FindPlayer(registry);
-		if (playerEntity == INVALID_ENTITY)
+		if (playerEntity == InvalidEntity)
 			return;
 
 		const Transform& playerTransform = registry.Get<Transform>(playerEntity);
@@ -54,13 +54,13 @@ namespace ECS
 					if (playerVisible)
 					{
 						chicken.state          = ChickenAI::State::Chasing;
-						chicken.loseSightTimer = ChickenAI::LOSE_SIGHT_DELAY;
+						chicken.loseSightTimer = ChickenAI::LoseSightDelay;
 					}
 					break;
 
 				case ChickenAI::State::Chasing:
 					if (playerVisible)
-						chicken.loseSightTimer = ChickenAI::LOSE_SIGHT_DELAY;
+						chicken.loseSightTimer = ChickenAI::LoseSightDelay;
 					else
 						chicken.loseSightTimer -= deltaTime;
 
@@ -72,7 +72,7 @@ namespace ECS
 					}
 
 					// Dead zone keeps the chicken from jittering right under the player.
-					if (std::abs(dx) > ChickenAI::STOP_DISTANCE)
+					if (std::abs(dx) > ChickenAI::StopDistance)
 					{
 						velocity.x            = (dx > 0.0f ? 1.0f : -1.0f) * chicken.speed;
 						facing.isLookingRight = (dx > 0.0f);
@@ -97,7 +97,7 @@ namespace ECS
 					{
 						const int direction = (velocity.x > 0.0f) ? 1 : -1;
 						particles.EmitRunDust({ transform.x, transform.y }, direction);
-						chicken.dustTimer = ChickenAI::DUST_SPACING / chicken.speed;
+						chicken.dustTimer = ChickenAI::DustSpacing / chicken.speed;
 					}
 				}
 			});

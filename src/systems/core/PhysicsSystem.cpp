@@ -24,6 +24,17 @@
 
 namespace ECS
 {
+	namespace
+	{
+		// Nudges a tile-boundary sample point a hair inward so std::floor never
+		// rounds it up to the tile beyond an exact edge (e.g. a hitbox bottom
+		// sitting exactly on a tile line would otherwise probe the wrong row).
+		constexpr float EdgeEpsilon = 0.001f;
+
+		// How far past the hitbox edge to probe for an adjacent wall tile/box.
+		constexpr float WallProbeDistance = 1.0f;
+	}
+
 	PhysicsSystem::PhysicsSystem(Registry& registry, const Tilemap& tilemap)
 		: registry(registry)
 		, tilemap(tilemap)
@@ -138,7 +149,7 @@ namespace ECS
 		const float bottom = transform.y;
 
 		const int firstRow = static_cast<int>(std::floor(top / tileSize));
-		const int lastRow = static_cast<int>(std::floor((bottom - 0.001f) / tileSize));
+		const int lastRow = static_cast<int>(std::floor((bottom - EdgeEpsilon) / tileSize));
 
 		if (velocity.x > 0.0f)
 		{
@@ -184,7 +195,7 @@ namespace ECS
 		const float right = transform.x + halfWidth;
 
 		const int firstColumn = static_cast<int>(std::floor(left / tileSize));
-		const int lastColumn = static_cast<int>(std::floor((right - 0.001f) / tileSize));
+		const int lastColumn = static_cast<int>(std::floor((right - EdgeEpsilon) / tileSize));
 
 		if (velocity.y > 0.0f)
 		{
@@ -229,10 +240,10 @@ namespace ECS
 		const float bottom = transform.y;
 
 		const int firstRow = static_cast<int>(std::floor(top / tileSize));
-		const int lastRow = static_cast<int>(std::floor((bottom - 0.001f) / tileSize));
+		const int lastRow = static_cast<int>(std::floor((bottom - EdgeEpsilon) / tileSize));
 
 		const float edge = (direction > 0) ? (transform.x + halfWidth) : (transform.x - halfWidth);
-		const int column = static_cast<int>(std::floor((edge + direction * 1.0f) / tileSize));
+		const int column = static_cast<int>(std::floor((edge + direction * WallProbeDistance) / tileSize));
 
 		for (int row = firstRow; row <= lastRow; row++)
 		{
@@ -328,11 +339,11 @@ namespace ECS
 		const float bottom = transform.y;
 
 		const float edge = (direction > 0) ? (transform.x + halfWidth) : (transform.x - halfWidth);
-		const float probe = edge + direction * 1.0f;
+		const float probe = edge + direction * WallProbeDistance;
 
 		for (const SolidBox& box : boxes)
 		{
-			const bool verticalOverlap = top < box.bottom && (bottom - 0.001f) > box.top;
+			const bool verticalOverlap = top < box.bottom && (bottom - EdgeEpsilon) > box.top;
 			if (verticalOverlap && probe >= box.left && probe <= box.right)
 				return true;
 		}

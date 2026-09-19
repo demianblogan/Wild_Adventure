@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+# The game targets Windows (the save system's atomic write goes through the
+# Win32 ReplaceFileW API), so CI builds and tests on windows-latest to match
+# what players actually run.
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Set up Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v5
+
+      - name: Set up vcpkg
+        uses: lukka/run-vcpkg@v11
+
+      # libs/SFML/README.md has contributors build SFML 3.1.0 from source to
+      # match their exact MSVC toolset; CI instead grabs the official
+      # prebuilt vc17 binaries; the C++ ABI has been stable across MSVC
+      # toolsets since VS2015, and rebuilding SFML from source on every run
+      # would dwarf the rest of this job's runtime.
+      - name: Fetch prebuilt SFML 3.1.0
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/SFML/SFML/releases/download/3.1.0/SFML-3.1.0-windows-vc17-64-bit.zip" -OutFile sfml.zip
+          Expand-Archive -Path sfml.zip -DestinationPath sfml-extracted
+          Move-Item -Path sfml-extracted/SFML-3.1.0/* -Destination libs/SFML
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

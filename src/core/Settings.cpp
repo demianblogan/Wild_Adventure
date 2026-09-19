@@ -1,10 +1,11 @@
 #include "Settings.h"
 
+#include "core/SafeFileWrite.h"
+
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
 #include <fstream>
-#include <stdexcept>
 
 namespace
 {
@@ -50,7 +51,12 @@ void Settings::SetScreenMode(ScreenMode mode)
 
 void Settings::SetVsync(bool value)
 {
-	current.vsync = value;
+	current.isVsyncEnabled = value;
+}
+
+void Settings::SetShowFps(bool value)
+{
+	current.isShowFpsEnabled = value;
 }
 
 void Settings::Load(const std::string& path)
@@ -62,23 +68,38 @@ void Settings::Load(const std::string& path)
 		return;
 	}
 
-	nlohmann::json data;
-	file >> data;
-
-	if (data.contains("audio"))
+	try
 	{
-		const auto& audio = data["audio"];
-		SetSoundVolume(audio.value("sound", current.soundVolume));
-		SetMusicVolume(audio.value("music", current.musicVolume));
+		nlohmann::json data;
+		file >> data;
+
+		if (data.contains("audio"))
+		{
+			const auto& audio = data["audio"];
+			SetSoundVolume(audio.value("sound", current.soundVolume));
+			SetMusicVolume(audio.value("music", current.musicVolume));
+		}
+
+		if (data.contains("graphics"))
+		{
+			const auto& graphics = data["graphics"];
+			current.resolutionWidth = graphics.value("width", current.resolutionWidth);
+			current.resolutionHeight = graphics.value("height", current.resolutionHeight);
+			current.screenMode = ScreenModeFromString(graphics.value("screenMode", ScreenModeToString(current.screenMode)));
+			current.isVsyncEnabled = graphics.value("vsync", current.isVsyncEnabled);
+			current.isShowFpsEnabled = graphics.value("showFps", current.isShowFpsEnabled);
+		}
 	}
-
-	if (data.contains("graphics"))
+	catch (const nlohmann::json::exception&)
 	{
-		const auto& graphics = data["graphics"];
-		current.resolutionWidth = graphics.value("width", current.resolutionWidth);
-		current.resolutionHeight = graphics.value("height", current.resolutionHeight);
-		current.screenMode = ScreenModeFromString(graphics.value("screenMode", ScreenModeToString(current.screenMode)));
-		current.vsync = graphics.value("vsync", current.vsync);
+		// A hand-edited or crash-truncated settings file must never take the
+		// game down with it: fall back to defaults and keep the bad file
+		// around (renamed aside) for inspection instead of silently
+		// overwriting it.
+		current = SettingsData();
+
+		file.close();
+		static_cast<void>(SafeFileWrite::PreserveCorruptFile(path));
 	}
 
 	saved = current;
@@ -93,13 +114,10 @@ void Settings::Save(const std::string& path)
 	data["graphics"]["width"] = current.resolutionWidth;
 	data["graphics"]["height"] = current.resolutionHeight;
 	data["graphics"]["screenMode"] = ScreenModeToString(current.screenMode);
-	data["graphics"]["vsync"] = current.vsync;
+	data["graphics"]["vsync"] = current.isVsyncEnabled;
+	data["graphics"]["showFps"] = current.isShowFpsEnabled;
 
-	std::ofstream file(path);
-	if (!file.is_open())
-		throw std::runtime_error("Settings: cannot write '" + path + "'");
-
-	file << data.dump(1, '\t');
+	static_cast<void>(SafeFileWrite::WriteFileAtomically(path, data.dump(1, '\t')));
 
 	saved = current;
 }
@@ -117,5 +135,6 @@ void Settings::ResetGraphicsToDefaults()
 	current.resolutionWidth = defaults.resolutionWidth;
 	current.resolutionHeight = defaults.resolutionHeight;
 	current.screenMode = defaults.screenMode;
-	current.vsync = defaults.vsync;
+	current.isVsyncEnabled = defaults.isVsyncEnabled;
+	current.isShowFpsEnabled = defaults.isShowFpsEnabled;
 }

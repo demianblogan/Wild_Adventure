@@ -107,7 +107,7 @@ namespace LevelSetup
 			return lighting;
 
 		const nlohmann::json& entry = data->at(key);
-		lighting.enabled  = true;
+		lighting.isEnabled  = true;
 		lighting.radius   = entry.value("radius", lighting.radius);
 		lighting.darkness = entry.value("darkness", lighting.darkness);
 

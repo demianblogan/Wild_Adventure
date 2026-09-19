@@ -23,7 +23,7 @@ namespace ECS
 
 		const Transform* playerTransform = nullptr;
 		const Collider*  playerCollider  = nullptr;
-		if (playerEntity != INVALID_ENTITY)
+		if (playerEntity != InvalidEntity)
 		{
 			playerTransform = &registry.Get<Transform>(playerEntity);
 			playerCollider  = &registry.Get<Collider>(playerEntity);
@@ -32,12 +32,12 @@ namespace ECS
 		registry.ForEach<Fire, Transform, Hitbox, AnimationState>(
 			[&](Entity entity, Fire& fire, Transform& transform, Hitbox& hitbox, AnimationState& animState)
 			{
-				bool playerOnPlate = false;
+				bool isPlayerOnPlate = false;
 				if (playerTransform != nullptr)
 				{
 					const float hHalfW = hitbox.width / 2.0f;
 					const float pHalfW = playerCollider->width / 2.0f;
-					playerOnPlate =
+					isPlayerOnPlate =
 						(transform.x - hHalfW) < (playerTransform->x + pHalfW) &&
 						(transform.x + hHalfW) > (playerTransform->x - pHalfW) &&
 						(transform.y - hitbox.height) < playerTransform->y &&
@@ -47,7 +47,7 @@ namespace ECS
 				switch (fire.state)
 				{
 				case Fire::State::Off:
-					if (playerOnPlate)
+					if (isPlayerOnPlate)
 					{
 						fire.state        = Fire::State::Activating;
 						animState.current = "Hit";
@@ -62,10 +62,10 @@ namespace ECS
 						if (anim.playingState == "Hit" && anim.isFinished)
 						{
 							fire.state        = Fire::State::On;
-							fire.onTimer      = Fire::ON_DURATION;
+							fire.onTimer      = Fire::OnDuration;
 							animState.current = "On";
 							// Becomes harmful: DamageSystem burns anyone overlapping it.
-							registry.Add<Hazard>(entity, { Fire::BURN_DAMAGE });
+							registry.Add<Hazard>(entity, { Fire::BurnDamage });
 						}
 					}
 					break;

@@ -42,7 +42,7 @@ namespace UI
 
 		Animation& AddAnimation(std::unique_ptr<Animation> animation);
 
-		virtual void SetColor(sf::Color color) {}
+		virtual void SetColor(sf::Color) {}
 
 		std::string name;
 
@@ -55,13 +55,12 @@ namespace UI
 
 		// When true, the element is redrawn into the bloom layer every frame
 		// and gets a pulsing aura in its own colors (e.g. the golden title).
-		bool glow = false;
+		bool isGlowing = false;
 
 		// When true, this element's interactive descendants form one navigation row
 		// (left/right move between them, up/down leave the row).
 		bool isNavigationRow = false;
 
-	protected:
 	protected:
 		sf::Vector2f ComputePosition(sf::Vector2f parentPosition, sf::Vector2f parentSize) const;
 

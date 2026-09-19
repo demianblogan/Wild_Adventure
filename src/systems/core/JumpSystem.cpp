@@ -12,12 +12,12 @@ namespace ECS
 {
 	namespace
 	{
-		constexpr float WALL_JUMP_CONTROL_LOCK = 0.12f; // seconds the diagonal push is protected from input
+		constexpr float WallJumpControlLock = 0.12f; // seconds the diagonal push is protected from input
 
 		// Chained wall jumps add to any upward speed the hero already has (capped at
 		// this multiple of a normal jump) so climbing a wall with repeated jumps is
 		// quick, instead of each absolute reset cancelling the previous jump's lift.
-		constexpr float WALL_CLIMB_SPEED_CAP = 1.35f;
+		constexpr float WallClimbSpeedCap = 1.35f;
 	}
 
 	JumpSystem::JumpSystem(Registry& registry)
@@ -33,7 +33,7 @@ namespace ECS
 				if (collisionState.isOnGround)
 					jump.jumpsRemaining = jump.maxJumps;
 
-				if (jump.wantsToJump)
+				if (jump.wasJumpRequested)
 				{
 					if (collisionState.isOnWall && !collisionState.isOnGround)
 					{
@@ -42,9 +42,9 @@ namespace ECS
 						// Add the lift to any rising momentum (falling counts as zero) and
 						// cap it, so re-touching the wall mid-rise keeps climbing fast.
 						velocity.y = std::max(std::min(velocity.y, 0.0f) - jump.jumpSpeed,
-							-jump.jumpSpeed * WALL_CLIMB_SPEED_CAP);
+							-jump.jumpSpeed * WallClimbSpeedCap);
 						velocity.x = jump.wallJumpPushX * -collisionState.wallDirection;
-						jump.lockTimer = WALL_JUMP_CONTROL_LOCK;
+						jump.lockTimer = WallJumpControlLock;
 						jump.jumpsRemaining = jump.maxJumps - 1;
 					}
 					else if (jump.jumpsRemaining > 0)
@@ -54,7 +54,7 @@ namespace ECS
 					}
 				}
 
-				jump.wantsToJump = false;
+				jump.wasJumpRequested = false;
 			});
 	}
 }

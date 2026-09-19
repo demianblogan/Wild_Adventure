@@ -1,10 +1,11 @@
 #include "Campaign.h"
 
+#include "core/SafeFileWrite.h"
+
 #include <nlohmann/json.hpp>
 
 #include <filesystem>
 #include <fstream>
-#include <stdexcept>
 
 Campaign::Campaign()
 {
@@ -15,7 +16,7 @@ void Campaign::Load(const std::string& path)
 {
 	savePath = path;
 	bestStars.fill(-1);
-	victoryShown = false;
+	wasVictoryShown = false;
 	selectedSkin = "ninja_frog";
 
 	std::ifstream file(path);
@@ -24,20 +25,35 @@ void Campaign::Load(const std::string& path)
 	if (!file.is_open())
 		return;
 
-	const nlohmann::json data = nlohmann::json::parse(file);
-
-	victoryShown = data.value("victoryShown", false);
-	selectedSkin = data.value("selectedSkin", std::string("ninja_frog"));
-
-	if (!data.contains("levels"))
-		return;
-
-	for (const auto& [key, level] : data.at("levels").items())
+	try
 	{
-		const int number = std::stoi(key);
+		const nlohmann::json data = nlohmann::json::parse(file);
 
-		if (number >= 1 && number <= LEVEL_COUNT)
-			bestStars[number - 1] = level.value("stars", 0);
+		wasVictoryShown = data.value("victoryShown", false);
+		selectedSkin = data.value("selectedSkin", std::string("ninja_frog"));
+
+		if (!data.contains("levels"))
+			return;
+
+		for (const auto& [key, level] : data.at("levels").items())
+		{
+			const int number = std::stoi(key);
+
+			if (number >= 1 && number <= LevelCount)
+				bestStars[number - 1] = level.value("stars", 0);
+		}
+	}
+	catch (const std::exception&)
+	{
+		// A hand-edited or crash-truncated save must never take the game down
+		// with it: reset to a fresh campaign and keep the bad file around
+		// (renamed aside) for inspection instead of silently overwriting it.
+		bestStars.fill(-1);
+		wasVictoryShown = false;
+		selectedSkin = "ninja_frog";
+
+		file.close();
+		static_cast<void>(SafeFileWrite::PreserveCorruptFile(path));
 	}
 }
 
@@ -47,27 +63,22 @@ void Campaign::Save() const
 		return;
 
 	nlohmann::json data;
-	data["victoryShown"] = victoryShown;
+	data["victoryShown"] = wasVictoryShown;
 	data["selectedSkin"] = selectedSkin;
 	data["levels"] = nlohmann::json::object();
 
-	for (int i = 0; i < LEVEL_COUNT; i++)
+	for (int i = 0; i < LevelCount; i++)
 	{
 		if (bestStars[i] >= 0)
 			data["levels"][std::to_string(i + 1)]["stars"] = bestStars[i];
 	}
 
-	std::ofstream file(savePath);
-
-	if (!file.is_open())
-		throw std::runtime_error("Campaign: cannot write '" + savePath + "'");
-
-	file << data.dump(1, '\t');
+	static_cast<void>(SafeFileWrite::WriteFileAtomically(savePath, data.dump(1, '\t')));
 }
 
 void Campaign::RecordCompletion(int levelNumber, int stars)
 {
-	if (levelNumber < 1 || levelNumber > LEVEL_COUNT)
+	if (levelNumber < 1 || levelNumber > LevelCount)
 		return;
 
 	int& best = bestStars[levelNumber - 1];
@@ -81,7 +92,7 @@ void Campaign::RecordCompletion(int levelNumber, int stars)
 void Campaign::Reset()
 {
 	bestStars.fill(-1);
-	victoryShown = false;
+	wasVictoryShown = false;
 	selectedSkin = "ninja_frog";
 
 	if (savePath.empty())
@@ -98,12 +109,12 @@ bool Campaign::HasProgress() const
 
 bool Campaign::IsLevelCompleted(int levelNumber) const
 {
-	return levelNumber >= 1 && levelNumber <= LEVEL_COUNT && bestStars[levelNumber - 1] >= 0;
+	return levelNumber >= 1 && levelNumber <= LevelCount && bestStars[levelNumber - 1] >= 0;
 }
 
 int Campaign::GetStars(int levelNumber) const
 {
-	if (levelNumber < 1 || levelNumber > LEVEL_COUNT)
+	if (levelNumber < 1 || levelNumber > LevelCount)
 		return -1;
 
 	return bestStars[levelNumber - 1];
@@ -113,7 +124,7 @@ int Campaign::GetHighestCompletedLevel() const
 {
 	int highest = 0;
 
-	for (int i = 0; i < LEVEL_COUNT; i++)
+	for (int i = 0; i < LevelCount; i++)
 	{
 		if (bestStars[i] >= 0)
 			highest = i + 1;
@@ -126,7 +137,7 @@ int Campaign::CountThreeStarLevels() const
 {
 	int count = 0;
 
-	for (int i = 0; i < LEVEL_COUNT; i++)
+	for (int i = 0; i < LevelCount; i++)
 	{
 		if (bestStars[i] >= 3)
 			count++;
@@ -151,15 +162,15 @@ void Campaign::SetSelectedSkin(const std::string& skinId)
 
 bool Campaign::WasVictoryShown() const
 {
-	return victoryShown;
+	return wasVictoryShown;
 }
 
 void Campaign::MarkVictoryShown()
 {
-	if (victoryShown)
+	if (wasVictoryShown)
 		return;
 
-	victoryShown = true;
+	wasVictoryShown = true;
 	Save();
 }
 
@@ -170,7 +181,7 @@ std::string Campaign::LevelPath(int levelNumber)
 
 bool Campaign::LevelExists(int levelNumber)
 {
-	if (levelNumber < 1 || levelNumber > LEVEL_COUNT)
+	if (levelNumber < 1 || levelNumber > LevelCount)
 		return false;
 
 	return std::ifstream(LevelPath(levelNumber)).is_open();

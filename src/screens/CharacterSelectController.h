@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics/Rect.hpp>
 
-class Context;
+struct Context;
 
 namespace sf
 {
@@ -14,14 +14,14 @@ namespace sf
 // starts: New Game, Continue and Select Level all route through it. The
 // arrows cycle through the skins; locked ones are drawn gray with a lock
 // badge, and Play stays disabled until an unlocked skin is selected.
-// When the user backs out or presses Play, WantsClose() turns true.
+// When the user backs out or presses Play, WasCloseRequested() turns true.
 class CharacterSelectController
 {
 public:
 	CharacterSelectController(Context& context);
 
 	void Open(int levelNumber); // the level Play will launch
-	bool WantsClose() const { return wantsClose; }
+	bool WasCloseRequested() const { return wasCloseRequested; }
 
 	void HandleEvent(const sf::Event& event);
 	void Update(float deltaTime);
@@ -47,5 +47,5 @@ private:
 	int levelNumber = 1;
 	int selectedSkin = 0;
 	Focus focus = Focus::Carousel;
-	bool wantsClose = false;
+	bool wasCloseRequested = false;
 };

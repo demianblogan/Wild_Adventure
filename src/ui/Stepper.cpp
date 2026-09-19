@@ -6,22 +6,7 @@ namespace UI
 {
 	namespace
 	{
-		constexpr float KEYBOARD_PRESS_FLASH = 0.12f;
-
-		int StateToIndex(InteractionState state)
-		{
-			switch (state)
-			{
-			case InteractionState::Normal:
-				return 0;
-			case InteractionState::Highlighted:
-				return 1;
-			case InteractionState::Pressed:
-				return 2;
-			default:
-				return 0;
-			}
-		}
+		constexpr float KeyboardPressFlash = 0.12f;
 	}
 
 	void Stepper::SetLeftArrowNormal(std::unique_ptr<Element> element)
@@ -134,7 +119,7 @@ namespace UI
 		if (direction < 0)
 		{
 			pressedArrow = PressedArrow::Left;
-			pressedTimer = KEYBOARD_PRESS_FLASH;
+			pressedTimer = KeyboardPressFlash;
 			Refresh();
 
 			if (onStepLeft)
@@ -143,7 +128,7 @@ namespace UI
 		else if (direction > 0)
 		{
 			pressedArrow = PressedArrow::Right;
-			pressedTimer = KEYBOARD_PRESS_FLASH;
+			pressedTimer = KeyboardPressFlash;
 			Refresh();
 
 			if (onStepRight)

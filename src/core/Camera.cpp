@@ -33,9 +33,9 @@ void Camera::Update(float deltaTime)
 	if (trauma <= 0.0f)
 		return;
 
-	trauma = std::max(0.0f, trauma - TRAUMA_DECAY * deltaTime);
+	trauma = std::max(0.0f, trauma - TraumaDecay * deltaTime);
 
-	const float magnitude = MAX_SHAKE_OFFSET * trauma * trauma;
+	const float magnitude = MaxShakeOffset * trauma * trauma;
 
 	shakeOffset = { Random::Float(-magnitude, magnitude), Random::Float(-magnitude, magnitude) };
 }
@@ -57,17 +57,17 @@ sf::Vector2f Camera::Clamp(sf::Vector2f target) const
 	if (worldSize.x <= 0.0f || worldSize.y <= 0.0f)
 		return target;
 
-	const float halfWidth = VirtualScreen::WIDTH / 2.0f;
-	const float halfHeight = VirtualScreen::HEIGHT / 2.0f;
+	const float halfWidth = VirtualScreen::Width / 2.0f;
+	const float halfHeight = VirtualScreen::Height / 2.0f;
 
 	sf::Vector2f result = target;
 
-	if (worldSize.x <= VirtualScreen::WIDTH)
+	if (worldSize.x <= VirtualScreen::Width)
 		result.x = worldSize.x / 2.0f; // level narrower than the view: center it
 	else
 		result.x = std::clamp(target.x, halfWidth, worldSize.x - halfWidth);
 
-	if (worldSize.y <= VirtualScreen::HEIGHT)
+	if (worldSize.y <= VirtualScreen::Height)
 		result.y = worldSize.y / 2.0f;
 	else
 		result.y = std::clamp(target.y, halfHeight, worldSize.y - halfHeight);

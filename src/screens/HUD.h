@@ -3,7 +3,7 @@
 #include "ui/DataLoader.h"
 #include "ui/Root.h"
 
-class Context;
+struct Context;
 
 namespace sf
 {
@@ -20,7 +20,7 @@ public:
 	HUD(Context& context);
 
 	// Loads data/ui/hud.json. Call after the fonts are loaded.
-	void Build(int levelNumber, bool showLevelBanner);
+	void Build(int levelNumber, bool isLevelBannerVisible);
 
 	// The hearts row is sized to the player's maximum health, known only once the
 	// player has spawned.
@@ -56,7 +56,7 @@ private:
 	int blinkingHeart = -1;
 	float blinkTimer = 0.0f;
 
-	static constexpr float HEART_BLINK_DURATION = 0.5f;
+	static constexpr float HeartBlinkDuration = 0.5f;
 
 	// "Level X" banner: slides in from above the screen, holds, slides back out.
 	enum class BannerPhase
@@ -70,10 +70,10 @@ private:
 
 	BannerPhase bannerPhase = BannerPhase::Hidden;
 	float bannerTimer = 0.0f;
-	bool showLevelBanner = true; // false on checkpoint respawns
+	bool isLevelBannerVisible = true; // false on checkpoint respawns
 
-	static constexpr float BANNER_SLIDE_TIME = 0.45f; // slide in/out duration
-	static constexpr float BANNER_HOLD_TIME = 2.0f;   // time fully visible
-	static constexpr float BANNER_START_Y = -40.0f;   // off-screen above
-	static constexpr float BANNER_TARGET_Y = 90.0f;   // about a third of the screen
+	static constexpr float BannerSlideTime = 0.45f; // slide in/out duration
+	static constexpr float BannerHoldTime = 2.0f;   // time fully visible
+	static constexpr float BannerStartY = -40.0f;   // off-screen above
+	static constexpr float BannerTargetY = 90.0f;   // about a third of the screen
 };

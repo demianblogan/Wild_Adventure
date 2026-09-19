@@ -17,7 +17,7 @@
 
 namespace
 {
-	const std::string MENU_DIRECTORY = "data/ui/menu/";
+	const std::string MenuDirectory = "data/ui/menu/";
 }
 
 MenuState::MenuState(Context& context)
@@ -33,7 +33,7 @@ MenuState::MenuState(Context& context)
 	// launching the level directly.
 	selectLevel.SetLaunchHandler([this](int level)
 	{
-		inSelectLevel = false;
+		isInSelectLevel = false;
 		OpenCharacterSelect(level);
 	});
 
@@ -43,6 +43,18 @@ MenuState::MenuState(Context& context)
 	{
 		resources.fonts.Load("main", "assets/fonts/main.ttf");
 		resources.fonts.Get("main").setSmooth(false);
+	}
+
+	if (!resources.fonts.Has("title"))
+	{
+		resources.fonts.Load("title", "assets/fonts/born2bsporty-fs.regular.otf");
+		resources.fonts.Get("title").setSmooth(false);
+	}
+
+	if (!resources.fonts.Has("gameTitle"))
+	{
+		resources.fonts.Load("gameTitle", "assets/fonts/light-pixel-7.regular.ttf");
+		resources.fonts.Get("gameTitle").setSmooth(false);
 	}
 
 	interfaceLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
@@ -64,9 +76,9 @@ void MenuState::RegisterActions()
 {
 	interfaceLoader.RegisterAction("menu_open_play", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "play"; });
 	interfaceLoader.RegisterAction("menu_open_single", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "single"; });
-	interfaceLoader.RegisterAction("menu_open_author", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "author"; });
-	interfaceLoader.RegisterAction("menu_open_settings", [this] { inSettings = true; settings.Open(); });
-	interfaceLoader.RegisterAction("menu_select_level", [this] { inSelectLevel = true; selectLevel.Open(); });
+	interfaceLoader.RegisterAction("menu_open_credits", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "credits"; });
+	interfaceLoader.RegisterAction("menu_open_settings", [this] { isInSettings = true; settings.Open(); });
+	interfaceLoader.RegisterAction("menu_select_level", [this] { isInSelectLevel = true; selectLevel.Open(); });
 	interfaceLoader.RegisterAction("menu_back", [this] { pendingRequest = NavRequest::Back; });
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
 	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
@@ -76,13 +88,23 @@ void MenuState::RegisterActions()
 
 void MenuState::ShowPanel(const std::string& panelId)
 {
-	std::unique_ptr<UI::Element> frame = interfaceLoader.LoadFromFile(MENU_DIRECTORY + "frame.json");
+	std::unique_ptr<UI::Element> frame = interfaceLoader.LoadFromFile(MenuDirectory + "frame.json");
 
 	UI::Element* slot = frame->FindByName("panel_slot");
 	if (slot == nullptr)
 		throw std::runtime_error("MenuState: frame.json must contain 'panel_slot'");
 
-	slot->AddChild(interfaceLoader.LoadFromFile(MENU_DIRECTORY + panelId + ".json"));
+	// Credits needs the full screen height for its block of text, so it hides
+	// the frame's title and reclaims the space reserved above the panel slot.
+	if (panelId == "credits")
+	{
+		if (UI::Element* title = frame->FindByName("title"))
+			title->isVisible = false;
+
+		slot->offset = { 0.0f, 0.0f };
+	}
+
+	slot->AddChild(interfaceLoader.LoadFromFile(MenuDirectory + panelId + ".json"));
 
 	userInterface.SetContent(std::move(frame));
 
@@ -125,7 +147,7 @@ void MenuState::SetupPlayPanel()
 
 void MenuState::OpenCharacterSelect(int levelNumber)
 {
-	inCharacterSelect = true;
+	isInCharacterSelect = true;
 	characterSelect.Open(levelNumber);
 }
 
@@ -215,19 +237,19 @@ void MenuState::HandleEvent(const sf::Event& event)
 	if (transition.GetMode() != Transition::Mode::Idle)
 		return;
 
-	if (inSettings)
+	if (isInSettings)
 	{
 		settings.HandleEvent(event);
 		return;
 	}
 
-	if (inCharacterSelect)
+	if (isInCharacterSelect)
 	{
 		characterSelect.HandleEvent(event);
 		return;
 	}
 
-	if (inSelectLevel)
+	if (isInSelectLevel)
 	{
 		selectLevel.HandleEvent(event);
 		return;
@@ -247,39 +269,39 @@ void MenuState::Update(float deltaTime)
 	if (transition.GetMode() != Transition::Mode::Idle)
 		return;
 
-	if (inSettings)
+	if (isInSettings)
 	{
 		settings.Update(deltaTime);
 
-		if (settings.WantsClose())
+		if (settings.WasCloseRequested())
 		{
-			inSettings = false;
+			isInSettings = false;
 			userInterface.ResetFocus();
 		}
 
 		return;
 	}
 
-	if (inCharacterSelect)
+	if (isInCharacterSelect)
 	{
 		characterSelect.Update(deltaTime);
 
-		if (characterSelect.WantsClose())
+		if (characterSelect.WasCloseRequested())
 		{
-			inCharacterSelect = false;
+			isInCharacterSelect = false;
 			userInterface.ResetFocus();
 		}
 
 		return;
 	}
 
-	if (inSelectLevel)
+	if (isInSelectLevel)
 	{
 		selectLevel.Update(deltaTime);
 
-		if (selectLevel.WantsClose())
+		if (selectLevel.WasCloseRequested())
 		{
-			inSelectLevel = false;
+			isInSelectLevel = false;
 			userInterface.ResetFocus();
 		}
 
@@ -331,20 +353,20 @@ void MenuState::Render(float interpolationFactor)
 
 	sf::RenderTarget& renderTarget = context.virtualScreen.GetRenderTarget();
 
-	if (inSettings)
+	if (isInSettings)
 		settings.Render(renderTarget);
-	else if (inCharacterSelect)
+	else if (isInCharacterSelect)
 		characterSelect.Render(renderTarget);
-	else if (inSelectLevel)
+	else if (isInSelectLevel)
 		selectLevel.Render(renderTarget);
 	else
 	{
-		context.virtualScreen.SetCameraCenter(VirtualScreen::WIDTH / 2.0f, VirtualScreen::HEIGHT / 2.0f);
+		context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
 		userInterface.Draw(renderTarget);
 	}
 
 	// Bloom the highlighted button.
-	context.virtualScreen.CompositeGlow(VirtualScreen::GLOW_UI_STRENGTH);
+	context.virtualScreen.CompositeGlow(VirtualScreen::GlowUiStrength);
 
 	transition.Draw(renderTarget);
 }

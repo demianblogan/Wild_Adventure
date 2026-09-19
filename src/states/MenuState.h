@@ -43,13 +43,13 @@ private:
 	Transition transition;
 
 	SettingsController settings;
-	bool inSettings = false;
+	bool isInSettings = false;
 
 	SelectLevelController selectLevel;
-	bool inSelectLevel = false;
+	bool isInSelectLevel = false;
 
 	CharacterSelectController characterSelect;
-	bool inCharacterSelect = false;
+	bool isInCharacterSelect = false;
 
 	std::vector<std::string> panelStack;
 
