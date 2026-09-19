@@ -204,7 +204,7 @@
 									{
 										"Label":
 										{
-											"text": "No"
+											"textKey": "common.no"
 										}
 									}
 								}
@@ -244,7 +244,7 @@
 									{
 										"Label":
 										{
-											"text": "Yes"
+											"textKey": "common.yes"
 										}
 									}
 								}

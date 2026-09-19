@@ -5,8 +5,10 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <stdexcept>
+#include <system_error>
 #include <unordered_map>
 
 namespace
@@ -248,6 +250,11 @@ bool Input::SaveConfig(const std::string& path)
 	}
 
 	data["bindings"] = bindingsJSON;
+
+	// path lives under %LOCALAPPDATA%, which may not have been created yet
+	// (e.g. this player's first launch, or after clearing it by hand).
+	std::error_code ignored;
+	std::filesystem::create_directories(std::filesystem::path(path).parent_path(), ignored);
 
 	if (!SafeFileWrite::WriteFileAtomically(path, data.dump(1, '\t')))
 		return false;

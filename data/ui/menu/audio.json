@@ -99,7 +99,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Audio"
+								"textKey": "settings.audio"
 							}
 						}
 					]
@@ -192,7 +192,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Sounds"
+								"textKey": "audio.sounds"
 							}
 						},
 						{
@@ -351,7 +351,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Music"
+								"textKey": "audio.music"
 							}
 						},
 						{
@@ -488,7 +488,7 @@
 									{
 										"Label":
 										{
-											"text": "Save"
+											"textKey": "common.save"
 										}
 									}
 								}
@@ -526,7 +526,7 @@
 									{
 										"Label":
 										{
-											"text": "Reset"
+											"textKey": "common.reset"
 										}
 									}
 								}
@@ -564,7 +564,7 @@
 									{
 										"Label":
 										{
-											"text": "Back"
+											"textKey": "common.back"
 										}
 									}
 								}

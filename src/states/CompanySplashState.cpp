@@ -3,8 +3,10 @@
 #include "Context.h"
 #include "audio/Mixer.h"
 #include "core/Resources.h"
+#include "core/Settings.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "states/LanguagePickerState.h"
 #include "states/SplashState.h"
 
 #include <SFML/Graphics/Color.hpp>
@@ -104,7 +106,11 @@ void CompanySplashState::Leave()
 	context.graphics.SetCursorVisible(true); // restore the cursor for the menu
 
 	context.stateMachine.Clear();
-	context.stateMachine.Push(std::make_unique<SplashState>(context));
+
+	if (context.settings.IsLanguageChosen())
+		context.stateMachine.Push(std::make_unique<SplashState>(context));
+	else
+		context.stateMachine.Push(std::make_unique<LanguagePickerState>(context));
 }
 
 void CompanySplashState::Render(float)

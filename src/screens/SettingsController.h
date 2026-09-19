@@ -69,6 +69,10 @@ private:
 	void StepResolution(int direction);
 	void StepScreenMode(int direction);
 
+	void SetupLanguagePanel();
+	void UpdateLanguageLabel();
+	void StepLanguage(int direction);
+
 	Context& context;
 
 	UI::Root settingsInterface;

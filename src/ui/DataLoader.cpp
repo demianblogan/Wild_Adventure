@@ -1,6 +1,7 @@
 #include "DataLoader.h"
 
 #include "audio/Mixer.h"
+#include "localization/LocalizationManager.h"
 #include "ui/Button.h"
 #include "ui/Checkbox.h"
 #include "ui/Element.h"
@@ -56,6 +57,39 @@ namespace UI
 				return InteractionState::Pressed;
 
 			throw std::runtime_error("DataLoader: unknown interaction state '" + name + "'");
+		}
+
+		// Resolves a Label/TextBox element's displayed text: "textKey" (looked
+		// up through the loader's LocalizationManager) takes priority over a
+		// literal "text" field, so a panel mid-conversion to localization can
+		// mix both. Returns false if neither field is present.
+		bool TryResolveText(DataLoader& loader, const nlohmann::json& data, std::string& outText)
+		{
+			if (data.contains("textKey"))
+			{
+				LocalizationManager* localization = loader.GetLocalization();
+				if (localization == nullptr)
+					throw std::runtime_error("DataLoader: 'textKey' used but no LocalizationManager is set");
+
+				outText = localization->GetText(data["textKey"]);
+
+				// A TextBox's "name\tvalue" line (Credits' email/links) can keep
+				// a literal, untranslated value -- an email address or URL reads
+				// the same in every language -- while still translating the
+				// "name" half through textKey.
+				if (data.contains("value"))
+					outText += "\t" + data["value"].get<std::string>();
+
+				return true;
+			}
+
+			if (data.contains("text"))
+			{
+				outText = data["text"];
+				return true;
+			}
+
+			return false;
 		}
 	}
 
@@ -197,8 +231,10 @@ namespace UI
 					label->SetOutlineColor(ParseColor(data["outlineColor"]));
 				if (data.contains("outlineThickness"))
 					label->SetOutlineThickness(data["outlineThickness"]);
-				if (data.contains("text"))
-					label->SetText(data["text"]);
+
+				std::string text;
+				if (TryResolveText(loader, data, text))
+					label->SetText(text);
 
 				return label;
 			};
@@ -236,8 +272,9 @@ namespace UI
 				}
 				// Text is applied last: wrapping depends on the size and
 				// character size already being set.
-				if (data.contains("text"))
-					textBox->SetText(data["text"]);
+				std::string text;
+				if (TryResolveText(loader, data, text))
+					textBox->SetText(text);
 
 				return textBox;
 			};

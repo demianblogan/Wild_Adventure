@@ -6,6 +6,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <system_error>
 
 Campaign::Campaign()
 {
@@ -72,6 +73,11 @@ bool Campaign::Save() const
 		if (bestStars[i] >= 0)
 			data["levels"][std::to_string(i + 1)]["stars"] = bestStars[i];
 	}
+
+	// savePath lives under %LOCALAPPDATA%, which may not have been created
+	// yet (e.g. this player's first launch, or after clearing it by hand).
+	std::error_code ignored;
+	std::filesystem::create_directories(std::filesystem::path(savePath).parent_path(), ignored);
 
 	return SafeFileWrite::WriteFileAtomically(savePath, data.dump(1, '\t'));
 }

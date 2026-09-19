@@ -1,5 +1,6 @@
 #include "Application.h"
 
+#include "core/AppDataPath.h"
 #include "states/CompanySplashState.h"
 
 #include <SFML/Graphics/Color.hpp>
@@ -21,10 +22,14 @@
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
 	, audioMixer(resources)
-	, context(virtualScreen, stateMachine, resources, audioMixer, input, settings, *this, campaign)
+	, context(virtualScreen, stateMachine, resources, audioMixer, input, settings, *this, campaign, localization)
 {
-	settings.Load("data/settings.json");
-	campaign.Load("data/save.json");
+	// Per-player data (settings, campaign progress, key bindings) lives under
+	// %LOCALAPPDATA%, never inside the install/repo directory; only the
+	// read-only defaults shipped with the game come from data/.
+	settings.Load(AppDataPath::Resolve("settings.json").string());
+	campaign.Load(AppDataPath::Resolve("save.json").string());
+	localization.SetLanguage(settings.GetLanguage());
 
 	CreateWindow();
 
@@ -35,7 +40,7 @@ Application::Application()
 	// Defaults load first: LoadConfig falls back to them if the saved
 	// bindings file turns out to be missing or corrupt.
 	input.LoadDefaults("data/input_default.json");
-	input.LoadConfig("data/input.json");
+	input.LoadConfig(AppDataPath::Resolve("input.json").string());
 
 	resources.textures.Load("cursor", "assets/textures/cursor/pointer.png");
 	resources.textures.Get("cursor").setSmooth(false);
@@ -223,7 +228,10 @@ void Application::DrawFpsCounter()
 {
 	if (!resources.fonts.Has("main"))
 	{
-		resources.fonts.Load("main", "assets/fonts/main.ttf");
+		// Shares the button font's file: it is the only one of the three UI
+		// fonts with Cyrillic glyphs, so "main" (used for most body text) has
+		// to be backed by it too for Russian/Ukrainian to render at all.
+		resources.fonts.Load("main", "assets/fonts/born2bsporty-fs.regular.otf");
 		resources.fonts.Get("main").setSmooth(false);
 	}
 

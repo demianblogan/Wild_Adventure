@@ -95,7 +95,10 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 
 	if (!resources.fonts.Has("main"))
 	{
-		resources.fonts.Load("main", "assets/fonts/main.ttf");
+		// Shares the button font's file: it is the only one of the three UI
+		// fonts with Cyrillic glyphs, so "main" (used for most body text) has
+		// to be backed by it too for Russian/Ukrainian to render at all.
+		resources.fonts.Load("main", "assets/fonts/born2bsporty-fs.regular.otf");
 		resources.fonts.Get("main").setSmooth(false);
 	}
 

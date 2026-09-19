@@ -59,6 +59,7 @@ TEST_SUITE("Settings")
 			settings.SetResolution(1280, 720);
 			settings.SetScreenMode(ScreenMode::Window);
 			settings.SetVsync(false);
+			settings.SetLanguage(Language::Ukrainian);
 			settings.Save(path);
 		}
 
@@ -71,14 +72,42 @@ TEST_SUITE("Settings")
 		CHECK(reloaded.GetResolutionHeight() == 720);
 		CHECK(reloaded.GetScreenMode() == ScreenMode::Window);
 		CHECK_FALSE(reloaded.IsVsyncEnabled());
+		CHECK(reloaded.GetLanguage() == Language::Ukrainian);
+		CHECK(reloaded.IsLanguageChosen());
 		CHECK_FALSE(reloaded.IsDirty()); // Load must mark the freshly loaded state as saved
+	}
+
+	TEST_CASE("SetLanguage marks the language as chosen, and Load falls back to defaults for an old save file")
+	{
+		Settings settings;
+		CHECK(settings.GetLanguage() == Language::English);
+		CHECK_FALSE(settings.IsLanguageChosen());
+
+		settings.SetLanguage(Language::Russian);
+		CHECK(settings.GetLanguage() == Language::Russian);
+		CHECK(settings.IsLanguageChosen());
+
+		const TempDirectory dir;
+		const std::string path = (dir.GetPath() / "settings.json").string();
+		// A save file from before localization existed has no "localization" section at all.
+		REQUIRE(SafeFileWrite::WriteFileAtomically(path, "{ \"audio\": { \"sound\": 10, \"music\": 10 } }"));
+
+		Settings reloaded;
+		reloaded.Load(path);
+
+		CHECK(reloaded.GetLanguage() == Language::English);
+		CHECK_FALSE(reloaded.IsLanguageChosen());
 	}
 
 	TEST_CASE("A failed Save leaves the settings dirty instead of reporting success")
 	{
 		const TempDirectory dir;
-		// The parent directory does not exist, so the write cannot succeed.
-		const std::string path = (dir.GetPath() / "missing_subdir" / "settings.json").string();
+		// Save() creates missing parent directories on its own, so to force a
+		// genuine failure, a plain file (not a directory) sits where the
+		// parent directory needs to be -- create_directories can't replace it.
+		const std::filesystem::path blocker = dir.GetPath() / "blocked";
+		REQUIRE(SafeFileWrite::WriteFileAtomically(blocker, "not a directory"));
+		const std::string path = (blocker / "settings.json").string();
 
 		Settings settings;
 		settings.SetSoundVolume(3);

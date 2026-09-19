@@ -99,7 +99,7 @@
 									255
 								],
 								"outlineThickness": 1,
-								"text": "Pause"
+								"textKey": "pause.title"
 							}
 						}
 					]
@@ -194,7 +194,7 @@
 						{
 							"Label":
 							{
-								"text": "Continue"
+								"textKey": "common.continue"
 							}
 						}
 					}
@@ -262,7 +262,7 @@
 						{
 							"Label":
 							{
-								"text": "Restart Level"
+								"textKey": "pause.restart_level"
 							}
 						}
 					}
@@ -330,7 +330,7 @@
 						{
 							"Label":
 							{
-								"text": "Options"
+								"textKey": "pause.options"
 							}
 						}
 					}
@@ -398,7 +398,7 @@
 						{
 							"Label":
 							{
-								"text": "Quit to Main Menu"
+								"textKey": "pause.quit_to_menu"
 							}
 						}
 					}

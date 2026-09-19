@@ -55,7 +55,7 @@
 						{
 							"Label":
 							{
-								"text": "Back to Main Menu"
+								"textKey": "campaign_victory.back_to_menu"
 							}
 						}
 					}

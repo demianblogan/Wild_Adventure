@@ -4,6 +4,7 @@
 #include "core/Input.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "localization/LocalizationManager.h"
 #include "states/GameState.h"
 #include "states/MenuState.h"
 
@@ -27,6 +28,8 @@ PauseState::PauseState(Context& context, std::string levelPath, int levelNumber)
 	, levelNumber(levelNumber)
 {
 	pauseLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	pauseLoader.SetLocalization(context.localization);
+	lastLocalizationRevision = context.localization.Revision();
 	RegisterActions();
 
 	pauseInterface.SetContent(pauseLoader.LoadFromFile(PauseUiPath));
@@ -61,6 +64,16 @@ void PauseState::Update(float deltaTime)
 		if (settings.WasCloseRequested())
 		{
 			isInSettings = false;
+
+			// pause.json was built before the visit (possibly in a different
+			// language); Settings itself always reloads its own panels on a
+			// language change, but pauseInterface was never told to.
+			if (context.localization.Revision() != lastLocalizationRevision)
+			{
+				lastLocalizationRevision = context.localization.Revision();
+				pauseInterface.SetContent(pauseLoader.LoadFromFile(PauseUiPath));
+			}
+
 			pauseInterface.ResetFocus();
 		}
 

@@ -51,6 +51,8 @@ private:
 	int score = 0;
 	int previousScore = -1;
 
+	int lastLocalizationRevision = 0; // detects a language change made mid-level (e.g. via the pause menu)
+
 	int maxHearts = 3;
 	int displayedHealth = 3;
 	int blinkingHeart = -1;

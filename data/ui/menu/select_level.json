@@ -1,0 +1,49 @@
+{
+	"Element":
+	{
+		"children":
+		[
+			{
+				"Label":
+				{
+					"name": "title_label",
+					"anchor": [0, 0],
+					"pivot": [0.5, 0.5],
+					"offset": [240, 22],
+					"fontName": "main",
+					"characterSize": 16,
+					"color": [244, 199, 110, 255],
+					"outlineColor": [58, 42, 77, 255],
+					"outlineThickness": 1,
+					"textKey": "single.select_level"
+				}
+			},
+			{
+				"Image":
+				{
+					"name": "back_background",
+					"anchor": [0, 0],
+					"pivot": [0.5, 0.5],
+					"offset": [240, 247],
+					"size": [90, 26],
+					"textureName": "container_background",
+					"border": 15
+				}
+			},
+			{
+				"Label":
+				{
+					"name": "back_label",
+					"anchor": [0, 0],
+					"pivot": [0.5, 0.5],
+					"offset": [240, 247],
+					"fontName": "main",
+					"characterSize": 16,
+					"outlineColor": [58, 42, 77, 255],
+					"outlineThickness": 1,
+					"textKey": "common.back"
+				}
+			}
+		]
+	}
+}

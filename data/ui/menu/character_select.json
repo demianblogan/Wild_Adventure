@@ -1,0 +1,87 @@
+{
+	"Element":
+	{
+		"children":
+		[
+			{
+				"Image":
+				{
+					"name": "header_background",
+					"anchor": [0, 0],
+					"pivot": [0.5, 0.5],
+					"offset": [240, 38],
+					"size": [200, 30],
+					"textureName": "label_background",
+					"border": [32, 2]
+				}
+			},
+			{
+				"Label":
+				{
+					"name": "title_label",
+					"anchor": [0, 0],
+					"pivot": [0.5, 0.5],
+					"offset": [240, 38],
+					"fontName": "main",
+					"characterSize": 16,
+					"color": [244, 199, 110, 255],
+					"outlineColor": [58, 42, 77, 255],
+					"outlineThickness": 1,
+					"textKey": "character_select.title"
+				}
+			},
+			{
+				"Image":
+				{
+					"name": "play_background",
+					"anchor": [0, 0],
+					"pivot": [0.5, 0.5],
+					"offset": [185, 219],
+					"size": [90, 26],
+					"textureName": "container_background",
+					"border": 15
+				}
+			},
+			{
+				"Label":
+				{
+					"name": "play_label",
+					"anchor": [0, 0],
+					"pivot": [0.5, 0.5],
+					"offset": [185, 219],
+					"fontName": "main",
+					"characterSize": 16,
+					"outlineColor": [58, 42, 77, 255],
+					"outlineThickness": 1,
+					"textKey": "character_select.play"
+				}
+			},
+			{
+				"Image":
+				{
+					"name": "back_background",
+					"anchor": [0, 0],
+					"pivot": [0.5, 0.5],
+					"offset": [295, 219],
+					"size": [90, 26],
+					"textureName": "container_background",
+					"border": 15
+				}
+			},
+			{
+				"Label":
+				{
+					"name": "back_label",
+					"anchor": [0, 0],
+					"pivot": [0.5, 0.5],
+					"offset": [295, 219],
+					"fontName": "main",
+					"characterSize": 16,
+					"outlineColor": [58, 42, 77, 255],
+					"outlineThickness": 1,
+					"textKey": "common.back"
+				}
+			}
+		]
+	}
+}

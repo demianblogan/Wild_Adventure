@@ -3,6 +3,7 @@
 #include "Context.h"
 #include "core/Resources.h"
 #include "core/VirtualScreen.h"
+#include "localization/LocalizationManager.h"
 #include "ui/Element.h"
 #include "ui/Label.h"
 
@@ -10,6 +11,7 @@
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/System/String.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -19,7 +21,9 @@ HUD::HUD(Context& context)
 	: context(context)
 	, interface(context.virtualScreen)
 	, loader(context.resources)
-{}
+{
+	loader.SetLocalization(context.localization);
+}
 
 void HUD::Build(int levelNumber, bool isLevelBannerVisible)
 {
@@ -27,6 +31,7 @@ void HUD::Build(int levelNumber, bool isLevelBannerVisible)
 	this->isLevelBannerVisible = isLevelBannerVisible;
 
 	interface.SetContent(loader.LoadFromFile("data/ui/hud.json"));
+	lastLocalizationRevision = context.localization.Revision();
 }
 
 void HUD::SetMaxHearts(int maxHearts)
@@ -45,7 +50,7 @@ void HUD::SetScore(int score)
 	if (UI::Element* element = interface.FindByName("score"))
 	{
 		if (auto* label = dynamic_cast<UI::Label*>(element))
-			label->SetText("Score: " + std::to_string(score));
+			label->SetText(context.localization.FormatText("hud.score", "score", std::to_string(score)));
 	}
 
 	previousScore = score;
@@ -124,6 +129,20 @@ void HUD::UpdateBanner(float deltaTime)
 
 void HUD::Update(float deltaTime)
 {
+	if (context.localization.Revision() != lastLocalizationRevision)
+	{
+		lastLocalizationRevision = context.localization.Revision();
+
+		if (auto* label = dynamic_cast<UI::Label*>(interface.FindByName("health_label")))
+			label->SetText(context.localization.GetText("hud.health"));
+
+		// SetScore only re-resolves "score" when the number itself changes
+		// (see previousScore below), so a language change alone would
+		// otherwise sit stale until the score next ticks up.
+		if (auto* label = dynamic_cast<UI::Label*>(interface.FindByName("score")))
+			label->SetText(context.localization.FormatText("hud.score", "score", std::to_string(score)));
+	}
+
 	interface.Update(deltaTime);
 }
 
@@ -155,7 +174,8 @@ void HUD::DrawBanner(sf::RenderTarget& target)
 		y = BannerTargetY + (BannerStartY - BannerTargetY) * eased;
 	}
 
-	sf::Text text(context.resources.fonts.Get("main"), "Level " + std::to_string(levelNumber), 24);
+	const std::string bannerText = context.localization.FormatText("hud.level_banner", "level", std::to_string(levelNumber));
+	sf::Text text(context.resources.fonts.Get("main"), sf::String::fromUtf8(bannerText.begin(), bannerText.end()), 24);
 	text.setFillColor(sf::Color(244, 199, 110));     // warm gold, as on the complete menu
 	text.setOutlineColor(sf::Color(58, 42, 77));     // deep purple outline
 	text.setOutlineThickness(2.0f);

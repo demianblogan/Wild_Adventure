@@ -7,6 +7,7 @@ class Input;
 class Settings;
 class GraphicsTarget;
 class Campaign;
+class LocalizationManager;
 
 namespace Audio
 {
@@ -23,4 +24,5 @@ struct Context
 	Settings& settings;
 	GraphicsTarget& graphics;
 	Campaign& campaign;
+	LocalizationManager& localization;
 };

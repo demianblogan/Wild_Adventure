@@ -1,6 +1,11 @@
 #pragma once
 
+#include "ui/DataLoader.h"
+#include "ui/Element.h"
+
 #include <SFML/Graphics/Rect.hpp>
+
+#include <memory>
 
 struct Context;
 
@@ -43,6 +48,15 @@ private:
 	sf::FloatRect BackRect() const;
 
 	Context& context;
+
+	// Title/Play/Back are JSON-driven (textKey, styled with the same
+	// "container_background" panel used elsewhere) for localization and
+	// visual consistency; the carousel and its hit-testing/focus logic stay
+	// hand-drawn since they are generated from runtime skin/campaign data,
+	// not a fixed layout.
+	UI::DataLoader chromeLoader;
+	std::unique_ptr<UI::Element> chrome;
+	int lastLocalizationRevision = 0; // reload chrome if the language changed while this screen wasn't showing
 
 	int levelNumber = 1;
 	int selectedSkin = 0;

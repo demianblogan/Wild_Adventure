@@ -45,7 +45,7 @@
 						255
 					],
 					"outlineThickness": 1,
-					"text": "Health:"
+					"textKey": "hud.health"
 				}
 			},
 			{

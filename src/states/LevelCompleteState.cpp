@@ -6,6 +6,7 @@
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "localization/LocalizationManager.h"
 #include "states/CampaignVictoryState.h"
 #include "states/GameState.h"
 #include "states/MenuState.h"
@@ -17,6 +18,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/System/String.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -50,7 +52,7 @@ namespace
 		sf::Color fill, sf::Color outline, float outlineThickness,
 		float cx, float cy)
 	{
-		sf::Text text(font, str, charSize);
+		sf::Text text(font, sf::String::fromUtf8(str.begin(), str.end()), charSize);
 		text.setFillColor(fill);
 		text.setOutlineColor(outline);
 		text.setOutlineThickness(outlineThickness);
@@ -80,6 +82,7 @@ LevelCompleteState::LevelCompleteState(Context& context, std::string levelPath, 
 	, maxEnemies(maxEnemies)
 {
 	completeLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	completeLoader.SetLocalization(context.localization);
 	RegisterActions();
 	completeInterface.SetContent(completeLoader.LoadFromFile(LevelCompleteUiPath));
 	completeInterface.ResetFocus();
@@ -317,7 +320,7 @@ void LevelCompleteState::Render(float /*interpolationFactor*/)
 	const sf::Color outline(58, 42, 77, 255);
 
 	// Title — always visible.
-	const std::string titleStr = "Level " + std::to_string(levelNumber) + " Complete!";
+	const std::string titleStr = context.localization.FormatText("level_complete.title", "level", std::to_string(levelNumber));
 	DrawCenteredText(rt, font, titleStr, 16, gold, outline, 1.f, CenterX, YTitle);
 
 	// Stars row — always visible; filled in as stars are earned.
@@ -325,21 +328,21 @@ void LevelCompleteState::Render(float /*interpolationFactor*/)
 
 	if (hasRevealedDeaths)
 	{
-		const std::string s = "Deaths: " + std::to_string(static_cast<int>(displayedDeaths));
+		const std::string s = context.localization.FormatText("level_complete.deaths", "count", std::to_string(static_cast<int>(displayedDeaths)));
 		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CenterX, YDeaths);
 	}
 
 	if (hasRevealedFruits)
 	{
-		const std::string s = "Fruits: " +
-			std::to_string(static_cast<int>(displayedFruits)) + "/" + std::to_string(maxFruits);
+		const std::string value = std::to_string(static_cast<int>(displayedFruits)) + "/" + std::to_string(maxFruits);
+		const std::string s = context.localization.FormatText("level_complete.fruits", "value", value);
 		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CenterX, YFruits);
 	}
 
 	if (hasRevealedEnemies)
 	{
-		const std::string s = "Enemies: " +
-			std::to_string(static_cast<int>(displayedEnemies)) + "/" + std::to_string(maxEnemies);
+		const std::string value = std::to_string(static_cast<int>(displayedEnemies)) + "/" + std::to_string(maxEnemies);
+		const std::string s = context.localization.FormatText("level_complete.enemies", "value", value);
 		DrawCenteredText(rt, font, s, 16, white, outline, 1.f, CenterX, YEnemies);
 	}
 

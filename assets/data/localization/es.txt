@@ -1,0 +1,89 @@
+# Spanish catalog. Any key missing here silently falls back to en.txt.
+
+common.back = Atrás
+common.save = Guardar
+common.reset = Restablecer
+common.yes = Sí
+common.no = No
+common.continue = Continuar
+
+settings.title = Ajustes
+settings.audio = Audio
+settings.graphics = Gráficos
+settings.controls = Controles
+settings.keyboard = Teclado
+settings.joystick = Mando
+settings.language = Idioma
+
+graphics.resolution = Resolución:
+graphics.screen_mode = Modo de pantalla:
+graphics.vsync = V-Sync:
+graphics.show_fps = Mostrar FPS:
+graphics.mode_fullscreen = Pantalla completa
+graphics.mode_borderless = Sin bordes
+graphics.mode_window = Ventana
+
+audio.sounds = Sonidos
+audio.music = Música
+
+controls.move_left = Mover izquierda
+controls.move_right = Mover derecha
+controls.jump = Saltar
+controls.pause = Pausa
+controls.capturing = ...
+
+joystick.action_header = Acción
+joystick.xbox_header = Xbox
+joystick.ps_header = PS
+
+main_menu.start_game = Iniciar juego
+main_menu.credits = Créditos
+main_menu.exit = Salir
+
+pause.title = Pausa
+pause.restart_level = Reiniciar nivel
+pause.options = Opciones
+pause.quit_to_menu = Salir al menú principal
+
+play.single_player = Un jugador
+play.delete_saves = Borrar partidas
+
+single.new_game = Nueva partida
+single.select_level = Elegir nivel
+
+level_complete.title = ¡Nivel {level} completado!
+level_complete.restart = Reiniciar
+level_complete.main_menu = Menú principal
+level_complete.deaths = Muertes: {count}
+level_complete.fruits = Frutas: {value}
+level_complete.enemies = Enemigos: {value}
+
+campaign_victory.title = ¡Victoria!
+campaign_victory.line_trap = Ninguna trampa pudo detenerte.
+campaign_victory.line_enemy = Ningún enemigo te hizo rendirte.
+campaign_victory.complete = ¡Campaña completada!
+campaign_victory.back_to_menu = Volver al menú principal
+
+hud.health = Vida:
+hud.score = Puntos: {score}
+hud.level_banner = Nivel {level}
+
+splash.prompt = Pulsa cualquier tecla para empezar
+
+dialog.warning_title = ¡Atención!
+dialog.unsaved_changes_message = Tienes cambios sin guardar. ¿Deseas guardarlos?
+dialog.quit_confirm_message = ¿Quieres salir del juego?
+dialog.delete_progress_message = Esto borrará todo tu progreso de\nla campaña y tendrás que empezar\nde nuevo. ¿Quieres hacerlo?
+
+character_select.title = Elegir personaje
+character_select.play = Jugar
+character_select.locked_requirement = {required} niveles con 3 estrellas ({current}/{required})
+
+credits.bio = Hecho por Demian Blogan. Este es mi tercer proyecto de portafolio. Quería aprender a construir niveles grandes y variados llenos de enemigos, trampas y coleccionables - y este es también mi primer plataformas.
+credits.email_label = Mi correo:
+credits.linkedin_label = Mi LinkedIn:
+credits.instagram_label = Mi Instagram:
+credits.portfolio_label = Mi portafolio:
+credits.code_label = Código del juego:
+credits.programming_channel_label = Mi canal de programación:
+credits.gaming_channel_label = Mi canal de gaming:

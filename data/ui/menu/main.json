@@ -24,7 +24,7 @@
 						{
 							"Label":
 							{
-								"text": "Start Game"
+								"textKey": "main_menu.start_game"
 							}
 						}
 					}
@@ -46,7 +46,7 @@
 						{
 							"Label":
 							{
-								"text": "Settings"
+								"textKey": "settings.title"
 							}
 						}
 					}
@@ -68,7 +68,7 @@
 						{
 							"Label":
 							{
-								"text": "Credits"
+								"textKey": "main_menu.credits"
 							}
 						}
 					}
@@ -90,7 +90,7 @@
 						{
 							"Label":
 							{
-								"text": "Exit"
+								"textKey": "main_menu.exit"
 							}
 						}
 					}

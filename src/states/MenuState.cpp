@@ -7,6 +7,7 @@
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "localization/LocalizationManager.h"
 #include "states/ConfirmState.h"
 #include "states/GameState.h"
 #include "ui/Button.h"
@@ -41,7 +42,10 @@ MenuState::MenuState(Context& context)
 
 	if (!resources.fonts.Has("main"))
 	{
-		resources.fonts.Load("main", "assets/fonts/main.ttf");
+		// Shares the button font's file: it is the only one of the three UI
+		// fonts with Cyrillic glyphs, so "main" (used for most body text) has
+		// to be backed by it too for Russian/Ukrainian to render at all.
+		resources.fonts.Load("main", "assets/fonts/born2bsporty-fs.regular.otf");
 		resources.fonts.Get("main").setSmooth(false);
 	}
 
@@ -58,6 +62,8 @@ MenuState::MenuState(Context& context)
 	}
 
 	interfaceLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	interfaceLoader.SetLocalization(context.localization);
+	lastLocalizationRevision = context.localization.Revision();
 
 	RegisterActions();
 
@@ -168,7 +174,8 @@ void MenuState::GoBackPanel()
 void MenuState::OpenQuitDialog()
 {
 	context.stateMachine.Push(std::make_unique<ConfirmState>(context,
-		"Warning!", "Do you want to quit the game?",
+		context.localization.GetText("dialog.warning_title"),
+		context.localization.GetText("dialog.quit_confirm_message"),
 		[this] { context.stateMachine.Clear(); },
 		nullptr));
 }
@@ -207,10 +214,8 @@ void MenuState::ApplyPendingNavigation()
 
 	case NavRequest::DeleteSaves:
 		context.stateMachine.Push(std::make_unique<ConfirmState>(context,
-			"Warning!",
-			"This will delete all your campaign\n"
-			"progress and you will have to\n"
-			"start over. Do you want this?",
+			context.localization.GetText("dialog.warning_title"),
+			context.localization.GetText("dialog.delete_progress_message"),
 			[this]
 			{
 				context.campaign.Reset();
@@ -276,6 +281,16 @@ void MenuState::Update(float deltaTime)
 		if (settings.WasCloseRequested())
 		{
 			isInSettings = false;
+
+			// The menu behind Settings was built before the visit (possibly in
+			// a different language); Settings itself always reloads its own
+			// panels on a language change, but userInterface was never told to.
+			if (context.localization.Revision() != lastLocalizationRevision)
+			{
+				lastLocalizationRevision = context.localization.Revision();
+				ShowPanel(panelStack.back());
+			}
+
 			userInterface.ResetFocus();
 		}
 

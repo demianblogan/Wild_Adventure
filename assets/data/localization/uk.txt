@@ -1,0 +1,89 @@
+# Ukrainian catalog. Any key missing here silently falls back to en.txt.
+
+common.back = Назад
+common.save = Зберегти
+common.reset = Скинути
+common.yes = Так
+common.no = Ні
+common.continue = Продовжити
+
+settings.title = Налаштування
+settings.audio = Звук
+settings.graphics = Графіка
+settings.controls = Керування
+settings.keyboard = Клавіатура
+settings.joystick = Геймпад
+settings.language = Мова
+
+graphics.resolution = Роздільність:
+graphics.screen_mode = Режим екрана:
+graphics.vsync = Вертикальна синхронізація:
+graphics.show_fps = Показувати FPS:
+graphics.mode_fullscreen = Повноекранний
+graphics.mode_borderless = Без рамки
+graphics.mode_window = Віконний
+
+audio.sounds = Звуки
+audio.music = Музика
+
+controls.move_left = Рух ліворуч
+controls.move_right = Рух праворуч
+controls.jump = Стрибок
+controls.pause = Пауза
+controls.capturing = ...
+
+joystick.action_header = Дія
+joystick.xbox_header = Xbox
+joystick.ps_header = PS
+
+main_menu.start_game = Почати гру
+main_menu.credits = Титри
+main_menu.exit = Вихід
+
+pause.title = Пауза
+pause.restart_level = Почати рівень заново
+pause.options = Налаштування
+pause.quit_to_menu = Вийти в головне меню
+
+play.single_player = Один гравець
+play.delete_saves = Стерти прогрес
+
+single.new_game = Нова гра
+single.select_level = Вибрати рівень
+
+level_complete.title = Рівень {level} пройдено!
+level_complete.restart = Заново
+level_complete.main_menu = Головне меню
+level_complete.deaths = Смертей: {count}
+level_complete.fruits = Фрукти: {value}
+level_complete.enemies = Вороги: {value}
+
+campaign_victory.title = Перемога!
+campaign_victory.line_trap = Жодна пастка не змогла тебе зупинити.
+campaign_victory.line_enemy = Жоден ворог не змусив тебе здатися.
+campaign_victory.complete = Кампанію завершено!
+campaign_victory.back_to_menu = Назад у головне меню
+
+hud.health = Здоров'я:
+hud.score = Очки: {score}
+hud.level_banner = Рівень {level}
+
+splash.prompt = Натисніть будь-яку клавішу, щоб почати
+
+dialog.warning_title = Увага!
+dialog.unsaved_changes_message = У вас є незбережені зміни. Зберегти їх?
+dialog.quit_confirm_message = Ви хочете вийти з гри?
+dialog.delete_progress_message = Це видалить весь прогрес кампанії,\nі вам доведеться почати заново.\nВи впевнені?
+
+character_select.title = Вибір персонажа
+character_select.play = Грати
+character_select.locked_requirement = {required} рівнів із 3 зірками ({current}/{required})
+
+credits.bio = Створено Дем'яном Блоганом. Це мій третій проєкт у портфоліо. Я хотів навчитися створювати великі різноманітні рівні, повні ворогів, пасток і предметів - і це також моя перша гра в жанрі платформер.
+credits.email_label = Моя пошта:
+credits.linkedin_label = Мій LinkedIn:
+credits.instagram_label = Мій Instagram:
+credits.portfolio_label = Моє портфоліо:
+credits.code_label = Код гри:
+credits.programming_channel_label = Мій канал про програмування:
+credits.gaming_channel_label = Мій ігровий канал:

@@ -44,6 +44,7 @@ private:
 
 	SettingsController settings;
 	bool isInSettings = false;
+	int lastLocalizationRevision = 0; // detects a language change made while isInSettings was true
 
 	SelectLevelController selectLevel;
 	bool isInSelectLevel = false;

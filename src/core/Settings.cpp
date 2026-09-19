@@ -5,7 +5,9 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
+#include <system_error>
 
 namespace
 {
@@ -59,6 +61,12 @@ void Settings::SetShowFps(bool value)
 	current.isShowFpsEnabled = value;
 }
 
+void Settings::SetLanguage(Language value)
+{
+	current.language = value;
+	current.isLanguageChosen = true;
+}
+
 void Settings::Load(const std::string& path)
 {
 	std::ifstream file(path);
@@ -89,6 +97,13 @@ void Settings::Load(const std::string& path)
 			current.isVsyncEnabled = graphics.value("vsync", current.isVsyncEnabled);
 			current.isShowFpsEnabled = graphics.value("showFps", current.isShowFpsEnabled);
 		}
+
+		if (data.contains("localization"))
+		{
+			const auto& localization = data["localization"];
+			current.language = LanguageFromCode(localization.value("language", LanguageCode(current.language)));
+			current.isLanguageChosen = localization.value("languageChosen", current.isLanguageChosen);
+		}
 	}
 	catch (const nlohmann::json::exception&)
 	{
@@ -116,6 +131,14 @@ bool Settings::Save(const std::string& path)
 	data["graphics"]["screenMode"] = ScreenModeToString(current.screenMode);
 	data["graphics"]["vsync"] = current.isVsyncEnabled;
 	data["graphics"]["showFps"] = current.isShowFpsEnabled;
+
+	data["localization"]["language"] = LanguageCode(current.language);
+	data["localization"]["languageChosen"] = current.isLanguageChosen;
+
+	// path lives under %LOCALAPPDATA%, which may not have been created yet
+	// (e.g. this player's first launch, or after clearing it by hand).
+	std::error_code ignored;
+	std::filesystem::create_directories(std::filesystem::path(path).parent_path(), ignored);
 
 	if (!SafeFileWrite::WriteFileAtomically(path, data.dump(1, '\t')))
 		return false;
