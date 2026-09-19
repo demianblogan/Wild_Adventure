@@ -1,5 +1,6 @@
 {
   "name": "2d-platformer",
+  "builtin-baseline": "319504a5326aa870edde46438c5455fa76305a56",
   "dependencies": [
     "nlohmann-json"
   ]
