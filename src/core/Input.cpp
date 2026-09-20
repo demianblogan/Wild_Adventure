@@ -88,6 +88,11 @@ namespace
 		if (gamepad < 0)
 			return false;
 
+		// getIdentification() returns an Identification that owns a copy of
+		// the controller's name as an sf::String (a heap-allocated
+		// std::u32string) -- cheap once, but wasteful to call for every
+		// Button binding of every action, every frame. Callers cache this
+		// once per Input::Update() instead (see isGamepadPlayStation below).
 		return sf::Joystick::getIdentification(static_cast<unsigned int>(gamepad)).vendorId == SonyVendorId;
 	}
 
@@ -104,9 +109,9 @@ namespace
 	// for a detected PlayStation-style pad.
 	constexpr unsigned int DualSenseButtonRemap[] = { 1, 2, 0, 3, 4, 5, 8, 9, 10, 11 };
 
-	unsigned int RemapButtonForGamepad(unsigned int authoredButton, int gamepad)
+	unsigned int RemapButtonForGamepad(unsigned int authoredButton, bool isGamepadPlayStation)
 	{
-		if (IsPlayStationController(gamepad) && authoredButton < std::size(DualSenseButtonRemap))
+		if (isGamepadPlayStation && authoredButton < std::size(DualSenseButtonRemap))
 			return DualSenseButtonRemap[authoredButton];
 
 		return authoredButton;
@@ -338,7 +343,7 @@ int Input::FindGamepad()
 	return -1;
 }
 
-bool Input::IsBindingDown(const Binding& binding, int gamepad, bool& isFromGamepad) const
+bool Input::IsBindingDown(const Binding& binding, int gamepad, bool isGamepadPlayStation, bool& isFromGamepad) const
 {
 	switch (binding.type)
 	{
@@ -349,7 +354,7 @@ bool Input::IsBindingDown(const Binding& binding, int gamepad, bool& isFromGamep
 	case BindingType::Button:
 		isFromGamepad = true;
 		return gamepad >= 0 && sf::Joystick::isButtonPressed(
-			static_cast<unsigned int>(gamepad), RemapButtonForGamepad(binding.button, gamepad));
+			static_cast<unsigned int>(gamepad), RemapButtonForGamepad(binding.button, isGamepadPlayStation));
 
 	case BindingType::Axis:
 		isFromGamepad = true;
@@ -365,6 +370,12 @@ void Input::Update()
 {
 	const int gamepad = FindGamepad();
 
+	// Resolved once per frame instead of once per binding: it only changes on
+	// connect/disconnect, but a full Update() checks a Button binding for
+	// every action, and each call would otherwise re-query the driver for the
+	// controller's identity (see the comment on IsPlayStationController).
+	const bool isGamepadPlayStation = IsPlayStationController(gamepad);
+
 	bool hasNewPress = false;
 	InputDevice pressDevice = activeDevice;
 
@@ -378,7 +389,7 @@ void Input::Update()
 		for (const Binding& binding : bindings[i])
 		{
 			bool isFromGamepad = false;
-			if (IsBindingDown(binding, gamepad, isFromGamepad))
+			if (IsBindingDown(binding, gamepad, isGamepadPlayStation, isFromGamepad))
 			{
 				isDown = true;
 				if (isFromGamepad)

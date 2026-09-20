@@ -89,7 +89,7 @@ private:
 	static void LoadBindingsFile(const std::string& path, BindingSet target, float* outAxisThreshold);
 
 	static int FindGamepad();
-	bool IsBindingDown(const Binding& binding, int gamepad, bool& fromGamepad) const;
+	bool IsBindingDown(const Binding& binding, int gamepad, bool isGamepadPlayStation, bool& fromGamepad) const;
 
 	std::vector<Binding> bindings[ActionCount];        // working set used by Update
 	std::vector<Binding> savedBindings[ActionCount];   // last persisted state

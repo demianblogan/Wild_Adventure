@@ -65,17 +65,6 @@ namespace Haptics
 		// line with DualSense's.
 		constexpr float XboxOverallBoost = 1.8f;
 
-		[[nodiscard]] unsigned char LerpChannel(unsigned char from, unsigned char to, float t)
-		{
-			const float value = static_cast<float>(from) + (static_cast<float>(to) - static_cast<float>(from)) * t;
-			return static_cast<unsigned char>(std::clamp(value, 0.f, 255.f));
-		}
-
-		[[nodiscard]] RGBColor LerpColor(RGBColor from, RGBColor to, float t)
-		{
-			return { LerpChannel(from.r, to.r, t), LerpChannel(from.g, to.g, t), LerpChannel(from.b, to.b, t) };
-		}
-
 		[[nodiscard]] unsigned char ToByte(float normalizedValue)
 		{
 			return static_cast<unsigned char>(std::clamp(normalizedValue, 0.f, 1.f) * 255.f);
@@ -126,8 +115,20 @@ namespace Haptics
 		if (durationSeconds <= 0.f)
 			return;
 
-		pulseDuration = std::max(pulseDuration, durationSeconds);
-		pulseRemaining = std::max(pulseRemaining, durationSeconds);
+		// pulseDuration and pulseRemaining must move together, not be maxed
+		// independently: if they drifted apart (this call keeps the old,
+		// longer pulseDuration but bumps pulseRemaining up to this call's
+		// shorter durationSeconds), Update()'s fallOff = pulseRemaining /
+		// pulseDuration would start below 1 -- a fresh pulse computed as
+		// already partway decayed. Only take over the timeline when this
+		// pulse would actually outlast whatever's currently fading; otherwise
+		// leave it alone and just fold this call's strength into it.
+		if (durationSeconds >= pulseRemaining)
+		{
+			pulseDuration = durationSeconds;
+			pulseRemaining = durationSeconds;
+		}
+
 		pulseLowMotor = std::max(pulseLowMotor, std::clamp(lowFrequencyMotor, 0.f, 1.f));
 		pulseHighMotor = std::max(pulseHighMotor, std::clamp(highFrequencyMotor, 0.f, 1.f));
 	}
@@ -142,10 +143,24 @@ namespace Haptics
 		if (durationSeconds <= 0.f)
 			return;
 
-		lightbarPulseColor = color;
-		lightbarPulseBlinks = std::max(1, blinks);
-		lightbarPulseDuration = std::max(lightbarPulseDuration, durationSeconds);
-		lightbarPulseRemaining = std::max(lightbarPulseRemaining, durationSeconds);
+		// Same reasoning as PulseVibration above: duration and remaining must
+		// move together so Update()'s brightness fraction always starts at a
+		// full 1.0 for whichever call currently owns the timeline, instead of
+		// drifting apart and starting a fresh flash already dimmed. Unlike the
+		// two vibration motors (which blend sensibly via a per-channel max),
+		// there's no meaningful way to "merge" two different flash colors, so
+		// color/blinks only change when this call actually takes over the
+		// timeline -- otherwise a short, weak flash arriving mid-fade of a
+		// longer one would overwrite its color without ever weakening its
+		// brightness, e.g. a fruit's cyan pickup flash silently painting over
+		// the back half of a checkpoint's gold one.
+		if (durationSeconds >= lightbarPulseRemaining)
+		{
+			lightbarPulseColor = color;
+			lightbarPulseBlinks = std::max(1, blinks);
+			lightbarPulseDuration = durationSeconds;
+			lightbarPulseRemaining = durationSeconds;
+		}
 	}
 
 	void GamepadHaptics::Update(float deltaTime)

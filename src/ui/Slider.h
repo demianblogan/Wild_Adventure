@@ -19,7 +19,6 @@ namespace UI
 		void SetRange(float minValue, float maxValue);
 		void SetStep(float step);
 		void SetValue(float value);
-		float GetValue() const { return currentValue; }
 
 		void SetOnValueChanged(std::function<void(float)> callback);
 

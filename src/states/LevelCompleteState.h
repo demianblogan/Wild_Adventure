@@ -39,11 +39,7 @@ private:
 
 	void AdvancePhase();
 
-	// Helpers for rendering individual elements.
-	void DrawPanel(sf::RenderTarget& rt) const;
-	void DrawTitle(sf::RenderTarget& rt) const;
 	void DrawStars(sf::RenderTarget& rt) const;
-	void DrawStat(sf::RenderTarget& rt, const std::string& label, float y) const;
 
 	std::string levelPath;
 	int levelNumber;

@@ -290,17 +290,6 @@ namespace Haptics
 	constexpr RGBColor HealthCriticalFlashColor{ 255, 70, 40 };
 	constexpr RGBColor BlackColor{ 0, 0, 0 };
 
-	[[nodiscard]] inline unsigned char LerpChannel(unsigned char from, unsigned char to, float t)
-	{
-		return static_cast<unsigned char>(static_cast<float>(from) + (static_cast<float>(to) - static_cast<float>(from)) * t);
-	}
-
-	[[nodiscard]] inline RGBColor LerpColor(RGBColor from, RGBColor to, float t)
-	{
-		t = std::clamp(t, 0.f, 1.f);
-		return { LerpChannel(from.r, to.r, t), LerpChannel(from.g, to.g, t), LerpChannel(from.b, to.b, t) };
-	}
-
 	// A slow "thump-thump ... thump-thump" heartbeat, meant to run for as long
 	// as `active` stays true (e.g. the player is down to their last heart).
 	// Owned by whoever drives it and ticked every frame; stops and resets the

@@ -23,6 +23,21 @@ namespace Haptics
 		unsigned char b = 0u;
 	};
 
+	// t is expected in 0..1; the result is clamped regardless so a slightly
+	// out-of-range t (float slop) can never wrap a channel instead of just
+	// clipping it. The single shared implementation for every color fade in
+	// this module and in core/HapticCues.h.
+	[[nodiscard]] inline unsigned char LerpChannel(unsigned char from, unsigned char to, float t) noexcept
+	{
+		const float value = static_cast<float>(from) + (static_cast<float>(to) - static_cast<float>(from)) * t;
+		return static_cast<unsigned char>(value < 0.f ? 0.f : (value > 255.f ? 255.f : value));
+	}
+
+	[[nodiscard]] inline RGBColor LerpColor(RGBColor from, RGBColor to, float t) noexcept
+	{
+		return { LerpChannel(from.r, to.r, t), LerpChannel(from.g, to.g, t), LerpChannel(from.b, to.b, t) };
+	}
+
 	// Cross-controller vibration/lightbar layer, independent of SFML's own
 	// joystick polling -- detects an Xbox controller through its native
 	// XInput API, or a DualSense/DualShock controller through the vendored

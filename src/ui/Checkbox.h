@@ -25,7 +25,6 @@ namespace UI
 		void SetViewColor(InteractionState state, sf::Color color);
 
 		void SetChecked(bool checked);
-		bool IsChecked() const { return isChecked; }
 
 		void SetOnCheckedChanged(std::function<void(bool)> callback);
 
