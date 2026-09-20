@@ -10,7 +10,6 @@
 #include "localization/LocalizationManager.h"
 #include "states/ConfirmState.h"
 #include "states/GameState.h"
-#include "ui/Button.h"
 #include "ui/Element.h"
 
 #include <memory>
@@ -81,7 +80,6 @@ MenuState::MenuState(Context& context)
 void MenuState::RegisterActions()
 {
 	interfaceLoader.RegisterAction("menu_open_play", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "play"; });
-	interfaceLoader.RegisterAction("menu_open_single", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "single"; });
 	interfaceLoader.RegisterAction("menu_open_credits", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "credits"; });
 	interfaceLoader.RegisterAction("menu_open_settings", [this] { isInSettings = true; settings.Open(); });
 	interfaceLoader.RegisterAction("menu_select_level", [this] { isInSelectLevel = true; selectLevel.Open(); });
@@ -89,7 +87,6 @@ void MenuState::RegisterActions()
 	interfaceLoader.RegisterAction("menu_exit", [this] { pendingRequest = NavRequest::Exit; });
 	interfaceLoader.RegisterAction("menu_start_game", [this] { pendingRequest = NavRequest::StartGame; });
 	interfaceLoader.RegisterAction("menu_continue_game", [this] { pendingRequest = NavRequest::ContinueGame; });
-	interfaceLoader.RegisterAction("menu_delete_saves", [this] { pendingRequest = NavRequest::DeleteSaves; });
 }
 
 void MenuState::ShowPanel(const std::string& panelId)
@@ -114,41 +111,32 @@ void MenuState::ShowPanel(const std::string& panelId)
 
 	userInterface.SetContent(std::move(frame));
 
-	if (panelId == "single")
-		SetupSinglePanel();
-	else if (panelId == "play")
+	if (panelId == "play")
 		SetupPlayPanel();
 
-	userInterface.ResetFocus();
-}
-
-void MenuState::DisableButton(const std::string& buttonName)
-{
-	const sf::Color disabledTint(110, 110, 110, 255);
-
-	if (auto* button = dynamic_cast<UI::Button*>(userInterface.FindByName(buttonName)))
-	{
-		button->SetEnabled(false);
-		button->SetBackgroundTint(disabledTint);
-		button->SetForegroundColor(UI::InteractionState::Normal, disabledTint);
-	}
-}
-
-void MenuState::SetupSinglePanel()
-{
-	// Continue and Select Level unlock once the first level is completed.
-	if (context.campaign.GetHighestCompletedLevel() < 1)
-	{
-		DisableButton("continue_button");
-		DisableButton("select_level_button");
-	}
+	// Setup*Panel above may have just hidden a locked button; Root only
+	// scans for navigable elements at SetContent time, so without this,
+	// Up/Down (and mouse hover) could still land on something no longer
+	// drawn.
+	userInterface.RefreshInteractives();
 }
 
 void MenuState::SetupPlayPanel()
 {
-	// Nothing to delete until at least one level is completed.
-	if (!context.campaign.HasProgress())
-		DisableButton("delete_saves_button");
+	// Continue and Select Level are meaningless until there is a level to
+	// continue/select, so they're hidden entirely rather than shown disabled
+	// -- New Game and Back re-center into the space that frees up.
+	const bool hasProgress = context.campaign.HasProgress();
+
+	if (UI::Element* button = userInterface.FindByName("continue_button"))
+		button->isVisible = hasProgress;
+	if (UI::Element* button = userInterface.FindByName("select_level_button"))
+		button->isVisible = hasProgress;
+
+	// New Game's own JSON position (-18) already doubles as its centered
+	// spot when Continue/Select Level are hidden, so only Back needs to move.
+	if (UI::Element* back = userInterface.FindByName("play_back_button"))
+		back->offset.y = hasProgress ? 54.0f : 18.0f;
 }
 
 void MenuState::OpenCharacterSelect(int levelNumber)
@@ -194,7 +182,26 @@ void MenuState::ApplyPendingNavigation()
 		break;
 
 	case NavRequest::StartGame:
-		OpenCharacterSelect(1);
+		if (context.campaign.HasProgress())
+		{
+			// New Game doubles as the only way to wipe progress now that the
+			// separate Delete Progress button is gone, so starting fresh
+			// over existing progress needs the same confirmation that used
+			// to guard deleting it.
+			context.stateMachine.Push(std::make_unique<ConfirmState>(context,
+				context.localization.GetText("dialog.warning_title"),
+				context.localization.GetText("dialog.delete_progress_message"),
+				[this]
+				{
+					context.campaign.Reset();
+					OpenCharacterSelect(1);
+				},
+				nullptr));
+		}
+		else
+		{
+			OpenCharacterSelect(1);
+		}
 		break;
 
 	case NavRequest::ContinueGame:
@@ -211,20 +218,6 @@ void MenuState::ApplyPendingNavigation()
 			OpenCharacterSelect(nextLevel);
 		break;
 	}
-
-	case NavRequest::DeleteSaves:
-		context.stateMachine.Push(std::make_unique<ConfirmState>(context,
-			context.localization.GetText("dialog.warning_title"),
-			context.localization.GetText("dialog.delete_progress_message"),
-			[this]
-			{
-				context.campaign.Reset();
-
-				// Rebuild the panel so Delete Saves immediately turns grey.
-				ShowPanel(panelStack.back());
-			},
-			nullptr));
-		break;
 
 	case NavRequest::Exit:
 		OpenQuitDialog();

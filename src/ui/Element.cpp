@@ -30,16 +30,24 @@ namespace UI
 
 	void Element::Update(float deltaTime)
 	{
-		for (const auto& animation : animations)
-			animation->Update(deltaTime);
+		// Index-based on purpose: an animation's OnFinished callback may add a
+		// new animation to this same element (AddAnimation push_back()s into
+		// this vector), which can reallocate it. A range-based for loop would
+		// be left holding iterators into freed memory; re-checking
+		// animations.size() each pass keeps this safe either way.
+		for (std::size_t i = 0; i < animations.size(); i++)
+			animations[i]->Update(deltaTime);
 
 		animations.erase(
 			std::remove_if(animations.begin(), animations.end(),
 				[](const std::unique_ptr<Animation>& a) { return a->IsFinished(); }),
 			animations.end());
 
-		for (const auto& child : children)
-			child->Update(deltaTime);
+		// Same reasoning as the animations loop above: an OnFinished callback
+		// may add a new child to this element (e.g. a one-shot VFX spawned
+		// when a landing animation completes), which can reallocate `children`.
+		for (std::size_t i = 0; i < children.size(); i++)
+			children[i]->Update(deltaTime);
 	}
 
 	void Element::HandleEvent(const sf::Event& event)
@@ -85,6 +93,11 @@ namespace UI
 		animations.push_back(std::move(animation));
 
 		return *animations.back();
+	}
+
+	void Element::ClearAnimations()
+	{
+		animations.clear();
 	}
 
 	sf::Vector2f Element::ComputePosition(sf::Vector2f parentPosition, sf::Vector2f parentSize) const

@@ -32,6 +32,14 @@ namespace UI
 
 		Element& SetContent(std::unique_ptr<Element> content);
 
+		// Re-scans the current content for navigable elements and resets
+		// focus. Call this after changing an element's isVisible outside of
+		// SetContent (e.g. hiding a locked button once its unlock state is
+		// known) -- CollectInteractives() otherwise only ever runs once, at
+		// SetContent time, so a later visibility change wouldn't otherwise
+		// be reflected in what Up/Down/mouse-hover can reach.
+		void RefreshInteractives();
+
 		Element* FindByName(const std::string& name);
 
 		void HandleEvent(const sf::Event& event);

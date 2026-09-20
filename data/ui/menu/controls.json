@@ -9,6 +9,44 @@
 		"children":
 		[
 			{
+				"Element":
+				{
+					"name": "controls_panel_title",
+					"anchor": [0.5, 0.5],
+					"pivot": [0.5, 0.5],
+					"offset": [0, -58],
+					"size": [150, 30],
+					"children":
+					[
+						{
+							"Image":
+							{
+								"anchor": [0.5, 0.5],
+								"pivot": [0.5, 0.5],
+								"offset": [0, 0],
+								"size": [150, 30],
+								"textureName": "label_background",
+								"border": [32, 2]
+							}
+						},
+						{
+							"Label":
+							{
+								"anchor": [0.5, 0.5],
+								"pivot": [0.5, 0.5],
+								"offset": [0, 0],
+								"fontName": "main",
+								"characterSize": 16,
+								"color": [244, 199, 110, 255],
+								"outlineColor": [58, 42, 77, 255],
+								"outlineThickness": 1,
+								"textKey": "settings.controls"
+							}
+						}
+					]
+				}
+			},
+			{
 				"Button":
 				{
 					"prefab": "menu_button",
@@ -26,7 +64,7 @@
 					"offset":
 					[
 						0,
-						-36
+						-16
 					],
 					"action": "menu_open_keyboard",
 					"foregrounds":
@@ -59,7 +97,7 @@
 					"offset":
 					[
 						0,
-						0
+						20
 					],
 					"action": "menu_open_joystick",
 					"foregrounds":
@@ -92,7 +130,7 @@
 					"offset":
 					[
 						0,
-						36
+						56
 					],
 					"action": "menu_back",
 					"foregrounds":

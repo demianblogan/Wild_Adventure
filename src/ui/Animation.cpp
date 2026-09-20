@@ -7,19 +7,32 @@ namespace UI
 {
 	Animation::Animation(float fromValue, float toValue, float duration,
 		AnimationCurve curve, AnimationLoop loop,
-		std::function<void(float)> setter)
+		std::function<void(float)> setter, float delay)
 		: fromValue(fromValue)
 		, toValue(toValue)
 		, duration(duration)
 		, curve(curve)
 		, loop(loop)
 		, setter(std::move(setter))
+		, delay(delay)
 	{}
 
 	void Animation::Update(float deltaTime)
 	{
 		if (isFinished)
 			return;
+
+		if (delay > 0.0f)
+		{
+			delay -= deltaTime;
+			if (delay > 0.0f)
+				return; // still waiting: setter untouched, elapsed untouched
+
+			// The wait just ended: whatever time overshot it already counts
+			// towards the animation itself.
+			deltaTime = -delay;
+			delay = 0.0f;
+		}
 
 		elapsed += deltaTime;
 
@@ -108,6 +121,11 @@ namespace UI
 			// Inverted quadratic: 0 -> 0, 0.5 -> 0.75, 1 -> 1.
 			// Fast at the start, slows down towards the end.
 			return 1.0f - (1.0f - time) * (1.0f - time);
+
+		case AnimationCurve::EaseIn:
+			// Quadratic: 0 -> 0, 0.5 -> 0.25, 1 -> 1.
+			// Slow at the start, accelerating hard towards the end.
+			return time * time;
 
 		default:
 			return time;

@@ -9,6 +9,43 @@
 		"children":
 		[
 			{
+				"Element":
+				{
+					"anchor": [0.5, 0.5],
+					"pivot": [0.5, 0.5],
+					"offset": [0, -86],
+					"size": [150, 30],
+					"children":
+					[
+						{
+							"Image":
+							{
+								"anchor": [0.5, 0.5],
+								"pivot": [0.5, 0.5],
+								"offset": [0, 0],
+								"size": [150, 30],
+								"textureName": "label_background",
+								"border": [32, 2]
+							}
+						},
+						{
+							"Label":
+							{
+								"anchor": [0.5, 0.5],
+								"pivot": [0.5, 0.5],
+								"offset": [0, 0],
+								"fontName": "main",
+								"characterSize": 16,
+								"color": [244, 199, 110, 255],
+								"outlineColor": [58, 42, 77, 255],
+								"outlineThickness": 1,
+								"textKey": "settings.joystick"
+							}
+						}
+					]
+				}
+			},
+			{
 				"Image":
 				{
 					"anchor":
@@ -24,7 +61,7 @@
 					"offset":
 					[
 						0,
-						-72
+						-54
 					],
 					"size":
 					[
@@ -51,7 +88,7 @@
 					"offset":
 					[
 						90,
-						-72
+						-54
 					],
 					"fontName": "main",
 					"characterSize": 16,
@@ -89,7 +126,7 @@
 					"offset":
 					[
 						20,
-						-72
+						-54
 					],
 					"fontName": "main",
 					"characterSize": 16,
@@ -127,7 +164,7 @@
 					"offset":
 					[
 						130,
-						-72
+						-54
 					],
 					"fontName": "main",
 					"characterSize": 16,
@@ -166,7 +203,7 @@
 					"offset":
 					[
 						0,
-						-42
+						-24
 					],
 					"size":
 					[
@@ -193,7 +230,7 @@
 					"offset":
 					[
 						90,
-						-42
+						-24
 					],
 					"fontName": "main",
 					"characterSize": 16,
@@ -231,7 +268,7 @@
 					"offset":
 					[
 						20,
-						-42
+						-24
 					],
 					"size":
 					[
@@ -264,7 +301,7 @@
 					"offset":
 					[
 						130,
-						-42
+						-24
 					],
 					"size":
 					[
@@ -298,7 +335,7 @@
 					"offset":
 					[
 						0,
-						-16
+						2
 					],
 					"size":
 					[
@@ -325,7 +362,7 @@
 					"offset":
 					[
 						90,
-						-16
+						2
 					],
 					"fontName": "main",
 					"characterSize": 16,
@@ -363,7 +400,7 @@
 					"offset":
 					[
 						20,
-						-16
+						2
 					],
 					"size":
 					[
@@ -396,7 +433,7 @@
 					"offset":
 					[
 						130,
-						-16
+						2
 					],
 					"size":
 					[
@@ -430,7 +467,7 @@
 					"offset":
 					[
 						0,
-						10
+						28
 					],
 					"size":
 					[
@@ -457,7 +494,7 @@
 					"offset":
 					[
 						90,
-						10
+						28
 					],
 					"fontName": "main",
 					"characterSize": 16,
@@ -495,7 +532,7 @@
 					"offset":
 					[
 						20,
-						10
+						28
 					],
 					"size":
 					[
@@ -528,7 +565,7 @@
 					"offset":
 					[
 						130,
-						10
+						28
 					],
 					"size":
 					[
@@ -562,7 +599,7 @@
 					"offset":
 					[
 						0,
-						36
+						54
 					],
 					"size":
 					[
@@ -589,7 +626,7 @@
 					"offset":
 					[
 						90,
-						36
+						54
 					],
 					"fontName": "main",
 					"characterSize": 16,
@@ -627,7 +664,7 @@
 					"offset":
 					[
 						20,
-						36
+						54
 					],
 					"size":
 					[
@@ -660,7 +697,7 @@
 					"offset":
 					[
 						130,
-						36
+						54
 					],
 					"size":
 					[
@@ -696,7 +733,7 @@
 					"offset":
 					[
 						0,
-						68
+						86
 					],
 					"action": "menu_back",
 					"foregrounds":

@@ -10,10 +10,9 @@
 		"children":
 		[
 			{
-				"Label":
+				"Element":
 				{
 					"name": "title",
-					"glow": true,
 					"anchor":
 					[
 						0.5,
@@ -28,25 +27,7 @@
 					[
 						0,
 						50
-					],
-					"fontName": "gameTitle",
-					"characterSize": 28,
-					"color":
-					[
-						247,
-						198,
-						70,
-						255
-					],
-					"outlineColor":
-					[
-						99,
-						54,
-						22,
-						255
-					],
-					"outlineThickness": 3,
-					"text": "Wild Adventure"
+					]
 				}
 			},
 			{

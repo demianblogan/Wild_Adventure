@@ -15,7 +15,7 @@
 					"pivot": [0.5, 0.5],
 					"textureName": "container_background",
 					"border": 15,
-					"color": [200, 200, 200, 255]
+					"color": [200, 200, 200, 0]
 				}
 			},
 			"Highlighted":
@@ -27,7 +27,7 @@
 					"pivot": [0.5, 0.5],
 					"textureName": "container_background",
 					"border": 15,
-					"color": [255, 255, 255, 255]
+					"color": [255, 255, 255, 0]
 				}
 			},
 			"Pressed":
@@ -39,7 +39,7 @@
 					"pivot": [0.5, 0.5],
 					"textureName": "container_background",
 					"border": 15,
-					"color": [255, 255, 255, 255]
+					"color": [255, 255, 255, 0]
 				}
 			}
 		},
@@ -62,8 +62,8 @@
 		"foregroundColors":
 		{
 			"Normal": [226, 210, 255, 255],
-			"Highlighted": [255, 255, 255, 255],
-			"Pressed": [255, 255, 255, 255]
+			"Highlighted": [247, 198, 70, 255],
+			"Pressed": [247, 198, 70, 255]
 		}
 	}
 }

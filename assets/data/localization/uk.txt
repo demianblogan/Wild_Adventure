@@ -42,11 +42,9 @@ main_menu.exit = Вихід
 
 pause.title = Пауза
 pause.restart_level = Почати рівень заново
-pause.options = Налаштування
 pause.quit_to_menu = Вийти в головне меню
 
 play.single_player = Один гравець
-play.delete_saves = Стерти прогрес
 
 single.new_game = Нова гра
 single.select_level = Вибрати рівень

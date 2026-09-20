@@ -9,9 +9,9 @@
 				"Label":
 				{
 					"name": "prompt",
-					"anchor": [0, 0],
+					"anchor": [0.5, 0],
 					"pivot": [0.5, 0.5],
-					"offset": [240, 55],
+					"offset": [0, 42],
 					"fontName": "main",
 					"characterSize": 24,
 					"color": [255, 255, 255, 255],
@@ -20,34 +20,16 @@
 					"text": "Choose your language"
 				}
 			},
-			{
-				"Element":
-				{
-					"row": true,
-					"children":
-					[
-						{ "Button": { "prefab": "language_button", "name": "lang_en", "anchor": [0, 0], "pivot": [0.5, 0.5], "offset": [100, 120], "action": "pick_en",
-							"foregrounds": { "Normal": { "Label": { "name": "lang_en_label" } } } } },
-						{ "Button": { "prefab": "language_button", "name": "lang_de", "anchor": [0, 0], "pivot": [0.5, 0.5], "offset": [240, 120], "action": "pick_de",
-							"foregrounds": { "Normal": { "Label": { "name": "lang_de_label" } } } } },
-						{ "Button": { "prefab": "language_button", "name": "lang_es", "anchor": [0, 0], "pivot": [0.5, 0.5], "offset": [380, 120], "action": "pick_es",
-							"foregrounds": { "Normal": { "Label": { "name": "lang_es_label" } } } } }
-					]
-				}
-			},
-			{
-				"Element":
-				{
-					"row": true,
-					"children":
-					[
-						{ "Button": { "prefab": "language_button", "name": "lang_ru", "anchor": [0, 0], "pivot": [0.5, 0.5], "offset": [170, 160], "action": "pick_ru",
-							"foregrounds": { "Normal": { "Label": { "name": "lang_ru_label" } } } } },
-						{ "Button": { "prefab": "language_button", "name": "lang_uk", "anchor": [0, 0], "pivot": [0.5, 0.5], "offset": [310, 160], "action": "pick_uk",
-							"foregrounds": { "Normal": { "Label": { "name": "lang_uk_label" } } } } }
-					]
-				}
-			}
+			{ "Button": { "prefab": "language_button", "name": "lang_en", "anchor": [0.5, 0], "pivot": [0.5, 0.5], "offset": [0, 100], "action": "pick_en",
+				"foregrounds": { "Normal": { "Label": { "name": "lang_en_label" } } } } },
+			{ "Button": { "prefab": "language_button", "name": "lang_de", "anchor": [0.5, 0], "pivot": [0.5, 0.5], "offset": [0, 130], "action": "pick_de",
+				"foregrounds": { "Normal": { "Label": { "name": "lang_de_label" } } } } },
+			{ "Button": { "prefab": "language_button", "name": "lang_es", "anchor": [0.5, 0], "pivot": [0.5, 0.5], "offset": [0, 160], "action": "pick_es",
+				"foregrounds": { "Normal": { "Label": { "name": "lang_es_label" } } } } },
+			{ "Button": { "prefab": "language_button", "name": "lang_ru", "anchor": [0.5, 0], "pivot": [0.5, 0.5], "offset": [0, 190], "action": "pick_ru",
+				"foregrounds": { "Normal": { "Label": { "name": "lang_ru_label" } } } } },
+			{ "Button": { "prefab": "language_button", "name": "lang_uk", "anchor": [0.5, 0], "pivot": [0.5, 0.5], "offset": [0, 220], "action": "pick_uk",
+				"foregrounds": { "Normal": { "Label": { "name": "lang_uk_label" } } } } }
 		]
 	}
 }

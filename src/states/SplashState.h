@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/State.h"
+#include "graphics/ScreenShake.h"
 #include "graphics/Transition.h"
 #include "screens/MenuBackdrop.h"
 #include "ui/DataLoader.h"
@@ -24,6 +25,7 @@ private:
 	UI::DataLoader interfaceLoader;
 
 	Transition transition;
+	ScreenShake shake;
 
 	bool isLeaving = false;
 };

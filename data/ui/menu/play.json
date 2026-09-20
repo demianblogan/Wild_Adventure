@@ -12,19 +12,20 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "continue_button",
 					"offset":
 					[
 						0,
-						-36
+						-54
 					],
-					"action": "menu_open_single",
+					"action": "menu_continue_game",
 					"foregrounds":
 					{
 						"Normal":
 						{
 							"Label":
 							{
-								"textKey": "play.single_player"
+								"textKey": "common.continue"
 							}
 						}
 					}
@@ -34,20 +35,20 @@
 				"Button":
 				{
 					"prefab": "menu_button",
-					"name": "delete_saves_button",
+					"name": "new_game_button",
 					"offset":
 					[
 						0,
-						0
+						-18
 					],
-					"action": "menu_delete_saves",
+					"action": "menu_start_game",
 					"foregrounds":
 					{
 						"Normal":
 						{
 							"Label":
 							{
-								"textKey": "play.delete_saves"
+								"textKey": "single.new_game"
 							}
 						}
 					}
@@ -57,10 +58,34 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "select_level_button",
 					"offset":
 					[
 						0,
-						36
+						18
+					],
+					"action": "menu_select_level",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"textKey": "single.select_level"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"name": "play_back_button",
+					"offset":
+					[
+						0,
+						54
 					],
 					"action": "menu_back",
 					"foregrounds":

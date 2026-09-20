@@ -9,13 +9,52 @@
 		"children":
 		[
 			{
+				"Element":
+				{
+					"name": "settings_panel_title",
+					"anchor": [0.5, 0.5],
+					"pivot": [0.5, 0.5],
+					"offset": [0, -96],
+					"size": [150, 30],
+					"children":
+					[
+						{
+							"Image":
+							{
+								"anchor": [0.5, 0.5],
+								"pivot": [0.5, 0.5],
+								"offset": [0, 0],
+								"size": [150, 30],
+								"textureName": "label_background",
+								"border": [32, 2]
+							}
+						},
+						{
+							"Label":
+							{
+								"anchor": [0.5, 0.5],
+								"pivot": [0.5, 0.5],
+								"offset": [0, 0],
+								"fontName": "main",
+								"characterSize": 16,
+								"color": [244, 199, 110, 255],
+								"outlineColor": [58, 42, 77, 255],
+								"outlineThickness": 1,
+								"textKey": "settings.title"
+							}
+						}
+					]
+				}
+			},
+			{
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "settings_graphics_button",
 					"offset":
 					[
 						0,
-						-72
+						-50
 					],
 					"action": "menu_open_graphics",
 					"foregrounds":
@@ -34,10 +73,11 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "settings_audio_button",
 					"offset":
 					[
 						0,
-						-36
+						-14
 					],
 					"action": "menu_open_audio",
 					"foregrounds":
@@ -56,10 +96,11 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "settings_controls_button",
 					"offset":
 					[
 						0,
-						0
+						22
 					],
 					"action": "menu_open_controls",
 					"foregrounds":
@@ -78,10 +119,11 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "settings_language_button",
 					"offset":
 					[
 						0,
-						36
+						58
 					],
 					"action": "menu_open_language",
 					"foregrounds":
@@ -100,10 +142,11 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "settings_back_button",
 					"offset":
 					[
 						0,
-						72
+						94
 					],
 					"action": "menu_back",
 					"foregrounds":

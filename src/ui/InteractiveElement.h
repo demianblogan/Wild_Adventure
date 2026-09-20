@@ -53,6 +53,12 @@ namespace UI
 
 		InteractionState GetState() const { return state; }
 
+		// When true (the default), Root draws the highlighted element once
+		// more into the glow layer for a soft bloom. Text-only controls that
+		// already pulse their own alpha/size (e.g. the language picker list)
+		// turn this off so the glow doesn't wash the text out mid-pulse.
+		bool bloomsWhenHighlighted = true;
+
 		virtual void OnDragStart(sf::Vector2f) {}
 		virtual void OnDragMove(sf::Vector2f) {}
 		virtual void OnDragEnd() {}

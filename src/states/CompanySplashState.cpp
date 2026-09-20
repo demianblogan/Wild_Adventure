@@ -48,7 +48,16 @@ void CompanySplashState::HandleEvent(const sf::Event& event)
 		event.is<sf::Event::JoystickButtonPressed>();
 
 	if (anyInput)
-		StartFadeOut();
+		Skip();
+}
+
+void CompanySplashState::Skip()
+{
+	if (phase == Phase::Finished)
+		return;
+
+	phase = Phase::Finished;
+	Leave();
 }
 
 void CompanySplashState::StartFadeOut()
