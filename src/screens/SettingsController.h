@@ -45,6 +45,8 @@ private:
 	void SetupAudioPanel();
 	void SetVolumeDisplay(const std::string& sliderName, const std::string& labelName, int value);
 
+	void SetupGameplayPanel();
+
 	void SetupKeyboardPanel();
 	void BeginKeyCapture(Action action);
 	void ApplyKeyCapture(sf::Keyboard::Key key);

@@ -31,6 +31,9 @@ Application::Application()
 	campaign.Load(AppDataPath::Resolve("save.json").string());
 	localization.SetLanguage(settings.GetLanguage());
 
+	gamepadHaptics.SetVibrationEnabled(settings.IsVibrationEnabled());
+	gamepadHaptics.SetLightbarEnabled(settings.IsLightbarEnabled());
+
 	CreateWindow();
 
 	audioMixer.LoadFromFile("data/audio.json");

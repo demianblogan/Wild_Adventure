@@ -17,6 +17,7 @@ common.continue = Continue
 settings.title = Settings
 settings.audio = Audio
 settings.graphics = Graphics
+settings.gameplay = Gameplay
 settings.controls = Controls
 settings.keyboard = Keyboard
 settings.joystick = Joystick
@@ -32,6 +33,9 @@ graphics.mode_window = Window
 
 audio.sounds = Sounds
 audio.music = Music
+
+gameplay.vibration = Vibration:
+gameplay.lightbar = Controller Light:
 
 controls.move_left = Move Left
 controls.move_right = Move Right

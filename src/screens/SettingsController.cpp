@@ -60,6 +60,7 @@ void SettingsController::RegisterActions()
 {
 	settingsLoader.RegisterAction("menu_open_audio", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "audio"; });
 	settingsLoader.RegisterAction("menu_open_graphics", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "graphics"; });
+	settingsLoader.RegisterAction("menu_open_gameplay", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "gameplay"; });
 	settingsLoader.RegisterAction("menu_open_controls", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "controls"; });
 	settingsLoader.RegisterAction("menu_open_language", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "language"; });
 	settingsLoader.RegisterAction("menu_open_keyboard", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "keyboard"; });
@@ -115,6 +116,18 @@ void SettingsController::RegisterActions()
 			context.settings.SetShowFps(value); // applies immediately, nothing to re-create
 		});
 
+	settingsLoader.RegisterBoolAction("set_vibration", [this](bool value)
+		{
+			context.settings.SetVibrationEnabled(value);
+			context.gamepadHaptics.SetVibrationEnabled(value); // applies immediately
+		});
+
+	settingsLoader.RegisterBoolAction("set_lightbar", [this](bool value)
+		{
+			context.settings.SetLightbarEnabled(value);
+			context.gamepadHaptics.SetLightbarEnabled(value); // applies immediately
+		});
+
 	settingsLoader.RegisterAction("language_prev", [this] { StepLanguage(-1); });
 	settingsLoader.RegisterAction("language_next", [this] { StepLanguage(1); });
 }
@@ -147,7 +160,7 @@ void SettingsController::ShowPanel(const std::string& panelId)
 	// controls don't).
 	if (activeFrame != "frame")
 	{
-		const bool hasOwnTitle = (panelId == "audio" || panelId == "graphics"
+		const bool hasOwnTitle = (panelId == "audio" || panelId == "graphics" || panelId == "gameplay"
 			|| panelId == "keyboard" || panelId == "joystick" || panelId == "language");
 
 		if (UI::Element* block = settingsInterface.FindByName("frame_title_block"))
@@ -157,11 +170,13 @@ void SettingsController::ShowPanel(const std::string& panelId)
 		{
 			container->isVisible = !hasOwnTitle;
 
-			// Sized for the 5-button settings hub by default; controls only
+			// Sized for the 6-button settings hub by default; controls only
 			// has 3 buttons, so it gets a shorter box to match (paired with
 			// re-centering those buttons in the tighter space just below).
 			container->size = (panelId == "controls")
 				? sf::Vector2f(220.0f, 130.0f)
+				: (panelId == "settings")
+				? sf::Vector2f(220.0f, 260.0f)
 				: sf::Vector2f(220.0f, 200.0f);
 		}
 
@@ -196,18 +211,20 @@ void SettingsController::ShowPanel(const std::string& panelId)
 		else if (panelId == "settings")
 		{
 			// Same reasoning as controls above: settings.json's own heading
-			// is hidden (the frame already shows one), so its five buttons
+			// is hidden (the frame already shows one), so its six buttons
 			// re-center on the panel instead of sitting low.
 			if (UI::Element* button = settingsInterface.FindByName("settings_graphics_button"))
-				button->offset.y = -72.0f;
+				button->offset.y = -90.0f;
 			if (UI::Element* button = settingsInterface.FindByName("settings_audio_button"))
-				button->offset.y = -36.0f;
+				button->offset.y = -54.0f;
+			if (UI::Element* button = settingsInterface.FindByName("settings_gameplay_button"))
+				button->offset.y = -18.0f;
 			if (UI::Element* button = settingsInterface.FindByName("settings_controls_button"))
-				button->offset.y = 0.0f;
+				button->offset.y = 18.0f;
 			if (UI::Element* button = settingsInterface.FindByName("settings_language_button"))
-				button->offset.y = 36.0f;
+				button->offset.y = 54.0f;
 			if (UI::Element* button = settingsInterface.FindByName("settings_back_button"))
-				button->offset.y = 72.0f;
+				button->offset.y = 90.0f;
 		}
 	}
 
@@ -215,6 +232,8 @@ void SettingsController::ShowPanel(const std::string& panelId)
 		SetupAudioPanel();
 	else if (panelId == "graphics")
 		SetupGraphicsPanel();
+	else if (panelId == "gameplay")
+		SetupGameplayPanel();
 	else if (panelId == "keyboard")
 		SetupKeyboardPanel();
 	else if (panelId == "language")
@@ -236,6 +255,15 @@ void SettingsController::SetVolumeDisplay(const std::string& sliderName, const s
 
 	if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName(labelName)))
 		label->SetText(std::to_string(value));
+}
+
+void SettingsController::SetupGameplayPanel()
+{
+	if (auto* vibration = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("vibration_checkbox")))
+		vibration->SetChecked(context.settings.IsVibrationEnabled());
+
+	if (auto* lightbar = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("lightbar_checkbox")))
+		lightbar->SetChecked(context.settings.IsLightbarEnabled());
 }
 
 void SettingsController::SetupKeyboardPanel()
@@ -455,7 +483,8 @@ void SettingsController::UpdateLanguageLabel()
 
 bool SettingsController::IsSettingsPanel(const std::string& panelId) const
 {
-	return panelId == "audio" || panelId == "graphics" || panelId == "keyboard" || panelId == "language";
+	return panelId == "audio" || panelId == "graphics" || panelId == "gameplay"
+		|| panelId == "keyboard" || panelId == "language";
 }
 
 void SettingsController::ResetCurrentPanelToDefaults()
@@ -477,6 +506,13 @@ void SettingsController::ResetCurrentPanelToDefaults()
 		context.settings.ResetGraphicsToDefaults();
 		context.graphics.ApplyVsync(); // vsync applies live; resolution/mode wait for Save
 		SetupGraphicsPanel();
+	}
+	else if (panel == "gameplay")
+	{
+		context.settings.ResetGameplayToDefaults();
+		context.gamepadHaptics.SetVibrationEnabled(context.settings.IsVibrationEnabled());
+		context.gamepadHaptics.SetLightbarEnabled(context.settings.IsLightbarEnabled());
+		SetupGameplayPanel();
 	}
 	else if (panel == "keyboard")
 	{
@@ -537,7 +573,7 @@ bool SettingsController::PanelIsDirty(const std::string& panel) const
 {
 	if (panel == "keyboard")
 		return context.input.IsDirty();
-	if (panel == "audio" || panel == "graphics" || panel == "language")
+	if (panel == "audio" || panel == "graphics" || panel == "gameplay" || panel == "language")
 		return context.settings.IsDirty();
 	return false;
 }
@@ -552,7 +588,7 @@ void SettingsController::SavePanel(const std::string& panel)
 	{
 		context.input.SaveConfig(InputPath);
 	}
-	else if (panel == "audio" || panel == "graphics" || panel == "language")
+	else if (panel == "audio" || panel == "graphics" || panel == "gameplay" || panel == "language")
 	{
 		context.settings.Save(SettingsPath);
 		context.graphics.ApplyGraphics();
@@ -579,12 +615,14 @@ void SettingsController::RevertPanel(const std::string& panel)
 	{
 		context.input.Revert();
 	}
-	else if (panel == "audio" || panel == "graphics" || panel == "language")
+	else if (panel == "audio" || panel == "graphics" || panel == "gameplay" || panel == "language")
 	{
 		context.settings.Revert();
 		context.audioMixer.SetSoundVolume(context.settings.GetSoundVolume() / 10.0f);
 		context.audioMixer.SetMusicVolume(context.settings.GetMusicVolume() / 10.0f);
 		context.graphics.ApplyVsync();
+		context.gamepadHaptics.SetVibrationEnabled(context.settings.IsVibrationEnabled());
+		context.gamepadHaptics.SetLightbarEnabled(context.settings.IsLightbarEnabled());
 	}
 }
 

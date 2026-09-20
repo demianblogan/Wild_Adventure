@@ -96,11 +96,34 @@
 				"Button":
 				{
 					"prefab": "menu_button",
-					"name": "settings_controls_button",
+					"name": "settings_gameplay_button",
 					"offset":
 					[
 						0,
 						22
+					],
+					"action": "menu_open_gameplay",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"textKey": "settings.gameplay"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
+					"name": "settings_controls_button",
+					"offset":
+					[
+						0,
+						58
 					],
 					"action": "menu_open_controls",
 					"foregrounds":
@@ -123,7 +146,7 @@
 					"offset":
 					[
 						0,
-						58
+						94
 					],
 					"action": "menu_open_language",
 					"foregrounds":
@@ -146,7 +169,7 @@
 					"offset":
 					[
 						0,
-						94
+						130
 					],
 					"action": "menu_back",
 					"foregrounds":

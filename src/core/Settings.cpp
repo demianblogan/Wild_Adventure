@@ -61,6 +61,16 @@ void Settings::SetShowFps(bool value)
 	current.isShowFpsEnabled = value;
 }
 
+void Settings::SetVibrationEnabled(bool value)
+{
+	current.isVibrationEnabled = value;
+}
+
+void Settings::SetLightbarEnabled(bool value)
+{
+	current.isLightbarEnabled = value;
+}
+
 void Settings::SetLanguage(Language value)
 {
 	current.language = value;
@@ -98,6 +108,13 @@ void Settings::Load(const std::string& path)
 			current.isShowFpsEnabled = graphics.value("showFps", current.isShowFpsEnabled);
 		}
 
+		if (data.contains("gameplay"))
+		{
+			const auto& gameplay = data["gameplay"];
+			current.isVibrationEnabled = gameplay.value("vibration", current.isVibrationEnabled);
+			current.isLightbarEnabled = gameplay.value("lightbar", current.isLightbarEnabled);
+		}
+
 		if (data.contains("localization"))
 		{
 			const auto& localization = data["localization"];
@@ -132,6 +149,9 @@ bool Settings::Save(const std::string& path)
 	data["graphics"]["vsync"] = current.isVsyncEnabled;
 	data["graphics"]["showFps"] = current.isShowFpsEnabled;
 
+	data["gameplay"]["vibration"] = current.isVibrationEnabled;
+	data["gameplay"]["lightbar"] = current.isLightbarEnabled;
+
 	data["localization"]["language"] = LanguageCode(current.language);
 	data["localization"]["languageChosen"] = current.isLanguageChosen;
 
@@ -162,4 +182,11 @@ void Settings::ResetGraphicsToDefaults()
 	current.screenMode = defaults.screenMode;
 	current.isVsyncEnabled = defaults.isVsyncEnabled;
 	current.isShowFpsEnabled = defaults.isShowFpsEnabled;
+}
+
+void Settings::ResetGameplayToDefaults()
+{
+	const SettingsData defaults;
+	current.isVibrationEnabled = defaults.isVibrationEnabled;
+	current.isLightbarEnabled = defaults.isLightbarEnabled;
 }

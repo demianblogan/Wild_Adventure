@@ -10,6 +10,7 @@ common.continue = Продовжити
 settings.title = Налаштування
 settings.audio = Звук
 settings.graphics = Графіка
+settings.gameplay = Геймплей
 settings.controls = Керування
 settings.keyboard = Клавіатура
 settings.joystick = Геймпад
@@ -25,6 +26,9 @@ graphics.mode_window = Віконний
 
 audio.sounds = Звуки
 audio.music = Музика
+
+gameplay.vibration = Вібрація:
+gameplay.lightbar = Підсвітка джойстика:
 
 controls.move_left = Рух ліворуч
 controls.move_right = Рух праворуч

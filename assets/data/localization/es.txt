@@ -10,6 +10,7 @@ common.continue = Continuar
 settings.title = Ajustes
 settings.audio = Audio
 settings.graphics = Gráficos
+settings.gameplay = Jugabilidad
 settings.controls = Controles
 settings.keyboard = Teclado
 settings.joystick = Mando
@@ -25,6 +26,9 @@ graphics.mode_window = Ventana
 
 audio.sounds = Sonidos
 audio.music = Música
+
+gameplay.vibration = Vibración:
+gameplay.lightbar = Luz del mando:
 
 controls.move_left = Mover izquierda
 controls.move_right = Mover derecha
