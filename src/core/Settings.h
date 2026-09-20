@@ -24,6 +24,9 @@ struct SettingsData
 
 	bool isVibrationEnabled = true;
 	bool isLightbarEnabled = true;
+	bool isLowHealthVignetteEnabled = true;
+	bool isHitStopEnabled = true;
+	bool isCameraShakeEnabled = true;
 
 	Language language = Language::English;
 	bool isLanguageChosen = false; // false until the first-run language picker has been confirmed
@@ -63,6 +66,13 @@ public:
 	bool IsLightbarEnabled() const { return current.isLightbarEnabled; }
 	void SetVibrationEnabled(bool value);
 	void SetLightbarEnabled(bool value);
+
+	bool IsLowHealthVignetteEnabled() const { return current.isLowHealthVignetteEnabled; }
+	bool IsHitStopEnabled() const { return current.isHitStopEnabled; }
+	bool IsCameraShakeEnabled() const { return current.isCameraShakeEnabled; }
+	void SetLowHealthVignetteEnabled(bool value);
+	void SetHitStopEnabled(bool value);
+	void SetCameraShakeEnabled(bool value);
 
 	Language GetLanguage() const { return current.language; }
 	bool IsLanguageChosen() const { return current.isLanguageChosen; }

@@ -36,6 +36,9 @@ audio.music = Music
 
 gameplay.vibration = Vibration:
 gameplay.lightbar = Controller Light:
+gameplay.low_health_vignette = Low Health Vignette:
+gameplay.hit_stop = Hit Stop Effect:
+gameplay.camera_shake = Camera Shake:
 
 controls.move_left = Move Left
 controls.move_right = Move Right

@@ -9,7 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # SFML 3.1.0, built from source into libs/SFML (see libs/SFML/README.md):
 # vcpkg's own sfml port has not been updated past 3.0.2 yet.
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/libs/SFML")
-find_package(SFML 3.1 COMPONENTS Graphics Window System Audio CONFIG REQUIRED)
+find_package(SFML 3.1 COMPONENTS Graphics Window System Audio Main CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 # The project is feature-complete, so new source files are not expected; a
@@ -79,8 +79,13 @@ else()
 	target_compile_options(PlatformerLib PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 
-add_executable(Platformer src/main.cpp)
-target_link_libraries(Platformer PRIVATE PlatformerLib)
+# WIN32: builds the shipped game as a GUI app with no console window
+# attached (a plain add_executable defaults to the console subsystem on
+# Windows). SFML::Main supplies the WinMain a WIN32 subsystem app needs and
+# forwards straight to this project's own int main() in main.cpp, so nothing
+# about that file has to change.
+add_executable(Platformer WIN32 src/main.cpp)
+target_link_libraries(Platformer PRIVATE PlatformerLib SFML::Main)
 
 # assets/ and data/ are loaded with paths relative to the current working
 # directory. Some launch paths (Visual Studio's CMake integration among them)

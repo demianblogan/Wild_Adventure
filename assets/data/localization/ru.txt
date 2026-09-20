@@ -29,6 +29,9 @@ audio.music = Музыка
 
 gameplay.vibration = Вибрация:
 gameplay.lightbar = Подсветка джойстика:
+gameplay.low_health_vignette = Виньетка низкого здоровья:
+gameplay.hit_stop = Эффект замирания кадра:
+gameplay.camera_shake = Тряска камеры:
 
 controls.move_left = Движение влево
 controls.move_right = Движение вправо

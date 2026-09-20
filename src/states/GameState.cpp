@@ -23,6 +23,7 @@
 #include "core/Campaign.h"
 #include "core/Random.h"
 #include "core/Resources.h"
+#include "core/Settings.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
 #include "core/Input.h"
@@ -372,7 +373,8 @@ void GameState::Update(float deltaTime)
 	enemySystem.Update();
 	if (enemiesKilled > enemiesBeforeStomp)
 	{
-		hitStopTimer = HitStopDuration;
+		if (context.settings.IsHitStopEnabled())
+			hitStopTimer = HitStopDuration;
 		Haptics::PulseStomp(context.gamepadHaptics);
 	}
 	trunkSystem.Update(deltaTime);
@@ -413,6 +415,10 @@ void GameState::Update(float deltaTime)
 			deathCount, fruitsCollected, maxFruits, enemiesKilled, maxEnemies));
 	}
 
+	// Cheap to set every frame; picks up a live change from the pause menu's
+	// Gameplay panel the moment play resumes, without Camera needing its own
+	// link back to Settings.
+	camera.SetShakeEnabled(context.settings.IsCameraShakeEnabled());
 	camera.Update(deltaTime);
 
 	// Ambient bubbles: spawn across the bottom of the view and let them rise.
@@ -447,6 +453,11 @@ void GameState::UpdatePlayer(float deltaTime)
 			ECS::CollisionState& collisionState, ECS::Jump& jump, ECS::Health& health)
 		{
 			hud.UpdateHearts(health.current, deltaTime);
+
+			if (context.settings.IsLowHealthVignetteEnabled() && health.current == 1)
+				lowHealthVignetteTime += deltaTime;
+			else
+				lowHealthVignetteTime = 0.0f;
 
 			const sf::Vector2f feet = { transform.x, transform.y };
 			camera.MoveTo(feet);
@@ -534,5 +545,20 @@ void GameState::Render(float interpolationFactor)
 
 	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
 	hud.Draw(renderTarget);
+
+	// Low-health vignette: a pulsing red tint on the screen edges while down
+	// to the last heart. Radius reaches past the corners so only the edges
+	// ever show any tint at all; the center always stays clear.
+	if (lowHealthVignetteTime > 0.0f)
+	{
+		const float pulse = std::sin(lowHealthVignetteTime * LowHealthVignetteSpeed) * 0.5f + 0.5f;
+		const float intensity = LowHealthVignetteMinIntensity
+			+ (LowHealthVignetteMaxIntensity - LowHealthVignetteMinIntensity) * pulse;
+
+		lightOverlay.Draw(renderTarget,
+			{ VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f },
+			LowHealthVignetteRadius, intensity, sf::Color(200, 20, 20));
+	}
+
 	transition.Draw(renderTarget);
 }

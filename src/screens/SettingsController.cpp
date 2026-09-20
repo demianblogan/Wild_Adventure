@@ -128,6 +128,21 @@ void SettingsController::RegisterActions()
 			context.gamepadHaptics.SetLightbarEnabled(value); // applies immediately
 		});
 
+	settingsLoader.RegisterBoolAction("set_low_health_vignette", [this](bool value)
+		{
+			context.settings.SetLowHealthVignetteEnabled(value); // applies immediately, checked live each frame
+		});
+
+	settingsLoader.RegisterBoolAction("set_hit_stop", [this](bool value)
+		{
+			context.settings.SetHitStopEnabled(value); // applies immediately, checked live each frame
+		});
+
+	settingsLoader.RegisterBoolAction("set_camera_shake", [this](bool value)
+		{
+			context.settings.SetCameraShakeEnabled(value); // applies immediately, checked live each frame
+		});
+
 	settingsLoader.RegisterAction("language_prev", [this] { StepLanguage(-1); });
 	settingsLoader.RegisterAction("language_next", [this] { StepLanguage(1); });
 }
@@ -201,6 +216,12 @@ void SettingsController::ShowPanel(const std::string& panelId)
 				container->size = { 220.0f, 220.0f };
 				container->offset = { 0.0f, 0.0f };
 			}
+			else if (panelId == "gameplay")
+			{
+				// Five checkbox rows plus title and buttons need a taller box
+				// than the other panels' default.
+				container->size = { 220.0f, 230.0f };
+			}
 			else
 			{
 				container->size = { 220.0f, 200.0f };
@@ -271,6 +292,15 @@ void SettingsController::SetupGameplayPanel()
 
 	if (auto* lightbar = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("lightbar_checkbox")))
 		lightbar->SetChecked(context.settings.IsLightbarEnabled());
+
+	if (auto* vignette = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("low_health_vignette_checkbox")))
+		vignette->SetChecked(context.settings.IsLowHealthVignetteEnabled());
+
+	if (auto* hitStop = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("hit_stop_checkbox")))
+		hitStop->SetChecked(context.settings.IsHitStopEnabled());
+
+	if (auto* cameraShake = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("camera_shake_checkbox")))
+		cameraShake->SetChecked(context.settings.IsCameraShakeEnabled());
 }
 
 void SettingsController::SetupKeyboardPanel()

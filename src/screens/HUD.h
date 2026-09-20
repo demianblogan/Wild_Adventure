@@ -60,6 +60,22 @@ private:
 
 	static constexpr float HeartBlinkDuration = 0.5f;
 
+	// While down to the last heart, it double-blinks on a loop instead of
+	// just sitting there -- two quick blinks then a longer pause, timed to
+	// match Haptics::HeartbeatPulser's vibration/lightbar beat (see
+	// core/HapticCues.h) so the heart, the controller buzz and the lightbar
+	// all read as the same heartbeat. Duplicated here rather than shared
+	// because pulling that header in (and everything it drags in for
+	// talking to the controller) just for three float constants isn't worth
+	// coupling this purely-visual class to it.
+	float criticalHeartbeatTimer = 0.0f;
+	float criticalHeartbeatBlinkRemaining = 0.0f;
+	bool isCriticalHeartbeatSecondTap = false;
+
+	static constexpr float CriticalHeartbeatTapDuration = 0.05f;
+	static constexpr float CriticalHeartbeatGapBetweenTaps = 0.12f;
+	static constexpr float CriticalHeartbeatGapAfterPair = 0.55f;
+
 	// "Level X" banner: slides in from above the screen, holds, slides back out.
 	enum class BannerPhase
 	{

@@ -89,6 +89,34 @@ void HUD::UpdateHearts(int currentHealth, float deltaTime)
 			blinkingHeart = -1; // fully gone now
 	}
 
+	// The last heart double-blinks on a loop for as long as it's the only one
+	// left (and nothing is already blinking it away above).
+	const bool isCriticalHeartbeatActive = (displayedHealth == 1 && blinkingHeart < 0);
+
+	if (isCriticalHeartbeatActive)
+	{
+		criticalHeartbeatTimer -= deltaTime;
+		if (criticalHeartbeatBlinkRemaining > 0.0f)
+			criticalHeartbeatBlinkRemaining -= deltaTime;
+
+		if (criticalHeartbeatTimer <= 0.0f)
+		{
+			criticalHeartbeatBlinkRemaining = CriticalHeartbeatTapDuration;
+			criticalHeartbeatTimer = isCriticalHeartbeatSecondTap
+				? CriticalHeartbeatGapAfterPair
+				: CriticalHeartbeatGapBetweenTaps;
+			isCriticalHeartbeatSecondTap = !isCriticalHeartbeatSecondTap;
+		}
+	}
+	else
+	{
+		criticalHeartbeatTimer = 0.0f;
+		criticalHeartbeatBlinkRemaining = 0.0f;
+		isCriticalHeartbeatSecondTap = false;
+	}
+
+	const bool isCriticalHeartHidden = isCriticalHeartbeatActive && criticalHeartbeatBlinkRemaining > 0.0f;
+
 	for (int i = 0; i < maxHearts; i++)
 	{
 		UI::Element* heart = interface.FindByName("heart" + std::to_string(i));
@@ -96,7 +124,7 @@ void HUD::UpdateHearts(int currentHealth, float deltaTime)
 			continue;
 
 		if (i < displayedHealth)
-			heart->isVisible = true;       // settled, alive
+			heart->isVisible = !(i == 0 && isCriticalHeartHidden); // settled, alive (or mid-heartbeat blink)
 		else if (i == blinkingHeart)
 			heart->isVisible = isBlinkOn;    // blinking out
 		else

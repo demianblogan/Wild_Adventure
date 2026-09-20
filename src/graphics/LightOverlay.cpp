@@ -20,9 +20,11 @@ namespace
 
 LightOverlay::LightOverlay()
 {
-	// Black disc whose alpha rises smoothly from 0 (lit center) to full
-	// (darkness) toward the edge; the square's corners are fully dark, so the
-	// sprite blends seamlessly into the filler rectangles around it.
+	// White disc whose alpha rises smoothly from 0 (lit center) to full
+	// (fully opaque) toward the edge; the square's corners reach full alpha,
+	// so the sprite blends seamlessly into the filler rectangles around it.
+	// Stored as white (not the tint color) so Draw's `tint` parameter can
+	// recolor it freely -- multiplying by white leaves a color unchanged.
 	sf::Image image(sf::Vector2u{ TextureSize, TextureSize }, sf::Color::Transparent);
 
 	const float half = TextureSize / 2.0f;
@@ -38,31 +40,33 @@ LightOverlay::LightOverlay()
 			const float shade = SmoothStep(InnerFraction, 1.0f, distance);
 			const auto alpha = static_cast<std::uint8_t>(shade * 255.0f);
 
-			image.setPixel(sf::Vector2u{ x, y }, sf::Color(0, 0, 0, alpha));
+			image.setPixel(sf::Vector2u{ x, y }, sf::Color(255, 255, 255, alpha));
 		}
 	}
 
 	if (!gradientTexture.loadFromImage(image))
-		return; // Draw still works: the rectangles darken everything but the circle
+		return; // Draw still works: the rectangles tint everything but the circle
 
 	gradientTexture.setSmooth(true);
 }
 
-void LightOverlay::Draw(sf::RenderTarget& target, sf::Vector2f lightCenter, float radius, float darkness)
+void LightOverlay::Draw(sf::RenderTarget& target, sf::Vector2f center, float radius, float intensity, sf::Color tint)
 {
-	if (radius <= 0.0f || darkness <= 0.0f)
+	if (radius <= 0.0f || intensity <= 0.0f)
 		return;
 
-	const auto alpha = static_cast<std::uint8_t>(std::clamp(darkness, 0.0f, 1.0f) * 255.0f);
+	const auto alpha = static_cast<std::uint8_t>(std::clamp(intensity, 0.0f, 1.0f) * 255.0f);
+	const sf::Color scaledTint(tint.r, tint.g, tint.b, alpha);
 
 	// The gradient sprite over the circle's bounding box. Its own alpha is
-	// scaled by the overall darkness through the sprite color.
+	// scaled by the overall intensity, and its white RGB takes on `tint`,
+	// through the sprite color.
 	sf::Sprite sprite(gradientTexture);
 	sprite.setOrigin({ TextureSize / 2.0f, TextureSize / 2.0f });
 	const float scale = (radius * 2.0f) / static_cast<float>(TextureSize);
 	sprite.setScale({ scale, scale });
-	sprite.setPosition(lightCenter);
-	sprite.setColor(sf::Color(255, 255, 255, alpha));
+	sprite.setPosition(center);
+	sprite.setColor(scaledTint);
 	target.draw(sprite);
 
 	// Four solid bands covering the view outside the circle's bounding box.
@@ -72,12 +76,10 @@ void LightOverlay::Draw(sf::RenderTarget& target, sf::Vector2f lightCenter, floa
 	const float viewRight  = viewLeft + view.getSize().x;
 	const float viewBottom = viewTop + view.getSize().y;
 
-	const float boxLeft   = lightCenter.x - radius;
-	const float boxTop    = lightCenter.y - radius;
-	const float boxRight  = lightCenter.x + radius;
-	const float boxBottom = lightCenter.y + radius;
-
-	const sf::Color dark(0, 0, 0, alpha);
+	const float boxLeft   = center.x - radius;
+	const float boxTop    = center.y - radius;
+	const float boxRight  = center.x + radius;
+	const float boxBottom = center.y + radius;
 
 	const auto drawBand = [&](float left, float top, float right, float bottom)
 	{
@@ -86,7 +88,7 @@ void LightOverlay::Draw(sf::RenderTarget& target, sf::Vector2f lightCenter, floa
 
 		sf::RectangleShape band({ right - left, bottom - top });
 		band.setPosition({ left, top });
-		band.setFillColor(dark);
+		band.setFillColor(scaledTint);
 		target.draw(band);
 	};
 

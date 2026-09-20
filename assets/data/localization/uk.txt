@@ -29,6 +29,9 @@ audio.music = Музика
 
 gameplay.vibration = Вібрація:
 gameplay.lightbar = Підсвітка джойстика:
+gameplay.low_health_vignette = Віньєтка низького здоров'я:
+gameplay.hit_stop = Ефект застигання кадру:
+gameplay.camera_shake = Тряска камери:
 
 controls.move_left = Рух ліворуч
 controls.move_right = Рух праворуч

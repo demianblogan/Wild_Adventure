@@ -29,6 +29,9 @@ audio.music = Musik
 
 gameplay.vibration = Vibration:
 gameplay.lightbar = Controller-Licht:
+gameplay.low_health_vignette = Vignette bei wenig Leben:
+gameplay.hit_stop = Freeze-Frame-Effekt:
+gameplay.camera_shake = Kameraschütteln:
 
 controls.move_left = Nach links
 controls.move_right = Nach rechts

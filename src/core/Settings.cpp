@@ -71,6 +71,21 @@ void Settings::SetLightbarEnabled(bool value)
 	current.isLightbarEnabled = value;
 }
 
+void Settings::SetLowHealthVignetteEnabled(bool value)
+{
+	current.isLowHealthVignetteEnabled = value;
+}
+
+void Settings::SetHitStopEnabled(bool value)
+{
+	current.isHitStopEnabled = value;
+}
+
+void Settings::SetCameraShakeEnabled(bool value)
+{
+	current.isCameraShakeEnabled = value;
+}
+
 void Settings::SetLanguage(Language value)
 {
 	current.language = value;
@@ -113,6 +128,9 @@ void Settings::Load(const std::string& path)
 			const auto& gameplay = data["gameplay"];
 			current.isVibrationEnabled = gameplay.value("vibration", current.isVibrationEnabled);
 			current.isLightbarEnabled = gameplay.value("lightbar", current.isLightbarEnabled);
+			current.isLowHealthVignetteEnabled = gameplay.value("lowHealthVignette", current.isLowHealthVignetteEnabled);
+			current.isHitStopEnabled = gameplay.value("hitStop", current.isHitStopEnabled);
+			current.isCameraShakeEnabled = gameplay.value("cameraShake", current.isCameraShakeEnabled);
 		}
 
 		if (data.contains("localization"))
@@ -151,6 +169,9 @@ bool Settings::Save(const std::string& path)
 
 	data["gameplay"]["vibration"] = current.isVibrationEnabled;
 	data["gameplay"]["lightbar"] = current.isLightbarEnabled;
+	data["gameplay"]["lowHealthVignette"] = current.isLowHealthVignetteEnabled;
+	data["gameplay"]["hitStop"] = current.isHitStopEnabled;
+	data["gameplay"]["cameraShake"] = current.isCameraShakeEnabled;
 
 	data["localization"]["language"] = LanguageCode(current.language);
 	data["localization"]["languageChosen"] = current.isLanguageChosen;
@@ -189,4 +210,7 @@ void Settings::ResetGameplayToDefaults()
 	const SettingsData defaults;
 	current.isVibrationEnabled = defaults.isVibrationEnabled;
 	current.isLightbarEnabled = defaults.isLightbarEnabled;
+	current.isLowHealthVignetteEnabled = defaults.isLowHealthVignetteEnabled;
+	current.isHitStopEnabled = defaults.isHitStopEnabled;
+	current.isCameraShakeEnabled = defaults.isCameraShakeEnabled;
 }

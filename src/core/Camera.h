@@ -10,8 +10,14 @@ public:
 	void SetWorldSize(sf::Vector2f size); // level size in pixels, for edge clamping (zero = no clamp)
 
 	// Adds shake trauma (clamped to 1). The offset scales with trauma squared,
-	// so light bumps stay subtle while stacked hits rattle the screen.
+	// so light bumps stay subtle while stacked hits rattle the screen. A no-op
+	// while shake is disabled (see SetShakeEnabled).
 	void Shake(float trauma);
+
+	// Player-facing toggle (Settings > Gameplay). Disabling it drops any
+	// trauma already queued up too, rather than just ignoring new Shake()
+	// calls, so turning it off mid-shake stops it immediately.
+	void SetShakeEnabled(bool enabled);
 
 	// Decays trauma and rolls a fresh shake offset; call once per fixed step.
 	void Update(float deltaTime);
@@ -25,6 +31,7 @@ private:
 	sf::Vector2f currentCenter;
 	sf::Vector2f worldSize = { 0.0f, 0.0f };
 
+	bool isShakeEnabled = true;
 	float trauma = 0.0f;                       // 0..1
 	sf::Vector2f shakeOffset = { 0.0f, 0.0f }; // current frame's offset in pixels
 

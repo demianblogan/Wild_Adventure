@@ -25,7 +25,21 @@ void Camera::SetWorldSize(sf::Vector2f size)
 
 void Camera::Shake(float trauma)
 {
+	if (!isShakeEnabled)
+		return;
+
 	this->trauma = std::min(1.0f, this->trauma + trauma);
+}
+
+void Camera::SetShakeEnabled(bool enabled)
+{
+	isShakeEnabled = enabled;
+
+	if (!isShakeEnabled)
+	{
+		trauma = 0.0f;
+		shakeOffset = { 0.0f, 0.0f };
+	}
 }
 
 void Camera::Update(float deltaTime)

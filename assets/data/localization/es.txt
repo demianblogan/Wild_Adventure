@@ -29,6 +29,9 @@ audio.music = Música
 
 gameplay.vibration = Vibración:
 gameplay.lightbar = Luz del mando:
+gameplay.low_health_vignette = Viñeta de poca vida:
+gameplay.hit_stop = Efecto de congelado:
+gameplay.camera_shake = Sacudida de cámara:
 
 controls.move_left = Mover izquierda
 controls.move_right = Mover derecha
