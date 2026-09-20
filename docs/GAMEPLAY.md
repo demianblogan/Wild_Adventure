@@ -33,17 +33,21 @@ then it tumbles and falls off-screen — see [ARCHITECTURE.md](ARCHITECTURE.md#g
 anything else (walking into one, its projectile, its shell) deals contact
 damage to the player instead.
 
-| Enemy | Behavior |
-|---|---|
-| **Bee** | Flies a figure-eight patrol around its spawn point; closes in and fires a bullet straight down when the player is nearby. |
-| **Blue Bird** | Flies a straight patrol line (horizontal or vertical), reversing at its configured bounds or on hitting a wall/ceiling. No attack. |
-| **Chicken** | Idles until the player enters its vision box, then runs at them; gives up and returns to idling after losing sight for a moment. |
-| **Ghost** | Cycles visible → disappearing → invisible → appearing; keeps patrolling while invisible, but can only be stomped while visible. |
-| **Mushroom** | A simple ground patroller: walks until it hits a wall or the edge of a platform, pauses, and reverses. |
-| **Plant** | Stationary and one-directional; shoots a horizontal bullet when the player is in front of it, at the same height, and in range. |
-| **Snail** | Ground patroller. The **first** stomp doesn't kill it — it retreats into a shell instead, which then becomes a separate, kickable **Shell** entity: resting until touched, then rolling and bouncing off walls until it's stomped or runs its course. |
-| **Trunk** | Ground patroller that stops to fire a horizontal bullet when the player is in range, then resumes patrolling. |
-| **Turtle** | Stationary, cycling safe → spikes emerging → spiked → spikes retracting. Stomping it while spiked hurts the player instead of killing it — it's only vulnerable during the safe phase. |
+| Sprite | Enemy | Behavior | Score |
+|:---:|---|---|---:|
+| <img src="media/enemies/bee.png" width="56"> | Bee | Flies a figure-eight patrol around its spawn point; closes in and fires a bullet straight down when the player is nearby. | 25 |
+| <img src="media/enemies/blue_bird.png" width="56"> | Blue Bird | Flies a straight patrol line (horizontal or vertical), reversing at its configured bounds or on hitting a wall/ceiling. No attack. | 20 |
+| <img src="media/enemies/chicken.png" width="56"> | Chicken | Idles until the player enters its vision box, then runs at them; gives up and returns to idling after losing sight for a moment. | 25 |
+| <img src="media/enemies/ghost.png" width="56"> | Ghost | Cycles visible → disappearing → invisible → appearing; keeps patrolling while invisible, but can only be stomped while visible. | 20 |
+| <img src="media/enemies/mushroom.png" width="56"> | Mushroom | A simple ground patroller: walks until it hits a wall or the edge of a platform, pauses, and reverses. | 10 |
+| <img src="media/enemies/plant.png" width="56"> | Plant | Stationary and one-directional; shoots a horizontal bullet when the player is in front of it, at the same height, and in range. | 20 |
+| <img src="media/enemies/snail.png" width="56"> | Snail | Ground patroller. The **first** stomp doesn't kill it — it retreats into a shell instead, which then becomes a separate, kickable **Shell** entity: resting until touched, then rolling and bouncing off walls until it's stomped or runs its course. | 15 |
+| <img src="media/enemies/trunk.png" width="56"> | Trunk | Ground patroller that stops to fire a horizontal bullet when the player is in range, then resumes patrolling. | 15 |
+| <img src="media/enemies/turtle.png" width="56"> | Turtle | Stationary, cycling safe → spikes emerging → spiked → spikes retracting. Stomping it while spiked hurts the player instead of killing it — it's only vulnerable during the safe phase. | 20 |
+
+Icons are a single frame cropped from each enemy's idle spritesheet (they're
+all multi-frame animations in `assets/textures/enemies/`, not standalone
+icon files) and scaled up with nearest-neighbor so the pixel art stays crisp.
 
 ---
 
