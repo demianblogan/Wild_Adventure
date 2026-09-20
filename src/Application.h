@@ -2,6 +2,7 @@
 
 #include "Context.h"
 #include "core/Campaign.h"
+#include "core/GamepadHaptics.h"
 #include "core/GraphicsTarget.h"
 #include "core/Input.h"
 #include "core/Settings.h"
@@ -55,6 +56,7 @@ private:
 	Settings settings;
 	Campaign campaign;
 	LocalizationManager localization;
+	Haptics::GamepadHaptics gamepadHaptics;
 	Context context;
 
 	int appliedWidth = 0;

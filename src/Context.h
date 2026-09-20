@@ -14,6 +14,11 @@ namespace Audio
 	class Mixer;
 }
 
+namespace Haptics
+{
+	class GamepadHaptics;
+}
+
 struct Context
 {
 	VirtualScreen& virtualScreen;
@@ -25,4 +30,5 @@ struct Context
 	GraphicsTarget& graphics;
 	Campaign& campaign;
 	LocalizationManager& localization;
+	Haptics::GamepadHaptics& gamepadHaptics;
 };

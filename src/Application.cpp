@@ -22,7 +22,7 @@
 Application::Application()
 	: desktopMode(sf::VideoMode::getDesktopMode())
 	, audioMixer(resources)
-	, context(virtualScreen, stateMachine, resources, audioMixer, input, settings, *this, campaign, localization)
+	, context(virtualScreen, stateMachine, resources, audioMixer, input, settings, *this, campaign, localization, gamepadHaptics)
 {
 	// Per-player data (settings, campaign progress, key bindings) lives under
 	// %LOCALAPPDATA%, never inside the install/repo directory; only the
@@ -188,6 +188,7 @@ void Application::ProcessEvents()
 void Application::Update(float deltaTime)
 {
 	input.Update();
+	gamepadHaptics.Update(deltaTime);
 	stateMachine.Update(deltaTime);
 }
 

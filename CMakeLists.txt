@@ -23,9 +23,24 @@ file(GLOB_RECURSE PLATFORMER_LIB_SOURCES CONFIGURE_DEPENDS
 list(REMOVE_ITEM PLATFORMER_LIB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 list(SORT PLATFORMER_LIB_SOURCES)
 
+# DualSense/DualShock rumble + lightbar support: Ohjurot/DualSense-Windows
+# (MIT), vendored in full under libs/DualSenseWindows/, since Windows has no
+# public vendor API for these controllers (XInput doesn't cover them at
+# all) -- it talks to the hardware directly over raw HID instead. See
+# libs/DualSenseWindows/LICENSE.
+file(GLOB DUALSENSE_WINDOWS_SOURCES CONFIGURE_DEPENDS
+	"${CMAKE_CURRENT_SOURCE_DIR}/libs/DualSenseWindows/src/DualSenseWindows/*.cpp"
+)
+
 # Everything except main() lives in a library, so the test executable below
 # can link the whole game without also pulling in a competing main().
-add_library(PlatformerLib STATIC ${PLATFORMER_LIB_SOURCES})
+add_library(PlatformerLib STATIC ${PLATFORMER_LIB_SOURCES} ${DUALSENSE_WINDOWS_SOURCES})
+
+# Third-party code: builds at /W3 without warnings-as-errors, unlike the
+# rest of this target below.
+set_source_files_properties(${DUALSENSE_WINDOWS_SOURCES} PROPERTIES
+	COMPILE_OPTIONS "$<$<CXX_COMPILER_ID:MSVC>:/W3;/WX->"
+)
 
 target_link_libraries(PlatformerLib PUBLIC
 	SFML::Graphics
@@ -33,9 +48,26 @@ target_link_libraries(PlatformerLib PUBLIC
 	SFML::System
 	SFML::Audio
 	nlohmann_json::nlohmann_json
+	Xinput.lib
+	Setupapi.lib
+	Hid.lib
 )
 
-target_include_directories(PlatformerLib PUBLIC src)
+# DS5W_BUILD_LIB: DualSenseWindows is vendored as source, not a DLL, so its
+# API must not be declared __declspec(dllimport) (its default with neither
+# macro defined). PUBLIC so it stays consistent for every translation unit
+# that includes its headers, including the test executable below.
+target_compile_definitions(PlatformerLib PUBLIC DS5W_BUILD_LIB)
+
+target_include_directories(PlatformerLib PUBLIC src
+	"${CMAKE_CURRENT_SOURCE_DIR}/libs/DualSenseWindows/include"
+	# DualSenseWindows's own .cpp files reach for a few headers (DS_CRC32.h,
+	# DS5_Input.h, DS5_Output.h) that live next to them under src/ rather
+	# than in the public include/ folder above, via the same
+	# <DualSenseWindows/...> angle-bracket form -- so src/ needs to be on
+	# the include path too, matching how the vendored library is set up
+	# upstream.
+	"${CMAKE_CURRENT_SOURCE_DIR}/libs/DualSenseWindows/src")
 
 if (MSVC)
 	# C4458: a constructor/setter parameter deliberately shares a name with the
