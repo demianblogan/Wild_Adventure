@@ -1,7 +1,7 @@
 <h1 align="center">Wild Adventure</h1>
 
 <p align="center">
-  A handcrafted pixel-art 2D platformer — C++23 / SFML 3.1, a custom sparse-set ECS, no game framework.
+  A handcrafted pixel-art 2D platformer — C++23 / SFML 3.1, a custom sparse-set ECS.
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 
 ## What it is
 
-A hand-built platforming campaign across 7 handcrafted levels: run, jump, double-jump and wall-slide past 9 enemy types and environmental traps, smash crates for fruit, and chase a clean 3-star clear — no deaths, every fruit, every enemy — on the way to unlocking one of 4 playable skins. Built from scratch on a custom sparse-set Entity-Component-System; no Unity, no Godot, no third-party game engine.
+A hand-built platforming campaign across 7 handcrafted levels: run, jump, double-jump and wall-slide past 9 enemy types and environmental traps, smash crates for fruit, and chase a clean 3-star clear — no deaths, every fruit, every enemy — on the way to unlocking one of 4 playable skins. Built from scratch on a custom sparse-set Entity-Component-System.
 
 <table align="center">
   <tr>
