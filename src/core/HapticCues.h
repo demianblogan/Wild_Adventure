@@ -141,12 +141,20 @@ namespace Haptics
 	// One running footstep: a very light, very short tap, timed to the same
 	// cadence as the run-dust VFX (see PlayerFeedbackController) -- inspired
 	// by Astro's Playroom, where every stride has its own faint kick.
-	constexpr float FootstepMotor = 0.14f;
+	//
+	// Deliberately on the HIGH-frequency motor, not the low one: the
+	// low-frequency motor is a heavier, slower-spinning weight that reads as
+	// a blunt "thunk" even at low strength and barely has time to spin up at
+	// all within a ~35ms pulse, while the high-frequency motor is a much
+	// lighter, faster-spinning one built for exactly this kind of fine,
+	// buzzy texture (footsteps, reloads, menu ticks are the textbook use for
+	// it). Using the low motor here is what made this read as "coarse".
+	constexpr float FootstepMotor = 0.10f;
 	constexpr float FootstepDuration = 0.035f;
 
 	inline void PulseFootstep(GamepadHaptics& haptics)
 	{
-		haptics.PulseVibration(FootstepMotor, 0.f, FootstepDuration);
+		haptics.PulseVibration(0.f, FootstepMotor, FootstepDuration);
 	}
 
 	// Picking up a fruit: light and high-only, a little "sparkle" rather than
