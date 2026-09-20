@@ -259,15 +259,20 @@ void SettingsController::BeginKeyCapture(Action action)
 		label->SetText(context.localization.GetText("controls.capturing"));
 }
 
+void SettingsController::CancelKeyCapture()
+{
+	isCapturingKey = false;
+	isWaitingForKeyRelease = true;
+	SetupKeyboardPanel();
+}
+
 void SettingsController::ApplyKeyCapture(sf::Keyboard::Key key)
 {
 	// Escape cancels the capture; it is reserved as the fixed pause/back key
 	// and can never be bound to a game action.
 	if (key == sf::Keyboard::Key::Escape)
 	{
-		isCapturingKey = false;
-		isWaitingForKeyRelease = true;
-		SetupKeyboardPanel();
+		CancelKeyCapture();
 		return;
 	}
 
@@ -625,6 +630,15 @@ void SettingsController::Update(float deltaTime)
 	settingsInterface.Update(deltaTime);
 
 	Input& input = context.input;
+
+	// A gamepad has no keyboard event to swallow in HandleEvent, so give it a
+	// way out of key capture here: its "back" button cancels the rebind, same
+	// as pressing Escape.
+	if (isCapturingKey && input.WasPressed(Action::MenuBack))
+	{
+		CancelKeyCapture();
+		return;
+	}
 
 	if (isWaitingForKeyRelease && !isCapturingKey)
 	{
