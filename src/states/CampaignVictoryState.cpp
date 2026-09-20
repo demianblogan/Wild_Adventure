@@ -34,6 +34,7 @@ CampaignVictoryState::CampaignVictoryState(Context& context)
 	, victoryLoader(context.resources)
 {
 	victoryLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	victoryLoader.SetButtonHaptics(context.gamepadHaptics);
 	victoryLoader.SetLocalization(context.localization);
 	RegisterActions();
 	victoryInterface.SetContent(victoryLoader.LoadFromFile(VictoryUiPath));

@@ -82,6 +82,7 @@ LevelCompleteState::LevelCompleteState(Context& context, std::string levelPath, 
 	, maxEnemies(maxEnemies)
 {
 	completeLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	completeLoader.SetButtonHaptics(context.gamepadHaptics);
 	completeLoader.SetLocalization(context.localization);
 	RegisterActions();
 	completeInterface.SetContent(completeLoader.LoadFromFile(LevelCompleteUiPath));

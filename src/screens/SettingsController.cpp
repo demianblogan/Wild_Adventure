@@ -4,6 +4,7 @@
 #include "audio/Mixer.h"
 #include "core/AppDataPath.h"
 #include "core/GraphicsTarget.h"
+#include "core/HapticCues.h"
 #include "core/Resources.h"
 #include "core/Settings.h"
 #include "core/StateMachine.h"
@@ -37,6 +38,7 @@ SettingsController::SettingsController(Context& context)
 	, settingsLoader(context.resources)
 {
 	settingsLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	settingsLoader.SetButtonHaptics(context.gamepadHaptics);
 	settingsLoader.SetLocalization(context.localization);
 	RegisterActions();
 }
@@ -72,8 +74,12 @@ void SettingsController::RegisterActions()
 	settingsLoader.RegisterFloatAction("set_sound_volume", [this](float value)
 		{
 			const int level = static_cast<int>(std::lround(value));
+			const int previousLevel = context.settings.GetSoundVolume();
 			context.settings.SetSoundVolume(level);
 			context.audioMixer.SetSoundVolume(level / 10.0f);
+
+			if (level != previousLevel)
+				Haptics::PulseSlider(context.gamepadHaptics, level > previousLevel ? 1 : -1, level / 10.0f);
 
 			if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("sound_value")))
 				label->SetText(std::to_string(level));
@@ -82,8 +88,12 @@ void SettingsController::RegisterActions()
 	settingsLoader.RegisterFloatAction("set_music_volume", [this](float value)
 		{
 			const int level = static_cast<int>(std::lround(value));
+			const int previousLevel = context.settings.GetMusicVolume();
 			context.settings.SetMusicVolume(level);
 			context.audioMixer.SetMusicVolume(level / 10.0f);
+
+			if (level != previousLevel)
+				Haptics::PulseSlider(context.gamepadHaptics, level > previousLevel ? 1 : -1, level / 10.0f);
 
 			if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("music_value")))
 				label->SetText(std::to_string(level));

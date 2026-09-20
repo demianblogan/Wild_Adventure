@@ -28,6 +28,7 @@ PauseState::PauseState(Context& context, std::string levelPath, int levelNumber)
 	, levelNumber(levelNumber)
 {
 	pauseLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	pauseLoader.SetButtonHaptics(context.gamepadHaptics);
 	pauseLoader.SetLocalization(context.localization);
 	lastLocalizationRevision = context.localization.Revision();
 	RegisterActions();

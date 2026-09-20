@@ -1,5 +1,6 @@
 #include "screens/TitleDropAnimation.h"
 
+#include "core/HapticCues.h"
 #include "core/Random.h"
 #include "core/Resources.h"
 #include "graphics/ScreenShake.h"
@@ -136,7 +137,7 @@ namespace
 }
 
 void BuildTitleDropAnimation(UI::Element& container, Resources& resources, ScreenShake& shake,
-	const std::string& asciiText, std::function<void()> onAllLanded)
+	Haptics::GamepadHaptics& haptics, const std::string& asciiText, std::function<void()> onAllLanded)
 {
 	const sf::Font& font = resources.fonts.Get(FontName);
 
@@ -190,6 +191,13 @@ void BuildTitleDropAnimation(UI::Element& container, Resources& resources, Scree
 	// callback so the last one to settle can tell it was the last one.
 	auto landedCount = std::make_shared<std::size_t>(0);
 
+	// Separate counter for the vibration pulse: it fires at the landing
+	// impact (shrink finishing), one full stage earlier than landedCount
+	// above (which only advances once the spring-back settles), and counts
+	// up in the same left-to-right landing order.
+	auto landedLetterIndex = std::make_shared<std::size_t>(0);
+	const float letterFractionStep = totalLetters > 1 ? 1.f / static_cast<float>(totalLetters - 1) : 0.f;
+
 	// Every letter launches from the same spot -- the title block's own
 	// center -- so they all visibly come from one shared point, as if flung
 	// out from right in front of the camera.
@@ -242,10 +250,13 @@ void BuildTitleDropAnimation(UI::Element& container, Resources& resources, Scree
 			UI::AnimationCurve::EaseOut, UI::AnimationLoop::Once,
 			[&letter](float s) { letter.SetCharacterSize(static_cast<unsigned int>(s + 0.5f)); }, delay));
 
-		shrink.SetOnFinished([&letter, &container, &resources, &shake, restY, centerX, baselineY, totalLetters, landedCount, onAllLanded]
+		shrink.SetOnFinished([&letter, &container, &resources, &shake, &haptics, restY, centerX, baselineY,
+			totalLetters, landedCount, landedLetterIndex, letterFractionStep, onAllLanded]
 			{
 				shake.Add(ShakeTraumaPerLetter);
 				EmitDustBurst(container, resources, centerX, baselineY);
+
+				Haptics::PulseTitleLetterLanded(haptics, static_cast<float>((*landedLetterIndex)++) * letterFractionStep);
 
 				PlayLandingBounce(letter, restY, [landedCount, totalLetters, onAllLanded]
 					{

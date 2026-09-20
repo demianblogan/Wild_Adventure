@@ -1,6 +1,7 @@
 #include "DataLoader.h"
 
 #include "audio/Mixer.h"
+#include "core/HapticCues.h"
 #include "localization/LocalizationManager.h"
 #include "ui/Button.h"
 #include "ui/Checkbox.h"
@@ -348,19 +349,27 @@ namespace UI
 				if (data.contains("action"))
 					action = loader.FindAction(data["action"]);
 
-				if (loader.buttonSoundMixer != nullptr)
+				if (loader.buttonSoundMixer != nullptr || loader.buttonHaptics != nullptr)
 				{
 					Audio::Mixer* mixer = loader.buttonSoundMixer;
 					const std::string hoverSound = loader.buttonHoverSound;
 					const std::string pressSound = loader.buttonPressSound;
+					Haptics::GamepadHaptics* haptics = loader.buttonHaptics;
 
-					if (!hoverSound.empty())
-						button->SetOnHighlighted([mixer, hoverSound] { mixer->PlaySound(hoverSound); });
-
-					button->SetOnPressed([mixer, pressSound, action]
+					button->SetOnHighlighted([mixer, hoverSound, haptics]
 						{
-							if (!pressSound.empty())
+							if (mixer != nullptr && !hoverSound.empty())
+								mixer->PlaySound(hoverSound);
+							if (haptics != nullptr)
+								Haptics::PulseNavigation(*haptics);
+						});
+
+					button->SetOnPressed([mixer, pressSound, haptics, action]
+						{
+							if (mixer != nullptr && !pressSound.empty())
 								mixer->PlaySound(pressSound);
+							if (haptics != nullptr)
+								Haptics::PulsePress(*haptics);
 							if (action)
 								action();
 						});
@@ -490,27 +499,37 @@ namespace UI
 				if (data.contains("actionNext"))
 					stepRight = loader.FindAction(data["actionNext"]);
 
-				if (loader.buttonSoundMixer != nullptr)
+				if (loader.buttonSoundMixer != nullptr || loader.buttonHaptics != nullptr)
 				{
 					Audio::Mixer* mixer = loader.buttonSoundMixer;
 					const std::string hoverSound = loader.buttonHoverSound;
 					const std::string pressSound = loader.buttonPressSound;
+					Haptics::GamepadHaptics* haptics = loader.buttonHaptics;
 
-					if (!hoverSound.empty())
-						stepper->SetOnHighlighted([mixer, hoverSound] { mixer->PlaySound(hoverSound); });
-
-					stepper->SetOnStepLeft([mixer, pressSound, stepLeft]
+					stepper->SetOnHighlighted([mixer, hoverSound, haptics]
 						{
-							if (!pressSound.empty())
+							if (mixer != nullptr && !hoverSound.empty())
+								mixer->PlaySound(hoverSound);
+							if (haptics != nullptr)
+								Haptics::PulseNavigation(*haptics);
+						});
+
+					stepper->SetOnStepLeft([mixer, pressSound, haptics, stepLeft]
+						{
+							if (mixer != nullptr && !pressSound.empty())
 								mixer->PlaySound(pressSound);
+							if (haptics != nullptr)
+								Haptics::PulseCarousel(*haptics, -1);
 							if (stepLeft)
 								stepLeft();
 						});
 
-					stepper->SetOnStepRight([mixer, pressSound, stepRight]
+					stepper->SetOnStepRight([mixer, pressSound, haptics, stepRight]
 						{
-							if (!pressSound.empty())
+							if (mixer != nullptr && !pressSound.empty())
 								mixer->PlaySound(pressSound);
+							if (haptics != nullptr)
+								Haptics::PulseCarousel(*haptics, 1);
 							if (stepRight)
 								stepRight();
 						});
@@ -532,5 +551,10 @@ namespace UI
 		buttonSoundMixer = &mixer;
 		buttonHoverSound = hoverSoundName;
 		buttonPressSound = pressSoundName;
+	}
+
+	void DataLoader::SetButtonHaptics(Haptics::GamepadHaptics& haptics)
+	{
+		buttonHaptics = &haptics;
 	}
 }

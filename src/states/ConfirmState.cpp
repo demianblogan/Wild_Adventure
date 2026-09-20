@@ -24,6 +24,7 @@ ConfirmState::ConfirmState(Context& context, const std::string& title, const std
 	, onNo(std::move(onNo))
 {
 	loader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	loader.SetButtonHaptics(context.gamepadHaptics);
 	loader.SetLocalization(context.localization);
 
 	loader.RegisterAction("dialog_yes", [this] { if (this->onYes) this->onYes(); Close(); });

@@ -61,6 +61,7 @@ MenuState::MenuState(Context& context)
 	}
 
 	interfaceLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	interfaceLoader.SetButtonHaptics(context.gamepadHaptics);
 	interfaceLoader.SetLocalization(context.localization);
 	lastLocalizationRevision = context.localization.Revision();
 
