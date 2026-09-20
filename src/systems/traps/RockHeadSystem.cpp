@@ -10,6 +10,8 @@
 #include "components/physics/Solid.h"
 #include "components/physics/Transform.h"
 #include "components/physics/Velocity.h"
+#include "core/GamepadHaptics.h"
+#include "core/HapticCues.h"
 #include "core/ecs/Registry.h"
 #include "systems/core/PlayerQuery.h"
 #include "tilemap/Tilemap.h"
@@ -33,9 +35,10 @@ namespace ECS
 		constexpr float CrushInset = 2.0f;         // shrinks the crush check so standing on top isn't a crush
 	}
 
-	RockHeadSystem::RockHeadSystem(Registry& registry, const Tilemap& tilemap)
+	RockHeadSystem::RockHeadSystem(Registry& registry, const Tilemap& tilemap, Haptics::GamepadHaptics& gamepadHaptics)
 		: registry(registry)
 		, tilemap(tilemap)
+		, gamepadHaptics(gamepadHaptics)
 	{}
 
 	void RockHeadSystem::Update(float deltaTime)
@@ -161,6 +164,7 @@ namespace ECS
 						velocity.x        = 0.0f;
 						velocity.y        = 0.0f;
 						animState.current = hitAnim;
+						Haptics::PulseRockImpact(gamepadHaptics);
 					}
 					else
 					{

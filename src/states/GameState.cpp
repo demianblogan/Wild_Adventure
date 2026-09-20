@@ -70,7 +70,7 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, groundPatrolSystem(registry, tilemap, particles)
 	, enemyDeathSystem(registry)
 	, physicsSystem(registry, tilemap)
-	, rockHeadSystem(registry, tilemap)
+	, rockHeadSystem(registry, tilemap, context.gamepadHaptics)
 	, boxSystem(registry, sceneLoader, particles, context.audioMixer, context.gamepadHaptics)
 	, trampolineSystem(registry, context.audioMixer, context.gamepadHaptics)
 	, arrowSystem(registry, context.audioMixer, context.gamepadHaptics)
@@ -370,7 +370,10 @@ void GameState::Update(float deltaTime)
 	const int enemiesBeforeStomp = enemiesKilled;
 	enemySystem.Update();
 	if (enemiesKilled > enemiesBeforeStomp)
+	{
 		hitStopTimer = HitStopDuration;
+		Haptics::PulseStomp(context.gamepadHaptics);
+	}
 	trunkSystem.Update(deltaTime);
 	plantSystem.Update(deltaTime);
 	beeSystem.Update(deltaTime);

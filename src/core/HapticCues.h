@@ -194,6 +194,29 @@ namespace Haptics
 		haptics.PulseVibration(LaunchLowMotor, LaunchHighMotor, LaunchDuration);
 	}
 
+	// Stomping an enemy: a quick, punchy low-leaning thump -- satisfying but
+	// clearly lighter/friendlier than taking damage, since this is a win for
+	// the player rather than something painful.
+	constexpr float StompLowMotor = 0.50f;
+	constexpr float StompHighMotor = 0.35f;
+	constexpr float StompDuration = 0.09f;
+
+	inline void PulseStomp(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(StompLowMotor, StompHighMotor, StompDuration);
+	}
+
+	// A rock-head trap slamming into a wall/floor/ceiling: an ambient
+	// environmental thud, gentler than a hit landing on the player.
+	constexpr float RockImpactLowMotor = 0.35f;
+	constexpr float RockImpactHighMotor = 0.15f;
+	constexpr float RockImpactDuration = 0.09f;
+
+	inline void PulseRockImpact(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(RockImpactLowMotor, RockImpactHighMotor, RockImpactDuration);
+	}
+
 	// One beat of the finish-cup fanfare -- call three times, spaced out, from
 	// the moment the player touches it.
 	constexpr float FinishImpactLowMotor = 0.90f;
