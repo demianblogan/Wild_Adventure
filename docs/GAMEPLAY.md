@@ -45,21 +45,21 @@ damage to the player instead.
 | <img src="media/enemies/trunk.png" width="56"> | Trunk | Ground patroller that stops to fire a horizontal bullet when the player is in range, then resumes patrolling. | 15 |
 | <img src="media/enemies/turtle.png" width="56"> | Turtle | Stationary, cycling safe → spikes emerging → spiked → spikes retracting. Stomping it while spiked hurts the player instead of killing it — it's only vulnerable during the safe phase. | 20 |
 
-Icons are a single frame cropped from each enemy's idle spritesheet (they're
-all multi-frame animations in `assets/textures/enemies/`, not standalone
-icon files) and scaled up with nearest-neighbor so the pixel art stays crisp.
+Icons throughout this page are a single frame cropped from each sprite's own
+resting/idle animation (most are multi-frame sheets, not standalone icon
+files) and scaled up with nearest-neighbor so the pixel art stays crisp.
 
 ---
 
 ## Traps & hazards
 
-| Trap | Behavior |
-|---|---|
-| **Arrow / spring launcher** | Launches the player straight up on contact (keeping their horizontal speed), grants an extra air jump, and despawns after playing its "hit" animation once. |
-| **Fire plate** | A floor plate that ignites on contact, plays a brief warm-up, then burns anything standing on it for a set duration before turning back off. |
-| **Rock head** | A solid block sliding along one axis; reverses direction when it hits terrain, can carry a rider standing on top, and crushes the player for damage + knockback if they're caught between it and a wall. |
-| **Trampoline** | A straightforward bounce pad — launches the player upward and plays its "jump" animation/sound/haptic on every bounce. |
-| **Spikes** | A static hazard tile — no animation or state, just damage on contact. |
+| Sprite | Trap | Behavior |
+|:---:|---|---|
+| <img src="media/traps/arrow.png" width="48"> | Arrow / spring launcher | Launches the player straight up on contact (keeping their horizontal speed), grants an extra air jump, and despawns after playing its "hit" animation once. |
+| <img src="media/traps/fire.png" width="48"> | Fire plate | A floor plate that ignites on contact, plays a brief warm-up, then burns anything standing on it for a set duration before turning back off. |
+| <img src="media/traps/rock_head.png" width="48"> | Rock head | A solid block sliding along one axis; reverses direction when it hits terrain, can carry a rider standing on top, and crushes the player for damage + knockback if they're caught between it and a wall. |
+| <img src="media/traps/trampoline.png" width="48"> | Trampoline | A straightforward bounce pad — launches the player upward and plays its "jump" animation/sound/haptic on every bounce. |
+| <img src="media/traps/spikes.png" width="48"> | Spikes | A static hazard tile — no animation or state, just damage on contact. |
 
 ---
 
@@ -76,12 +76,12 @@ on that first completion:
 
 4 character skins unlock as you rack up 3-star clears across the campaign:
 
-| Skin | 3-star levels required |
-|---|---:|
-| Ninja Frog | 0 (default) |
-| Mask Dude | 3 |
-| Pink Man | 6 |
-| Virtual Guy | 7 (every level) |
+| Sprite | Skin | 3-star levels required |
+|:---:|---|---:|
+| <img src="media/skins/ninja_frog.png" width="56"> | Ninja Frog | 0 (default) |
+| <img src="media/skins/mask_dude.png" width="56"> | Mask Dude | 3 |
+| <img src="media/skins/pink_man.png" width="56"> | Pink Man | 6 |
+| <img src="media/skins/virtual_guy.png" width="56"> | Virtual Guy | 7 (every level) |
 
 ---
 
