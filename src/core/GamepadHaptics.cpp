@@ -47,6 +47,24 @@ namespace Haptics
 
 		constexpr float MotorSpeedScale = 65535.f;
 
+		// Both XInput and the DualSense drive two physically different rumble
+		// motors: a heavier low-frequency ("left") one that reads as a deep,
+		// strong thump, and a much lighter high-frequency ("right") one that
+		// reads as a faint buzz even at the same commanded strength -- true
+		// hardware asymmetry, not something either backend lets us calibrate
+		// away. Boost the high-frequency motor's commanded value so a pulse
+		// that asks for the same strength on both motors (every menu cue in
+		// HapticCues.h does) is actually felt as evenly balanced instead of
+		// left-heavy.
+		constexpr float HighMotorBoost = 1.6f;
+
+		// Xbox pads' ERM motors also produce noticeably less physical force
+		// than the DualSense's linear resonant actuators for the same
+		// commanded strength, so every value sent over XInput is boosted
+		// uniformly on top of the above to bring its overall feel roughly in
+		// line with DualSense's.
+		constexpr float XboxOverallBoost = 1.8f;
+
 		// Radians/second of the lightbar's throb while a pulse is running.
 		constexpr float LightbarThrobSpeed = 16.f;
 
@@ -63,8 +81,9 @@ namespace Haptics
 		[[nodiscard]] DWORD SendXInputVibration(unsigned long userIndex, float lowFrequencyMotor, float highFrequencyMotor)
 		{
 			XINPUT_VIBRATION vibration{};
-			vibration.wLeftMotorSpeed = static_cast<WORD>(std::clamp(lowFrequencyMotor, 0.f, 1.f) * MotorSpeedScale);
-			vibration.wRightMotorSpeed = static_cast<WORD>(std::clamp(highFrequencyMotor, 0.f, 1.f) * MotorSpeedScale);
+			vibration.wLeftMotorSpeed = static_cast<WORD>(std::clamp(lowFrequencyMotor * XboxOverallBoost, 0.f, 1.f) * MotorSpeedScale);
+			vibration.wRightMotorSpeed = static_cast<WORD>(
+				std::clamp(highFrequencyMotor * XboxOverallBoost * HighMotorBoost, 0.f, 1.f) * MotorSpeedScale);
 
 			return XInputSetState(userIndex, &vibration);
 		}
@@ -273,11 +292,24 @@ namespace Haptics
 		{
 			DS5W::DS5OutputState outputState{};
 			outputState.leftRumble = ToByte(lowFrequencyMotor);
-			outputState.rightRumble = ToByte(highFrequencyMotor);
+			outputState.rightRumble = ToByte(highFrequencyMotor * HighMotorBoost);
 			outputState.lightbar = { currentLightbar.r, currentLightbar.g, currentLightbar.b };
 
 			if (DS5W_FAILED(DS5W::setDeviceOutputState(&dualSenseContext, &outputState)))
-				DisconnectDualSense();
+			{
+				// A single failed HID write is usually a transient hiccup
+				// (seen fairly often over Bluetooth, occasionally even over
+				// USB) rather than a real disconnect. reconnectDevice()
+				// reopens the same device handle without a full
+				// re-enumeration; retry once before giving up on the
+				// controller for a whole ConnectionRecheckInterval, which is
+				// what made vibration feel like it "randomly" skipped ticks.
+				const bool recovered = DS5W_SUCCESS(DS5W::reconnectDevice(&dualSenseContext))
+					&& DS5W_SUCCESS(DS5W::setDeviceOutputState(&dualSenseContext, &outputState));
+
+				if (!recovered)
+					DisconnectDualSense();
+			}
 
 			break;
 		}

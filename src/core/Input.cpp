@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <stdexcept>
 #include <system_error>
 #include <unordered_map>
@@ -76,6 +77,39 @@ namespace
 				return name;
 
 		return "X";
+	}
+
+	// Sony Interactive Entertainment's USB vendor ID: covers DualSense and
+	// DualShock 4, the only pads Windows can't give an XInput identity to.
+	constexpr unsigned int SonyVendorId = 0x054C;
+
+	bool IsPlayStationController(int gamepad)
+	{
+		if (gamepad < 0)
+			return false;
+
+		return sf::Joystick::getIdentification(static_cast<unsigned int>(gamepad)).vendorId == SonyVendorId;
+	}
+
+	// Every "button" binding in input_default.json is authored against
+	// XInput's face-button order (A=0, B=1, X=2, Y=3, LB=4, RB=5, Back=6,
+	// Start=7, LS=8, RS=9) since that's what Xbox controllers report through
+	// Windows. A DualSense/DualShock has no XInput support at all, so Windows
+	// falls back to raw HID/DirectInput for it instead, which reports
+	// buttons in Sony's own physical order (Square=0, Cross=1, Circle=2,
+	// Triangle=3, L1=4, R1=5, Share=8, Options=9, L3=10, R3=11) -- so without
+	// translation, a binding meant for Xbox's A/DualSense's Cross would
+	// silently fire on Square instead. This table maps an authored
+	// (XInput-order) button index to the physical index actually reported
+	// for a detected PlayStation-style pad.
+	constexpr unsigned int DualSenseButtonRemap[] = { 1, 2, 0, 3, 4, 5, 8, 9, 10, 11 };
+
+	unsigned int RemapButtonForGamepad(unsigned int authoredButton, int gamepad)
+	{
+		if (IsPlayStationController(gamepad) && authoredButton < std::size(DualSenseButtonRemap))
+			return DualSenseButtonRemap[authoredButton];
+
+		return authoredButton;
 	}
 }
 
@@ -314,7 +348,8 @@ bool Input::IsBindingDown(const Binding& binding, int gamepad, bool& isFromGamep
 
 	case BindingType::Button:
 		isFromGamepad = true;
-		return gamepad >= 0 && sf::Joystick::isButtonPressed(static_cast<unsigned int>(gamepad), binding.button);
+		return gamepad >= 0 && sf::Joystick::isButtonPressed(
+			static_cast<unsigned int>(gamepad), RemapButtonForGamepad(binding.button, gamepad));
 
 	case BindingType::Axis:
 		isFromGamepad = true;
