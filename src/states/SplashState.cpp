@@ -2,6 +2,7 @@
 
 #include "Context.h"
 #include "audio/Mixer.h"
+#include "core/HapticCues.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
@@ -43,6 +44,8 @@ SplashState::SplashState(Context& context)
 	interfaceLoader.SetLocalization(context.localization);
 	BuildInterface();
 
+	Haptics::SetMenuLightbar(context.gamepadHaptics);
+
 	context.audioMixer.PlayMusic("menu_theme");
 
 	transition.StartReveal();
@@ -63,7 +66,7 @@ void SplashState::BuildInterface()
 	// Letters need to exist before SetContent() below: Root only collects
 	// which elements bloom (isGlowing) at that point, so anything added
 	// afterwards would never get the glow pass.
-	BuildTitleDropAnimation(*title, context.resources, shake, "Wild Adventure",
+	BuildTitleDropAnimation(*title, context.resources, shake, context.gamepadHaptics, "Wild Adventure",
 		[prompt]()
 		{
 			prompt->isVisible = true;
@@ -87,7 +90,10 @@ void SplashState::HandleEvent(const sf::Event& event)
 		event.is<sf::Event::JoystickButtonPressed>();
 
 	if (anyInput)
+	{
+		Haptics::PulsePrompt(context.gamepadHaptics);
 		transition.StartCover();
+	}
 }
 
 void SplashState::Update(float deltaTime)

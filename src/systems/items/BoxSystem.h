@@ -12,6 +12,11 @@ namespace Audio
 	class Mixer;
 }
 
+namespace Haptics
+{
+	class GamepadHaptics;
+}
+
 namespace ECS
 {
 	class Registry;
@@ -19,7 +24,8 @@ namespace ECS
 	class BoxSystem
 	{
 	public:
-		BoxSystem(Registry& registry, SceneLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer);
+		BoxSystem(Registry& registry, SceneLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer,
+			Haptics::GamepadHaptics& gamepadHaptics);
 
 		void Update();
 
@@ -30,5 +36,6 @@ namespace ECS
 		SceneLoader& loader;
 		ParticleSystem& particles;
 		Audio::Mixer& mixer;
+		Haptics::GamepadHaptics& gamepadHaptics;
 	};
 }

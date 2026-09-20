@@ -10,6 +10,7 @@ common.continue = Продолжить
 settings.title = Настройки
 settings.audio = Звук
 settings.graphics = Графика
+settings.gameplay = Геймплей
 settings.controls = Управление
 settings.keyboard = Клавиатура
 settings.joystick = Геймпад
@@ -25,6 +26,12 @@ graphics.mode_window = Оконный
 
 audio.sounds = Звуки
 audio.music = Музыка
+
+gameplay.vibration = Вибрация:
+gameplay.lightbar = Подсветка джойстика:
+gameplay.low_health_vignette = Виньетка низкого здоровья:
+gameplay.hit_stop = Эффект замирания кадра:
+gameplay.camera_shake = Тряска камеры:
 
 controls.move_left = Движение влево
 controls.move_right = Движение вправо

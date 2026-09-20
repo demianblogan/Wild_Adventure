@@ -22,6 +22,12 @@ struct SettingsData
 	bool isVsyncEnabled = true;
 	bool isShowFpsEnabled = false;
 
+	bool isVibrationEnabled = true;
+	bool isLightbarEnabled = true;
+	bool isLowHealthVignetteEnabled = true;
+	bool isHitStopEnabled = true;
+	bool isCameraShakeEnabled = true;
+
 	Language language = Language::English;
 	bool isLanguageChosen = false; // false until the first-run language picker has been confirmed
 
@@ -43,6 +49,7 @@ public:
 
 	void ResetAudioToDefaults();
 	void ResetGraphicsToDefaults();
+	void ResetGameplayToDefaults();
 
 	int GetSoundVolume() const { return current.soundVolume; }
 	int GetMusicVolume() const { return current.musicVolume; }
@@ -54,6 +61,18 @@ public:
 	ScreenMode GetScreenMode() const { return current.screenMode; }
 	bool IsVsyncEnabled() const { return current.isVsyncEnabled; }
 	bool IsShowFpsEnabled() const { return current.isShowFpsEnabled; }
+
+	bool IsVibrationEnabled() const { return current.isVibrationEnabled; }
+	bool IsLightbarEnabled() const { return current.isLightbarEnabled; }
+	void SetVibrationEnabled(bool value);
+	void SetLightbarEnabled(bool value);
+
+	bool IsLowHealthVignetteEnabled() const { return current.isLowHealthVignetteEnabled; }
+	bool IsHitStopEnabled() const { return current.isHitStopEnabled; }
+	bool IsCameraShakeEnabled() const { return current.isCameraShakeEnabled; }
+	void SetLowHealthVignetteEnabled(bool value);
+	void SetHitStopEnabled(bool value);
+	void SetCameraShakeEnabled(bool value);
 
 	Language GetLanguage() const { return current.language; }
 	bool IsLanguageChosen() const { return current.isLanguageChosen; }

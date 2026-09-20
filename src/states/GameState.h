@@ -145,6 +145,16 @@ private:
 	bool  isWaterLevel = false;     // "water" theme: floaty gravity and ambient bubbles
 	float bubbleTimer = 0.0f;     // countdown to the next ambient bubble
 
+	// Low-health vignette: counts up continuously while the player is down to
+	// the last heart (0 = off), driving a sine pulse; reset the instant that
+	// stops being true so it always restarts the same fade-in next time.
+	float lowHealthVignetteTime = 0.0f;
+
+	static constexpr float LowHealthVignetteRadius = 200.0f;
+	static constexpr float LowHealthVignetteSpeed = 6.0f; // radians/second
+	static constexpr float LowHealthVignetteMinIntensity = 0.15f;
+	static constexpr float LowHealthVignetteMaxIntensity = 0.45f;
+
 	static constexpr float DeathFlashTime = 0.2f; // duration of the death "lightning" flash
 	static constexpr float DeathFallTime = 0.5f;  // max tumble time before the restart kicks in
 	static constexpr float WaterGravityScale = 0.55f;   // gravity multiplier in a water level

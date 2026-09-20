@@ -3,6 +3,7 @@
 #include "Context.h"
 #include "audio/Mixer.h"
 #include "core/AppDataPath.h"
+#include "core/HapticCues.h"
 #include "core/Input.h"
 #include "core/Resources.h"
 #include "core/Settings.h"
@@ -95,10 +96,13 @@ LanguagePickerState::LanguagePickerState(Context& context)
 	}
 
 	interfaceLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	interfaceLoader.SetButtonHaptics(context.gamepadHaptics);
 	interfaceLoader.SetLocalization(context.localization);
 
 	RegisterActions();
 	BuildPickerInterface();
+
+	Haptics::SetMenuLightbar(context.gamepadHaptics);
 
 	context.audioMixer.PlayMusic("menu_theme");
 
@@ -213,14 +217,16 @@ void LanguagePickerState::WireLanguageButton(const LanguageEntry& entry, std::si
 				[label](float a) { label->SetAlpha(a); }));
 		});
 
-	// Replaces the hover-sound-only callback SetButtonSounds wired: still
-	// plays the sound, and also previews the prompt in this button's
+	// Replaces the hover-sound-only callback SetButtonSounds (and
+	// SetButtonHaptics) wired: still plays the sound and the light
+	// navigation pulse, and also previews the prompt in this button's
 	// language and emphasizes its text -- for both mouse hover and keyboard
 	// focus, since Root drives both through the same SetHighlighted call.
 	Language language = entry.language;
 	interactive->SetOnHighlighted([this, label, language]
 		{
 			context.audioMixer.PlaySound("ui_hover");
+			Haptics::PulseNavigation(context.gamepadHaptics);
 			PreviewLanguage(language);
 			SetHighlightEmphasis(label);
 		});
@@ -336,7 +342,7 @@ void LanguagePickerState::BuildSplashInterface()
 	// Letters need to exist before SetContent() below: Root only collects
 	// which elements bloom (isGlowing) at that point, so anything added
 	// afterwards would never get the glow pass.
-	BuildTitleDropAnimation(*title, context.resources, shake, "Wild Adventure",
+	BuildTitleDropAnimation(*title, context.resources, shake, context.gamepadHaptics, "Wild Adventure",
 		[prompt]()
 		{
 			prompt->isVisible = true;
@@ -369,7 +375,10 @@ void LanguagePickerState::HandleEvent(const sf::Event& event)
 		event.is<sf::Event::JoystickButtonPressed>();
 
 	if (anyInput)
+	{
+		Haptics::PulsePrompt(context.gamepadHaptics);
 		transition.StartCover();
+	}
 }
 
 void LanguagePickerState::Update(float deltaTime)

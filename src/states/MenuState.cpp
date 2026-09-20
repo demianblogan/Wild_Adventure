@@ -3,6 +3,7 @@
 #include "Context.h"
 #include "audio/Mixer.h"
 #include "core/Campaign.h"
+#include "core/HapticCues.h"
 #include "core/Input.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
@@ -61,8 +62,11 @@ MenuState::MenuState(Context& context)
 	}
 
 	interfaceLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	interfaceLoader.SetButtonHaptics(context.gamepadHaptics);
 	interfaceLoader.SetLocalization(context.localization);
 	lastLocalizationRevision = context.localization.Revision();
+
+	Haptics::SetMenuLightbar(context.gamepadHaptics);
 
 	RegisterActions();
 
@@ -323,6 +327,7 @@ void MenuState::Update(float deltaTime)
 	if (input.WasPressed(Action::MenuBack))
 	{
 		pendingRequest = NavRequest::Back;
+		Haptics::PulsePress(context.gamepadHaptics);
 	}
 	else if (input.WasPressed(Action::MenuDown))
 	{

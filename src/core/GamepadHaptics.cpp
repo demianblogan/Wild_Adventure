@@ -1,0 +1,338 @@
+#include "GamepadHaptics.h"
+
+#include <algorithm>
+#include <cmath>
+#include <numbers>
+
+// NOMINMAX: stops Windows.h from defining its own min/max macros, which
+// would otherwise shadow std::min/std::max (used below) and silently break
+// them anywhere this header is included.
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+// WIN32_LEAN_AND_MEAN: excludes the rarely-used parts of Windows.h (WinSock
+// 1, GDI, shell, RPC, cryptography...) that this file never touches -- keeps
+// the include lightweight and avoids the classic WinSock1/WinSock2 macro
+// collisions some of those unused headers are prone to.
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+#include <Windows.h>
+#include <Xinput.h>
+
+#include <DualSenseWindows/DSW_Api.h>
+#include <DualSenseWindows/IO.h>
+
+namespace Haptics
+{
+	namespace
+	{
+		// How often (in seconds) to scan for a newly connected controller
+		// while none is currently active. Disconnects of an already-active
+		// controller are instead caught reactively, the moment a send to it
+		// fails -- re-enumerating/reopening a DualSense's HID handle every
+		// second while nothing has changed would be wasteful (and could
+		// visibly flicker its lightbar), and XInput slots are just as cheap
+		// to notice as "gone" on their next failed send.
+		constexpr float ConnectionRecheckInterval = 1.f;
+
+		// XInput exposes controllers on 4 fixed slots; this project has no
+		// local multiplayer, so the first connected slot found is always the
+		// one to drive.
+		constexpr unsigned long MaximumXInputUserIndex = 3u;
+
+		constexpr unsigned int MaximumDualSenseDevices = 4u;
+
+		constexpr float MotorSpeedScale = 65535.f;
+
+		// Both XInput and the DualSense drive two physically different rumble
+		// motors: a heavier low-frequency ("left") one that reads as a deep,
+		// strong thump, and a much lighter high-frequency ("right") one that
+		// reads as a faint buzz even at the same commanded strength -- true
+		// hardware asymmetry, not something either backend lets us calibrate
+		// away. Boost the high-frequency motor's commanded value so a pulse
+		// that asks for the same strength on both motors (every menu cue in
+		// HapticCues.h does) is actually felt as evenly balanced instead of
+		// left-heavy.
+		constexpr float HighMotorBoost = 1.6f;
+
+		// Xbox pads' ERM motors also produce noticeably less physical force
+		// than the DualSense's linear resonant actuators for the same
+		// commanded strength, so every value sent over XInput is boosted
+		// uniformly on top of the above to bring its overall feel roughly in
+		// line with DualSense's.
+		constexpr float XboxOverallBoost = 1.8f;
+
+		[[nodiscard]] unsigned char ToByte(float normalizedValue)
+		{
+			return static_cast<unsigned char>(std::clamp(normalizedValue, 0.f, 1.f) * 255.f);
+		}
+
+		[[nodiscard]] DWORD SendXInputVibration(unsigned long userIndex, float lowFrequencyMotor, float highFrequencyMotor)
+		{
+			XINPUT_VIBRATION vibration{};
+			vibration.wLeftMotorSpeed = static_cast<WORD>(std::clamp(lowFrequencyMotor * XboxOverallBoost, 0.f, 1.f) * MotorSpeedScale);
+			vibration.wRightMotorSpeed = static_cast<WORD>(
+				std::clamp(highFrequencyMotor * XboxOverallBoost * HighMotorBoost, 0.f, 1.f) * MotorSpeedScale);
+
+			return XInputSetState(userIndex, &vibration);
+		}
+	}
+
+	GamepadHaptics::GamepadHaptics()
+	{
+		RefreshConnection();
+	}
+
+	GamepadHaptics::~GamepadHaptics()
+	{
+		if (connectedType == ConnectedControllerType::Xbox)
+		{
+			static_cast<void>(SendXInputVibration(xboxUserIndex, 0.f, 0.f));
+		}
+		else if (connectedType == ConnectedControllerType::DualSense)
+		{
+			DS5W::DS5OutputState offState{};
+			DS5W::setDeviceOutputState(&dualSenseContext, &offState);
+			DS5W::freeDeviceContext(&dualSenseContext);
+		}
+	}
+
+	void GamepadHaptics::SetVibrationEnabled(bool newIsVibrationEnabled) noexcept
+	{
+		isVibrationEnabled = newIsVibrationEnabled;
+	}
+
+	void GamepadHaptics::SetLightbarEnabled(bool newIsLightbarEnabled) noexcept
+	{
+		isLightbarEnabled = newIsLightbarEnabled;
+	}
+
+	void GamepadHaptics::PulseVibration(float lowFrequencyMotor, float highFrequencyMotor, float durationSeconds)
+	{
+		if (durationSeconds <= 0.f)
+			return;
+
+		// pulseDuration and pulseRemaining must move together, not be maxed
+		// independently: if they drifted apart (this call keeps the old,
+		// longer pulseDuration but bumps pulseRemaining up to this call's
+		// shorter durationSeconds), Update()'s fallOff = pulseRemaining /
+		// pulseDuration would start below 1 -- a fresh pulse computed as
+		// already partway decayed. Only take over the timeline when this
+		// pulse would actually outlast whatever's currently fading; otherwise
+		// leave it alone and just fold this call's strength into it.
+		if (durationSeconds >= pulseRemaining)
+		{
+			pulseDuration = durationSeconds;
+			pulseRemaining = durationSeconds;
+		}
+
+		pulseLowMotor = std::max(pulseLowMotor, std::clamp(lowFrequencyMotor, 0.f, 1.f));
+		pulseHighMotor = std::max(pulseHighMotor, std::clamp(highFrequencyMotor, 0.f, 1.f));
+	}
+
+	void GamepadHaptics::SetLightbarColor(RGBColor color) noexcept
+	{
+		lightbarColor = color;
+	}
+
+	void GamepadHaptics::PulseLightbar(RGBColor color, float durationSeconds, int blinks) noexcept
+	{
+		if (durationSeconds <= 0.f)
+			return;
+
+		// Same reasoning as PulseVibration above: duration and remaining must
+		// move together so Update()'s brightness fraction always starts at a
+		// full 1.0 for whichever call currently owns the timeline, instead of
+		// drifting apart and starting a fresh flash already dimmed. Unlike the
+		// two vibration motors (which blend sensibly via a per-channel max),
+		// there's no meaningful way to "merge" two different flash colors, so
+		// color/blinks only change when this call actually takes over the
+		// timeline -- otherwise a short, weak flash arriving mid-fade of a
+		// longer one would overwrite its color without ever weakening its
+		// brightness, e.g. a fruit's cyan pickup flash silently painting over
+		// the back half of a checkpoint's gold one.
+		if (durationSeconds >= lightbarPulseRemaining)
+		{
+			lightbarPulseColor = color;
+			lightbarPulseBlinks = std::max(1, blinks);
+			lightbarPulseDuration = durationSeconds;
+			lightbarPulseRemaining = durationSeconds;
+		}
+	}
+
+	void GamepadHaptics::Update(float deltaTime)
+	{
+		connectionRecheckRemaining -= deltaTime;
+
+		if (connectionRecheckRemaining <= 0.f)
+		{
+			RefreshConnection();
+			connectionRecheckRemaining = ConnectionRecheckInterval;
+		}
+
+		if (pulseRemaining > 0.f)
+			pulseRemaining = std::max(0.f, pulseRemaining - deltaTime);
+
+		const float fallOff = (pulseDuration > 0.f && pulseRemaining > 0.f) ? pulseRemaining / pulseDuration : 0.f;
+
+		if (fallOff <= 0.f)
+		{
+			pulseDuration = 0.f;
+			pulseLowMotor = 0.f;
+			pulseHighMotor = 0.f;
+		}
+
+		const float lowMotor = isVibrationEnabled ? pulseLowMotor * fallOff : 0.f;
+		const float highMotor = isVibrationEnabled ? pulseHighMotor * fallOff : 0.f;
+
+		// --- Lightbar ---
+
+		if (lightbarPulseRemaining > 0.f)
+			lightbarPulseRemaining = std::max(0.f, lightbarPulseRemaining - deltaTime);
+
+		const float lightbarFallOff = (lightbarPulseDuration > 0.f && lightbarPulseRemaining > 0.f)
+			? lightbarPulseRemaining / lightbarPulseDuration
+			: 0.f;
+
+		if (lightbarFallOff <= 0.f)
+		{
+			lightbarPulseDuration = 0.f;
+			lightbarPulseColor = {};
+			lightbarPulseBlinks = 1;
+		}
+
+		if (!isLightbarEnabled)
+		{
+			currentLightbar = {};
+		}
+		else if (lightbarFallOff > 0.f)
+		{
+			// The pulse blends UP from the resting color toward lightbarPulseColor
+			// rather than replacing it outright, and never dips toward black: a
+			// quick, sharp brighten-then-settle-back that reads as "this color,
+			// but brighter for a moment" instead of the lightbar visibly turning
+			// off and back on around every flash.
+			float brightness = 0.f;
+
+			if (lightbarPulseBlinks <= 1)
+			{
+				// One clean flash: snaps to full brightness the instant it's
+				// triggered, then eases back down to resting over the duration.
+				brightness = lightbarFallOff;
+			}
+			else
+			{
+				// N clean on-off flashes spread across the duration -- "off"
+				// here means brightness 0, i.e. resting color, never black.
+				constexpr float Pi = std::numbers::pi_v<float>;
+				const float progress = 1.f - lightbarFallOff;
+				brightness = std::abs(std::sin(progress * Pi * static_cast<float>(lightbarPulseBlinks)));
+			}
+
+			currentLightbar = LerpColor(lightbarColor, lightbarPulseColor, brightness);
+		}
+		else
+		{
+			currentLightbar = lightbarColor;
+		}
+
+		ApplyVibration(lowMotor, highMotor);
+	}
+
+	void GamepadHaptics::RefreshConnection()
+	{
+		// Disconnects of an already-active controller surface reactively in
+		// ApplyVibration (see the comment on ConnectionRecheckInterval), so
+		// there's nothing to re-verify here while one is still marked connected.
+		if (connectedType != ConnectedControllerType::None)
+			return;
+
+		if (RefreshXboxConnection())
+		{
+			connectedType = ConnectedControllerType::Xbox;
+			return;
+		}
+
+		if (RefreshDualSenseConnection())
+			connectedType = ConnectedControllerType::DualSense;
+	}
+
+	bool GamepadHaptics::RefreshXboxConnection()
+	{
+		for (unsigned long userIndex = 0u; userIndex <= MaximumXInputUserIndex; userIndex++)
+		{
+			XINPUT_STATE state{};
+			if (XInputGetState(userIndex, &state) == ERROR_SUCCESS)
+			{
+				xboxUserIndex = userIndex;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool GamepadHaptics::RefreshDualSenseConnection()
+	{
+		DS5W::DeviceEnumInfo devices[MaximumDualSenseDevices]{};
+		unsigned int deviceCount = 0u;
+
+		if (DS5W_FAILED(DS5W::enumDevices(devices, MaximumDualSenseDevices, &deviceCount)) || deviceCount == 0u)
+			return false;
+
+		return DS5W_SUCCESS(DS5W::initDeviceContext(&devices[0], &dualSenseContext));
+	}
+
+	void GamepadHaptics::DisconnectDualSense()
+	{
+		DS5W::freeDeviceContext(&dualSenseContext);
+		dualSenseContext = DS5W::DeviceContext{};
+		connectedType = ConnectedControllerType::None;
+	}
+
+	void GamepadHaptics::ApplyVibration(float lowFrequencyMotor, float highFrequencyMotor)
+	{
+		switch (connectedType)
+		{
+		case ConnectedControllerType::Xbox:
+			if (SendXInputVibration(xboxUserIndex, lowFrequencyMotor, highFrequencyMotor) != ERROR_SUCCESS)
+				connectedType = ConnectedControllerType::None;
+			break;
+
+		case ConnectedControllerType::DualSense:
+		{
+			DS5W::DS5OutputState outputState{};
+			outputState.leftRumble = ToByte(lowFrequencyMotor);
+			outputState.rightRumble = ToByte(highFrequencyMotor * HighMotorBoost);
+			outputState.lightbar = { currentLightbar.r, currentLightbar.g, currentLightbar.b };
+
+			if (DS5W_FAILED(DS5W::setDeviceOutputState(&dualSenseContext, &outputState)))
+			{
+				// A single failed HID write is usually a transient hiccup
+				// (seen fairly often over Bluetooth, occasionally even over
+				// USB) rather than a real disconnect. reconnectDevice()
+				// reopens the same device handle without a full
+				// re-enumeration; retry once before giving up on the
+				// controller for a whole ConnectionRecheckInterval, which is
+				// what made vibration feel like it "randomly" skipped ticks.
+				const bool recovered = DS5W_SUCCESS(DS5W::reconnectDevice(&dualSenseContext))
+					&& DS5W_SUCCESS(DS5W::setDeviceOutputState(&dualSenseContext, &outputState));
+
+				if (!recovered)
+					DisconnectDualSense();
+			}
+
+			break;
+		}
+
+		// Deliberately listed rather than left to a default: with every
+		// enumerator handled explicitly, the compiler warns if this enum
+		// ever gains a value and this switch isn't updated for it.
+		case ConnectedControllerType::None:
+			break;
+		}
+	}
+}

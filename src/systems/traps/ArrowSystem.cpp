@@ -9,6 +9,8 @@
 #include "components/physics/Jump.h"
 #include "components/physics/Transform.h"
 #include "components/physics/Velocity.h"
+#include "core/GamepadHaptics.h"
+#include "core/HapticCues.h"
 #include "core/ecs/Registry.h"
 #include "systems/core/PlayerQuery.h"
 
@@ -16,9 +18,10 @@
 
 namespace ECS
 {
-	ArrowSystem::ArrowSystem(Registry& registry, Audio::Mixer& mixer)
+	ArrowSystem::ArrowSystem(Registry& registry, Audio::Mixer& mixer, Haptics::GamepadHaptics& gamepadHaptics)
 		: registry(registry)
 		, mixer(mixer)
+		, gamepadHaptics(gamepadHaptics)
 	{}
 
 	void ArrowSystem::Update()
@@ -68,6 +71,7 @@ namespace ECS
 						animState.current  = "Hit";
 						arrow.hasTriggered = true;
 						mixer.PlaySound("player_jump");
+						Haptics::PulseLaunch(gamepadHaptics);
 					}
 				}
 				else if (registry.Has<Animation>(entity))

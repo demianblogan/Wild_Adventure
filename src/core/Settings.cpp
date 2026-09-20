@@ -61,6 +61,31 @@ void Settings::SetShowFps(bool value)
 	current.isShowFpsEnabled = value;
 }
 
+void Settings::SetVibrationEnabled(bool value)
+{
+	current.isVibrationEnabled = value;
+}
+
+void Settings::SetLightbarEnabled(bool value)
+{
+	current.isLightbarEnabled = value;
+}
+
+void Settings::SetLowHealthVignetteEnabled(bool value)
+{
+	current.isLowHealthVignetteEnabled = value;
+}
+
+void Settings::SetHitStopEnabled(bool value)
+{
+	current.isHitStopEnabled = value;
+}
+
+void Settings::SetCameraShakeEnabled(bool value)
+{
+	current.isCameraShakeEnabled = value;
+}
+
 void Settings::SetLanguage(Language value)
 {
 	current.language = value;
@@ -98,6 +123,16 @@ void Settings::Load(const std::string& path)
 			current.isShowFpsEnabled = graphics.value("showFps", current.isShowFpsEnabled);
 		}
 
+		if (data.contains("gameplay"))
+		{
+			const auto& gameplay = data["gameplay"];
+			current.isVibrationEnabled = gameplay.value("vibration", current.isVibrationEnabled);
+			current.isLightbarEnabled = gameplay.value("lightbar", current.isLightbarEnabled);
+			current.isLowHealthVignetteEnabled = gameplay.value("lowHealthVignette", current.isLowHealthVignetteEnabled);
+			current.isHitStopEnabled = gameplay.value("hitStop", current.isHitStopEnabled);
+			current.isCameraShakeEnabled = gameplay.value("cameraShake", current.isCameraShakeEnabled);
+		}
+
 		if (data.contains("localization"))
 		{
 			const auto& localization = data["localization"];
@@ -132,6 +167,12 @@ bool Settings::Save(const std::string& path)
 	data["graphics"]["vsync"] = current.isVsyncEnabled;
 	data["graphics"]["showFps"] = current.isShowFpsEnabled;
 
+	data["gameplay"]["vibration"] = current.isVibrationEnabled;
+	data["gameplay"]["lightbar"] = current.isLightbarEnabled;
+	data["gameplay"]["lowHealthVignette"] = current.isLowHealthVignetteEnabled;
+	data["gameplay"]["hitStop"] = current.isHitStopEnabled;
+	data["gameplay"]["cameraShake"] = current.isCameraShakeEnabled;
+
 	data["localization"]["language"] = LanguageCode(current.language);
 	data["localization"]["languageChosen"] = current.isLanguageChosen;
 
@@ -162,4 +203,14 @@ void Settings::ResetGraphicsToDefaults()
 	current.screenMode = defaults.screenMode;
 	current.isVsyncEnabled = defaults.isVsyncEnabled;
 	current.isShowFpsEnabled = defaults.isShowFpsEnabled;
+}
+
+void Settings::ResetGameplayToDefaults()
+{
+	const SettingsData defaults;
+	current.isVibrationEnabled = defaults.isVibrationEnabled;
+	current.isLightbarEnabled = defaults.isLightbarEnabled;
+	current.isLowHealthVignetteEnabled = defaults.isLowHealthVignetteEnabled;
+	current.isHitStopEnabled = defaults.isHitStopEnabled;
+	current.isCameraShakeEnabled = defaults.isCameraShakeEnabled;
 }

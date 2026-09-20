@@ -19,6 +19,7 @@
 #include "components/tags/Frozen.h"
 #include "core/AABB.h"
 #include "core/Camera.h"
+#include "core/HapticCues.h"
 #include "core/SceneLoader.h"
 #include "core/ecs/Registry.h"
 #include "graphics/ConfettiSystem.h"
@@ -28,7 +29,8 @@
 #include <cmath>
 
 LevelSequencer::LevelSequencer(ECS::Registry& registry, SceneLoader& sceneLoader, Camera& camera,
-	ConfettiSystem& confetti, Audio::Mixer& audioMixer, Transition& transition, HUD& hud)
+	ConfettiSystem& confetti, Audio::Mixer& audioMixer, Transition& transition, HUD& hud,
+	Haptics::GamepadHaptics& gamepadHaptics)
 	: registry(registry)
 	, sceneLoader(sceneLoader)
 	, camera(camera)
@@ -36,6 +38,7 @@ LevelSequencer::LevelSequencer(ECS::Registry& registry, SceneLoader& sceneLoader
 	, audioMixer(audioMixer)
 	, transition(transition)
 	, hud(hud)
+	, gamepadHaptics(gamepadHaptics)
 {}
 
 bool LevelSequencer::Update(float deltaTime, int score, int fruitsCollected, int enemiesKilled)
@@ -100,6 +103,21 @@ bool LevelSequencer::Update(float deltaTime, int score, int fruitsCollected, int
 	{
 		// The hero bounced off the cup and rises for a moment, then vanishes mid-air.
 		finishTimer -= deltaTime;
+
+		// Two more fanfare impacts spread across the rise, evenly spaced after
+		// the first one (already fired the instant the cup was touched).
+		const float elapsedSinceTouch = FinishRiseTime - finishTimer;
+		if (finishImpactsPlayed == 1 && elapsedSinceTouch >= FinishRiseTime / 3.0f)
+		{
+			Haptics::PulseFinishImpact(gamepadHaptics);
+			finishImpactsPlayed = 2;
+		}
+		if (finishImpactsPlayed == 2 && elapsedSinceTouch >= FinishRiseTime * 2.0f / 3.0f)
+		{
+			Haptics::PulseFinishImpact(gamepadHaptics);
+			finishImpactsPlayed = 3;
+		}
+
 		if (finishTimer > 0.0f)
 			return false;
 
@@ -191,6 +209,9 @@ bool LevelSequencer::Update(float deltaTime, int score, int fruitsCollected, int
 		confetti.Emit({ finish.x, finish.y - ConfettiRise });
 
 		camera.Shake(ShakeTouch);
+		Haptics::PulseFinishImpact(gamepadHaptics);
+		Haptics::FlashFinishLightbar(gamepadHaptics);
+		finishImpactsPlayed = 1;
 
 		// The Solid's bounceSpeed already launched the hero upward this frame; he
 		// rises for FinishRiseTime, then vanishes.
@@ -236,6 +257,8 @@ void LevelSequencer::UpdateCheckpoints(int score, int fruitsCollected, int enemi
 			audioMixer.PlaySound("checkpoint");
 			confetti.Emit({ transform.x, transform.y - ConfettiRise });
 			camera.Shake(ShakeTouch);
+			Haptics::PulseCheckpoint(gamepadHaptics);
+			Haptics::FlashCheckpointLightbar(gamepadHaptics);
 
 			// Freeze the score and snapshot all alive collectibles and unbroken boxes
 			// so we can restore this exact state if the player dies here.

@@ -1,0 +1,137 @@
+#pragma once
+
+#include <DualSenseWindows/DS5State.h>
+#include <DualSenseWindows/Device.h>
+
+// DualSense/DualShock support (rumble, lightbar) is built on top of
+// Ohjurot/DualSense-Windows (MIT), vendored in full under
+// libs/DualSenseWindows/. Windows exposes no public vendor API for these
+// controllers -- XInput doesn't cover them at all -- so this library talks
+// to the hardware directly over raw HID (SetupAPI/hid.lib), matching it by
+// its USB vendor/product ID. See libs/DualSenseWindows/LICENSE.
+
+namespace Haptics
+{
+	// Plain 0..255 RGB. This module is deliberately SFML-free -- it's meant
+	// to be copied wholesale into another project that might not even use
+	// SFML -- so it can't reach for sf::Color the way the rest of this
+	// project's code does; this is its own minimal stand-in.
+	struct RGBColor
+	{
+		unsigned char r = 0u;
+		unsigned char g = 0u;
+		unsigned char b = 0u;
+	};
+
+	// t is expected in 0..1; the result is clamped regardless so a slightly
+	// out-of-range t (float slop) can never wrap a channel instead of just
+	// clipping it. The single shared implementation for every color fade in
+	// this module and in core/HapticCues.h.
+	[[nodiscard]] inline unsigned char LerpChannel(unsigned char from, unsigned char to, float t) noexcept
+	{
+		const float value = static_cast<float>(from) + (static_cast<float>(to) - static_cast<float>(from)) * t;
+		return static_cast<unsigned char>(value < 0.f ? 0.f : (value > 255.f ? 255.f : value));
+	}
+
+	[[nodiscard]] inline RGBColor LerpColor(RGBColor from, RGBColor to, float t) noexcept
+	{
+		return { LerpChannel(from.r, to.r, t), LerpChannel(from.g, to.g, t), LerpChannel(from.b, to.b, t) };
+	}
+
+	// Cross-controller vibration/lightbar layer, independent of SFML's own
+	// joystick polling -- detects an Xbox controller through its native
+	// XInput API, or a DualSense/DualShock controller through the vendored
+	// DualSenseWindows library (raw HID), and turns high-level "make it
+	// rumble"/"set this color" calls into whatever that hardware actually
+	// expects.
+	//
+	// Self-contained: only depends on the Windows SDK and the vendored
+	// DualSenseWindows library -- nothing from this project's own game code.
+	class GamepadHaptics
+	{
+	public:
+		GamepadHaptics();
+		~GamepadHaptics();
+
+		GamepadHaptics(const GamepadHaptics&) = delete;
+		GamepadHaptics& operator=(const GamepadHaptics&) = delete;
+
+		void SetVibrationEnabled(bool isVibrationEnabled) noexcept;
+		void SetLightbarEnabled(bool isLightbarEnabled) noexcept;
+
+		// Starts (or strengthens) a vibration burst that fades linearly to
+		// zero over durationSeconds. Motor strengths are 0..1:
+		// lowFrequencyMotor is the heavier/rumblier motor, highFrequencyMotor
+		// the sharper/buzzier one (XInput's two-motor convention; DualSense's
+		// single pair of rumble motors map onto the same two values).
+		// Calling this again while a pulse is still fading only ever makes
+		// the result stronger/longer, never weaker or restarted from scratch,
+		// so a rapid string of small pulses reads as one continuous vibration
+		// instead of stuttering.
+		void PulseVibration(float lowFrequencyMotor, float highFrequencyMotor, float durationSeconds);
+
+		// DualSense/DualShock only -- no-op on Xbox (that hardware has no
+		// lightbar). Sets the resting lightbar color shown whenever no pulse
+		// is running. Takes effect on the next Update(); safe to call every
+		// frame with the same color.
+		void SetLightbarColor(RGBColor color) noexcept;
+
+		// DualSense/DualShock only. Flashes `color` on the lightbar over
+		// durationSeconds. With blinks == 1 it fades back to the resting
+		// color with a faint throb, and re-arming every frame holds it lit
+		// (a sustained glow). With blinks > 1 it does that many clean
+		// on-off flashes across the duration instead. Merges toward the
+		// stronger / longer request, like PulseVibration.
+		void PulseLightbar(RGBColor color, float durationSeconds, int blinks = 1) noexcept;
+
+		// Advances the current pulse's fade-out and re-sends the resulting
+		// motor speeds (and, on DualSense, the lightbar color) to the
+		// connected controller. Call once per frame, regardless of which
+		// part of the game is currently active.
+		void Update(float deltaTime);
+
+	private:
+		// No Generic/other case: XInput is already the generic path here --
+		// on Windows it covers the overwhelming majority of controllers
+		// people actually plug in, Xbox pads included -- so anything this
+		// enum doesn't name is a controller neither backend recognizes at
+		// all, meaning there is nothing to drive rumble on regardless of
+		// what we'd call it. That's exactly what None already means: no
+		// controller, or one connected that neither backend can talk to.
+		enum class ConnectedControllerType
+		{
+			None,
+			Xbox,
+			DualSense
+		};
+
+		void RefreshConnection();
+		[[nodiscard]] bool RefreshXboxConnection();
+		[[nodiscard]] bool RefreshDualSenseConnection();
+		void DisconnectDualSense();
+
+		void ApplyVibration(float lowFrequencyMotor, float highFrequencyMotor);
+
+		bool isVibrationEnabled = true;
+		bool isLightbarEnabled = true;
+
+		ConnectedControllerType connectedType = ConnectedControllerType::None;
+		unsigned long xboxUserIndex = 0u;
+		DS5W::DeviceContext dualSenseContext{};
+
+		float connectionRecheckRemaining = 0.f;
+
+		float pulseRemaining = 0.f;
+		float pulseDuration = 0.f;
+		float pulseLowMotor = 0.f;
+		float pulseHighMotor = 0.f;
+
+		RGBColor lightbarColor{};
+
+		RGBColor lightbarPulseColor{};
+		float lightbarPulseRemaining = 0.f;
+		float lightbarPulseDuration = 0.f;
+		int lightbarPulseBlinks = 1;
+		RGBColor currentLightbar{};
+	};
+}

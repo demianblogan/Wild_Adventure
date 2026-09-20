@@ -39,8 +39,6 @@ namespace UI
 		// Such a control is auto-activated while focused, so left/right adjust it
 		// directly instead of moving between sibling elements.
 		virtual bool IsValueControl() const { return false; }
-		
-		bool IsActivated() const { return isActivated; }
 
 		void SetEnabled(bool enabled);
 		bool IsEnabled() const { return isEnabled; }

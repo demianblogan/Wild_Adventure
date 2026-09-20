@@ -9,44 +9,6 @@
 		"children":
 		[
 			{
-				"Element":
-				{
-					"name": "settings_panel_title",
-					"anchor": [0.5, 0.5],
-					"pivot": [0.5, 0.5],
-					"offset": [0, -96],
-					"size": [150, 30],
-					"children":
-					[
-						{
-							"Image":
-							{
-								"anchor": [0.5, 0.5],
-								"pivot": [0.5, 0.5],
-								"offset": [0, 0],
-								"size": [150, 30],
-								"textureName": "label_background",
-								"border": [32, 2]
-							}
-						},
-						{
-							"Label":
-							{
-								"anchor": [0.5, 0.5],
-								"pivot": [0.5, 0.5],
-								"offset": [0, 0],
-								"fontName": "main",
-								"characterSize": 16,
-								"color": [244, 199, 110, 255],
-								"outlineColor": [58, 42, 77, 255],
-								"outlineThickness": 1,
-								"textKey": "settings.title"
-							}
-						}
-					]
-				}
-			},
-			{
 				"Button":
 				{
 					"prefab": "menu_button",
@@ -54,7 +16,7 @@
 					"offset":
 					[
 						0,
-						-50
+						-90
 					],
 					"action": "menu_open_graphics",
 					"foregrounds":
@@ -77,7 +39,7 @@
 					"offset":
 					[
 						0,
-						-14
+						-54
 					],
 					"action": "menu_open_audio",
 					"foregrounds":
@@ -96,11 +58,34 @@
 				"Button":
 				{
 					"prefab": "menu_button",
+					"name": "settings_gameplay_button",
+					"offset":
+					[
+						0,
+						-18
+					],
+					"action": "menu_open_gameplay",
+					"foregrounds":
+					{
+						"Normal":
+						{
+							"Label":
+							{
+								"textKey": "settings.gameplay"
+							}
+						}
+					}
+				}
+			},
+			{
+				"Button":
+				{
+					"prefab": "menu_button",
 					"name": "settings_controls_button",
 					"offset":
 					[
 						0,
-						22
+						18
 					],
 					"action": "menu_open_controls",
 					"foregrounds":
@@ -123,7 +108,7 @@
 					"offset":
 					[
 						0,
-						58
+						54
 					],
 					"action": "menu_open_language",
 					"foregrounds":
@@ -146,7 +131,7 @@
 					"offset":
 					[
 						0,
-						94
+						90
 					],
 					"action": "menu_back",
 					"foregrounds":

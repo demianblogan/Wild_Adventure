@@ -10,6 +10,7 @@ common.continue = Fortsetzen
 settings.title = Einstellungen
 settings.audio = Audio
 settings.graphics = Grafik
+settings.gameplay = Gameplay
 settings.controls = Steuerung
 settings.keyboard = Tastatur
 settings.joystick = Gamepad
@@ -25,6 +26,12 @@ graphics.mode_window = Fenster
 
 audio.sounds = Geräusche
 audio.music = Musik
+
+gameplay.vibration = Vibration:
+gameplay.lightbar = Controller-Licht:
+gameplay.low_health_vignette = Vignette bei wenig Leben:
+gameplay.hit_stop = Freeze-Frame-Effekt:
+gameplay.camera_shake = Kameraschütteln:
 
 controls.move_left = Nach links
 controls.move_right = Nach rechts

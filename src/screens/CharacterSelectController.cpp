@@ -4,6 +4,7 @@
 #include "audio/Mixer.h"
 #include "core/Campaign.h"
 #include "core/Input.h"
+#include "core/HapticCues.h"
 #include "core/Resources.h"
 #include "core/Skins.h"
 #include "core/StateMachine.h"
@@ -147,6 +148,7 @@ void CharacterSelectController::MoveSkin(int delta)
 	const int count = static_cast<int>(AllSkins().size());
 	selectedSkin = (selectedSkin + delta + count) % count;
 	context.audioMixer.PlaySound("ui_hover");
+	Haptics::PulseNavigation(context.gamepadHaptics);
 }
 
 void CharacterSelectController::SetFocus(Focus newFocus)
@@ -156,6 +158,7 @@ void CharacterSelectController::SetFocus(Focus newFocus)
 
 	focus = newFocus;
 	context.audioMixer.PlaySound("ui_hover");
+	Haptics::PulseNavigation(context.gamepadHaptics);
 }
 
 void CharacterSelectController::Activate()
@@ -170,6 +173,7 @@ void CharacterSelectController::Activate()
 
 	case Focus::BackButton:
 		context.audioMixer.PlaySound("ui_press");
+		Haptics::PulsePress(context.gamepadHaptics);
 		wasCloseRequested = true;
 		break;
 	}
@@ -179,6 +183,7 @@ void CharacterSelectController::Launch()
 {
 	context.campaign.SetSelectedSkin(AllSkins()[selectedSkin].id);
 	context.audioMixer.PlaySound("ui_press");
+	Haptics::PulsePress(context.gamepadHaptics);
 	wasCloseRequested = true;
 
 	context.stateMachine.Push(std::make_unique<GameState>(
@@ -219,7 +224,7 @@ void CharacterSelectController::HandleEvent(const sf::Event& event)
 
 		if (LeftArrowRect().contains(mouse) || RightArrowRect().contains(mouse))
 			SetFocus(Focus::Carousel);
-		else if (PlayRect().contains(mouse))
+		else if (PlayRect().contains(mouse) && IsUnlocked(selectedSkin))
 			SetFocus(Focus::PlayButton);
 		else if (BackRect().contains(mouse))
 			SetFocus(Focus::BackButton);
@@ -235,7 +240,7 @@ void CharacterSelectController::HandleEvent(const sf::Event& event)
 			MoveSkin(-1);
 		else if (RightArrowRect().contains(mouse))
 			MoveSkin(1);
-		else if (PlayRect().contains(mouse))
+		else if (PlayRect().contains(mouse) && IsUnlocked(selectedSkin))
 		{
 			focus = Focus::PlayButton;
 			Activate();
@@ -255,14 +260,20 @@ void CharacterSelectController::Update(float)
 	if (input.WasPressed(Action::MenuBack))
 	{
 		wasCloseRequested = true;
+		Haptics::PulsePress(context.gamepadHaptics);
 		return;
 	}
+
+	// Locked skins leave Play disabled, so navigation must skip over it: the
+	// carousel and Back button remain reachable, but focus can never land on
+	// a Play button the player cannot activate.
+	const bool playReachable = IsUnlocked(selectedSkin);
 
 	if (input.WasPressed(Action::MenuLeft))
 	{
 		if (focus == Focus::Carousel)
 			MoveSkin(-1);
-		else
+		else if (playReachable)
 			SetFocus(Focus::PlayButton);
 	}
 	else if (input.WasPressed(Action::MenuRight))
@@ -275,13 +286,16 @@ void CharacterSelectController::Update(float)
 	else if (input.WasPressed(Action::MenuDown))
 	{
 		if (focus == Focus::Carousel)
-			SetFocus(Focus::PlayButton);
+			SetFocus(playReachable ? Focus::PlayButton : Focus::BackButton);
 	}
 	else if (input.WasPressed(Action::MenuUp))
 	{
 		if (focus != Focus::Carousel)
 			SetFocus(Focus::Carousel);
 	}
+
+	if (!playReachable && focus == Focus::PlayButton)
+		focus = Focus::BackButton;
 
 	if (input.WasPressed(Action::MenuConfirm))
 		Activate();

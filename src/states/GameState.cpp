@@ -19,9 +19,11 @@
 #include "components/render/Sprite.h"
 #include "components/items/StartPlatform.h"
 #include "components/items/Finish.h"
+#include "core/HapticCues.h"
 #include "core/Campaign.h"
 #include "core/Random.h"
 #include "core/Resources.h"
+#include "core/Settings.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
 #include "core/Input.h"
@@ -69,10 +71,10 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, groundPatrolSystem(registry, tilemap, particles)
 	, enemyDeathSystem(registry)
 	, physicsSystem(registry, tilemap)
-	, rockHeadSystem(registry, tilemap)
-	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
-	, trampolineSystem(registry, context.audioMixer)
-	, arrowSystem(registry, context.audioMixer)
+	, rockHeadSystem(registry, tilemap, context.gamepadHaptics)
+	, boxSystem(registry, sceneLoader, particles, context.audioMixer, context.gamepadHaptics)
+	, trampolineSystem(registry, context.audioMixer, context.gamepadHaptics)
+	, arrowSystem(registry, context.audioMixer, context.gamepadHaptics)
 	, fireSystem(registry)
 	, movementSystem(registry)
 	, bulletSystem(registry, tilemap, particles)
@@ -81,8 +83,8 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, playerAnimationSystem(registry)
 	, renderSystem(registry, context.resources, context.virtualScreen)
 	, hud(context)
-	, levelSequencer(registry, sceneLoader, camera, confetti, context.audioMixer, transition, hud)
-	, playerFeedback(camera, particles, context.audioMixer)
+	, levelSequencer(registry, sceneLoader, camera, confetti, context.audioMixer, transition, hud, context.gamepadHaptics)
+	, playerFeedback(camera, particles, context.audioMixer, context.gamepadHaptics)
 	, levelPath(levelPath)
 	, levelNumber(levelNumber)
 	, respawnOverride(respawnAt)
@@ -333,6 +335,7 @@ void GameState::Update(float deltaTime)
 			[](ECS::Entity, ECS::Transform& t, ECS::PreviousTransform& pt) { pt.x = t.x; pt.y = t.y; });
 
 		context.stateMachine.Push(std::make_unique<PauseState>(context, levelPath, levelNumber));
+		Haptics::PulsePress(context.gamepadHaptics);
 		return;
 	}
 
@@ -369,7 +372,11 @@ void GameState::Update(float deltaTime)
 	const int enemiesBeforeStomp = enemiesKilled;
 	enemySystem.Update();
 	if (enemiesKilled > enemiesBeforeStomp)
-		hitStopTimer = HitStopDuration;
+	{
+		if (context.settings.IsHitStopEnabled())
+			hitStopTimer = HitStopDuration;
+		Haptics::PulseStomp(context.gamepadHaptics);
+	}
 	trunkSystem.Update(deltaTime);
 	plantSystem.Update(deltaTime);
 	beeSystem.Update(deltaTime);
@@ -391,7 +398,11 @@ void GameState::Update(float deltaTime)
 	const int scoreBeforePickup = score;
 	pickupSystem.Update(deltaTime);
 	if (score > scoreBeforePickup)
+	{
 		context.audioMixer.PlaySound("fruit_collect");
+		Haptics::PulseCollect(context.gamepadHaptics);
+		Haptics::FlashCollectLightbar(context.gamepadHaptics);
+	}
 
 	playerAnimationSystem.Update();
 	animationSystem.Update(deltaTime);
@@ -404,6 +415,10 @@ void GameState::Update(float deltaTime)
 			deathCount, fruitsCollected, maxFruits, enemiesKilled, maxEnemies));
 	}
 
+	// Cheap to set every frame; picks up a live change from the pause menu's
+	// Gameplay panel the moment play resumes, without Camera needing its own
+	// link back to Settings.
+	camera.SetShakeEnabled(context.settings.IsCameraShakeEnabled());
 	camera.Update(deltaTime);
 
 	// Ambient bubbles: spawn across the bottom of the view and let them rise.
@@ -439,6 +454,11 @@ void GameState::UpdatePlayer(float deltaTime)
 		{
 			hud.UpdateHearts(health.current, deltaTime);
 
+			if (context.settings.IsLowHealthVignetteEnabled() && health.current == 1)
+				lowHealthVignetteTime += deltaTime;
+			else
+				lowHealthVignetteTime = 0.0f;
+
 			const sf::Vector2f feet = { transform.x, transform.y };
 			camera.MoveTo(feet);
 
@@ -454,6 +474,7 @@ void GameState::UpdatePlayer(float deltaTime)
 			if (!isRestarting && (health.current <= 0 || fellIntoPit) && !hasPlayedDeathSound)
 			{
 				context.audioMixer.PlaySound("player_death");
+				Haptics::PulseDeath(context.gamepadHaptics);
 				hasPlayedDeathSound = true;
 				deathFlashTimer = DeathFlashTime;
 				deathCount++;
@@ -524,5 +545,20 @@ void GameState::Render(float interpolationFactor)
 
 	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
 	hud.Draw(renderTarget);
+
+	// Low-health vignette: a pulsing red tint on the screen edges while down
+	// to the last heart. Radius reaches past the corners so only the edges
+	// ever show any tint at all; the center always stays clear.
+	if (lowHealthVignetteTime > 0.0f)
+	{
+		const float pulse = std::sin(lowHealthVignetteTime * LowHealthVignetteSpeed) * 0.5f + 0.5f;
+		const float intensity = LowHealthVignetteMinIntensity
+			+ (LowHealthVignetteMaxIntensity - LowHealthVignetteMinIntensity) * pulse;
+
+		lightOverlay.Draw(renderTarget,
+			{ VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f },
+			LowHealthVignetteRadius, intensity, sf::Color(200, 20, 20));
+	}
+
 	transition.Draw(renderTarget);
 }

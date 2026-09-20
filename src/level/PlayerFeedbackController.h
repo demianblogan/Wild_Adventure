@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/HapticCues.h"
+
 #include <SFML/System/Vector2.hpp>
 
 class Camera;
@@ -26,7 +28,8 @@ namespace ECS
 class PlayerFeedbackController
 {
 public:
-	PlayerFeedbackController(Camera& camera, ParticleSystem& particles, Audio::Mixer& audioMixer);
+	PlayerFeedbackController(Camera& camera, ParticleSystem& particles, Audio::Mixer& audioMixer,
+		Haptics::GamepadHaptics& gamepadHaptics);
 
 	// Seeds the health baseline right after the player spawns, so the first
 	// Update call never mistakes a fresh spawn for having taken damage.
@@ -42,12 +45,15 @@ private:
 	Camera& camera;
 	ParticleSystem& particles;
 	Audio::Mixer& audioMixer;
+	Haptics::GamepadHaptics& gamepadHaptics;
 
 	bool wasOnGround = false;
 	float runDustTimer = 0.0f;
 	int previousJumpsRemaining = 0;
 	float previousLockTimer = 0.0f;
 	int previousPlayerHealth = -1;
+	Haptics::HeartbeatPulser lowHealthHeartbeat;
+	Haptics::DeathLightbarFader deathLightbarFader;
 
 	// Squash & stretch: the player's sprite briefly deforms on jump, land and
 	// hit, then springs back to normal. X/Y pairs roughly preserve volume.

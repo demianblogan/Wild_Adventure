@@ -15,6 +15,11 @@ namespace Audio
 	class Mixer;
 }
 
+namespace Haptics
+{
+	class GamepadHaptics;
+}
+
 namespace UI
 {
 	class Element;
@@ -41,6 +46,13 @@ namespace UI
 
 		void SetButtonSounds(Audio::Mixer& mixer, const std::string& hoverSoundName, const std::string& pressSoundName);
 
+		// Every Button/Stepper this loader builds afterwards also pulses a
+		// light "navigation" vibration on hover/focus and a firmer "press" (or
+		// per-direction "carousel") vibration on press/step, alongside
+		// whatever SetButtonSounds already wires -- see core/HapticCues.h for
+		// the actual pulse shapes.
+		void SetButtonHaptics(Haptics::GamepadHaptics& haptics);
+
 		// Lets Label/TextBox elements resolve a "textKey" field (instead of a
 		// literal "text") through the given catalog. Optional: a DataLoader with
 		// no localization set only understands literal "text" fields.
@@ -57,6 +69,8 @@ namespace UI
 		Audio::Mixer* buttonSoundMixer = nullptr;
 		std::string buttonHoverSound;
 		std::string buttonPressSound;
+
+		Haptics::GamepadHaptics* buttonHaptics = nullptr;
 
 		std::string prefabDirectory = "data/ui/prefabs/";
 		std::unordered_map<std::string, nlohmann::json> prefabCache;

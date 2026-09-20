@@ -18,6 +18,11 @@ namespace Audio
 	class Mixer;
 }
 
+namespace Haptics
+{
+	class GamepadHaptics;
+}
+
 namespace ECS
 {
 	class Registry;
@@ -42,7 +47,8 @@ public:
 	};
 
 	LevelSequencer(ECS::Registry& registry, SceneLoader& sceneLoader, Camera& camera,
-		ConfettiSystem& confetti, Audio::Mixer& audioMixer, Transition& transition, HUD& hud);
+		ConfettiSystem& confetti, Audio::Mixer& audioMixer, Transition& transition, HUD& hud,
+		Haptics::GamepadHaptics& gamepadHaptics);
 
 	// The scene loader hands these back after populating the level; call once
 	// right after the scene (and, for the player, the player prefab) loads.
@@ -83,6 +89,7 @@ private:
 	Audio::Mixer& audioMixer;
 	Transition& transition;
 	HUD& hud;
+	Haptics::GamepadHaptics& gamepadHaptics;
 
 	Phase phase = Phase::Revealing;
 
@@ -95,6 +102,11 @@ private:
 	bool hasPlayedStartMoving = false;
 	float finishTimer = 0.0f;
 	bool hasShownLevelComplete = false;
+
+	// The finish-cup fanfare is 3 strong haptic impacts spread across the
+	// FinishRiseTime bounce window: the first fires the instant the cup is
+	// touched, this just tracks how many of the remaining two are still due.
+	int finishImpactsPlayed = 0;
 
 	sf::Vector2f respawnPoint;
 	int checkpointScore = 0;

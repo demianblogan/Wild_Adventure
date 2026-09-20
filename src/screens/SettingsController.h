@@ -45,9 +45,12 @@ private:
 	void SetupAudioPanel();
 	void SetVolumeDisplay(const std::string& sliderName, const std::string& labelName, int value);
 
+	void SetupGameplayPanel();
+
 	void SetupKeyboardPanel();
 	void BeginKeyCapture(Action action);
 	void ApplyKeyCapture(sf::Keyboard::Key key);
+	void CancelKeyCapture();
 	static std::string KeyLabelName(Action action);
 
 	bool PanelIsDirty(const std::string& panel) const;

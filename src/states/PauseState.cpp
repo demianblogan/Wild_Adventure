@@ -1,6 +1,7 @@
 #include "PauseState.h"
 
 #include "Context.h"
+#include "core/HapticCues.h"
 #include "core/Input.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
@@ -28,9 +29,12 @@ PauseState::PauseState(Context& context, std::string levelPath, int levelNumber)
 	, levelNumber(levelNumber)
 {
 	pauseLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	pauseLoader.SetButtonHaptics(context.gamepadHaptics);
 	pauseLoader.SetLocalization(context.localization);
 	lastLocalizationRevision = context.localization.Revision();
 	RegisterActions();
+
+	Haptics::SetMenuLightbar(context.gamepadHaptics);
 
 	pauseInterface.SetContent(pauseLoader.LoadFromFile(PauseUiPath));
 	pauseInterface.ResetFocus();
@@ -87,6 +91,7 @@ void PauseState::Update(float deltaTime)
 	if (input.WasPressed(Action::Pause) || input.WasPressed(Action::MenuBack))
 	{
 		pendingRequest = NavRequest::Continue;
+		Haptics::PulsePress(context.gamepadHaptics);
 	}
 	else if (input.WasPressed(Action::MenuDown))
 	{

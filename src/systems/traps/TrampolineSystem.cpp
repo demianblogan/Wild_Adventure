@@ -3,12 +3,15 @@
 #include "components/render/Animation.h"
 #include "components/render/AnimationState.h"
 #include "components/traps/Trampoline.h"
+#include "core/GamepadHaptics.h"
+#include "core/HapticCues.h"
 
 namespace ECS
 {
-	TrampolineSystem::TrampolineSystem(Registry& registry, Audio::Mixer& mixer)
+	TrampolineSystem::TrampolineSystem(Registry& registry, Audio::Mixer& mixer, Haptics::GamepadHaptics& gamepadHaptics)
 		: registry(registry)
 		, mixer(mixer)
+		, gamepadHaptics(gamepadHaptics)
 	{}
 
 	void TrampolineSystem::Update()
@@ -30,6 +33,7 @@ namespace ECS
 					}
 
 					mixer.PlaySound("player_jump");
+					Haptics::PulseLaunch(gamepadHaptics);
 					return;
 				}
 

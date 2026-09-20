@@ -3,6 +3,11 @@
 #include "core/ecs/Registry.h"
 #include "tilemap/Tilemap.h"
 
+namespace Haptics
+{
+	class GamepadHaptics;
+}
+
 namespace ECS
 {
 	// Drives the rock-head platform: ramps its speed each pass, reverses when PhysicsSystem
@@ -12,11 +17,12 @@ namespace ECS
 	class RockHeadSystem
 	{
 	public:
-		RockHeadSystem(Registry& registry, const Tilemap& tilemap);
+		RockHeadSystem(Registry& registry, const Tilemap& tilemap, Haptics::GamepadHaptics& gamepadHaptics);
 		void Update(float deltaTime);
 
 	private:
 		Registry&      registry;
 		const Tilemap& tilemap;
+		Haptics::GamepadHaptics& gamepadHaptics;
 	};
 }

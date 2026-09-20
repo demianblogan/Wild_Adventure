@@ -4,6 +4,7 @@
 #include "audio/Mixer.h"
 #include "core/AppDataPath.h"
 #include "core/GraphicsTarget.h"
+#include "core/HapticCues.h"
 #include "core/Resources.h"
 #include "core/Settings.h"
 #include "core/StateMachine.h"
@@ -37,6 +38,7 @@ SettingsController::SettingsController(Context& context)
 	, settingsLoader(context.resources)
 {
 	settingsLoader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
+	settingsLoader.SetButtonHaptics(context.gamepadHaptics);
 	settingsLoader.SetLocalization(context.localization);
 	RegisterActions();
 }
@@ -58,6 +60,7 @@ void SettingsController::RegisterActions()
 {
 	settingsLoader.RegisterAction("menu_open_audio", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "audio"; });
 	settingsLoader.RegisterAction("menu_open_graphics", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "graphics"; });
+	settingsLoader.RegisterAction("menu_open_gameplay", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "gameplay"; });
 	settingsLoader.RegisterAction("menu_open_controls", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "controls"; });
 	settingsLoader.RegisterAction("menu_open_language", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "language"; });
 	settingsLoader.RegisterAction("menu_open_keyboard", [this] { pendingRequest = NavRequest::OpenPanel; pendingPanelId = "keyboard"; });
@@ -72,8 +75,12 @@ void SettingsController::RegisterActions()
 	settingsLoader.RegisterFloatAction("set_sound_volume", [this](float value)
 		{
 			const int level = static_cast<int>(std::lround(value));
+			const int previousLevel = context.settings.GetSoundVolume();
 			context.settings.SetSoundVolume(level);
 			context.audioMixer.SetSoundVolume(level / 10.0f);
+
+			if (level != previousLevel)
+				Haptics::PulseSlider(context.gamepadHaptics, level > previousLevel ? 1 : -1, level / 10.0f);
 
 			if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("sound_value")))
 				label->SetText(std::to_string(level));
@@ -82,8 +89,12 @@ void SettingsController::RegisterActions()
 	settingsLoader.RegisterFloatAction("set_music_volume", [this](float value)
 		{
 			const int level = static_cast<int>(std::lround(value));
+			const int previousLevel = context.settings.GetMusicVolume();
 			context.settings.SetMusicVolume(level);
 			context.audioMixer.SetMusicVolume(level / 10.0f);
+
+			if (level != previousLevel)
+				Haptics::PulseSlider(context.gamepadHaptics, level > previousLevel ? 1 : -1, level / 10.0f);
 
 			if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("music_value")))
 				label->SetText(std::to_string(level));
@@ -103,6 +114,33 @@ void SettingsController::RegisterActions()
 	settingsLoader.RegisterBoolAction("set_show_fps", [this](bool value)
 		{
 			context.settings.SetShowFps(value); // applies immediately, nothing to re-create
+		});
+
+	settingsLoader.RegisterBoolAction("set_vibration", [this](bool value)
+		{
+			context.settings.SetVibrationEnabled(value);
+			context.gamepadHaptics.SetVibrationEnabled(value); // applies immediately
+		});
+
+	settingsLoader.RegisterBoolAction("set_lightbar", [this](bool value)
+		{
+			context.settings.SetLightbarEnabled(value);
+			context.gamepadHaptics.SetLightbarEnabled(value); // applies immediately
+		});
+
+	settingsLoader.RegisterBoolAction("set_low_health_vignette", [this](bool value)
+		{
+			context.settings.SetLowHealthVignetteEnabled(value); // applies immediately, checked live each frame
+		});
+
+	settingsLoader.RegisterBoolAction("set_hit_stop", [this](bool value)
+		{
+			context.settings.SetHitStopEnabled(value); // applies immediately, checked live each frame
+		});
+
+	settingsLoader.RegisterBoolAction("set_camera_shake", [this](bool value)
+		{
+			context.settings.SetCameraShakeEnabled(value); // applies immediately, checked live each frame
 		});
 
 	settingsLoader.RegisterAction("language_prev", [this] { StepLanguage(-1); });
@@ -127,6 +165,15 @@ void SettingsController::ShowPanel(const std::string& panelId)
 
 		slot->offset = { 0.0f, 0.0f };
 	}
+	else if (panelId == "settings")
+	{
+		// The settings hub has no title of its own in either context (see
+		// below) and its six buttons already span most of the screen, so it
+		// gets the same full-height slot as the main-menu case instead of
+		// pause_frame.json's default offset (which otherwise leaves room for
+		// a title block this panel doesn't show).
+		slot->offset = { 0.0f, 0.0f };
+	}
 
 	slot->AddChild(settingsLoader.LoadFromFile(MenuDirectory + panelId + ".json"));
 
@@ -137,37 +184,61 @@ void SettingsController::ShowPanel(const std::string& panelId)
 	// controls don't).
 	if (activeFrame != "frame")
 	{
-		const bool hasOwnTitle = (panelId == "audio" || panelId == "graphics"
+		const bool hasOwnTitle = (panelId == "audio" || panelId == "graphics" || panelId == "gameplay"
 			|| panelId == "keyboard" || panelId == "joystick" || panelId == "language");
 
+		// The settings hub shows no title at all (not even the frame's own
+		// generic "Settings" heading below) so its six-button list can use
+		// the full height without one, same as in the main menu.
+		const bool showsFrameTitle = !hasOwnTitle && panelId != "settings";
+
 		if (UI::Element* block = settingsInterface.FindByName("frame_title_block"))
-			block->isVisible = !hasOwnTitle;
+			block->isVisible = showsFrameTitle;
 
 		if (UI::Element* container = settingsInterface.FindByName("frame_container"))
 		{
 			container->isVisible = !hasOwnTitle;
 
-			// Sized for the 5-button settings hub by default; controls only
-			// has 3 buttons, so it gets a shorter box to match (paired with
-			// re-centering those buttons in the tighter space just below).
-			container->size = (panelId == "controls")
-				? sf::Vector2f(220.0f, 130.0f)
-				: sf::Vector2f(220.0f, 200.0f);
+			if (panelId == "controls")
+			{
+				// Only 3 buttons: a shorter box to match (paired with
+				// re-centering those buttons in the tighter space below).
+				container->size = { 220.0f, 130.0f };
+			}
+			else if (panelId == "settings")
+			{
+				// No title above it to make room for, so it centers on the
+				// whole frame instead of sitting low. Buttons are 200px wide
+				// (see menu_button.json), so the box can't shrink much
+				// narrower than the default without clipping them; height
+				// shrinks to match the now-centered six-button list instead
+				// of the taller box a title above it would have needed.
+				container->size = { 220.0f, 220.0f };
+				container->offset = { 0.0f, 0.0f };
+			}
+			else if (panelId == "gameplay")
+			{
+				// Five checkbox rows plus title and buttons need a taller box
+				// than the other panels' default.
+				container->size = { 220.0f, 230.0f };
+			}
+			else
+			{
+				container->size = { 220.0f, 200.0f };
+			}
 		}
 
-		if (!hasOwnTitle)
+		if (showsFrameTitle)
 		{
 			const std::string titleKey = (panelId == "controls") ? "settings.controls" : "settings.title";
 			if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("frame_title_label")))
 				label->SetText(context.localization.GetText(titleKey));
 
-			// controls.json and settings.json also carry their own heading
-			// (needed when reached from the main menu, which has no
-			// frame_title_block of its own) -- in pause context that would
-			// duplicate the one just shown above, so hide it here.
+			// controls.json also carries its own heading (needed when
+			// reached from the main menu, which has no frame_title_block of
+			// its own) -- in pause context that would duplicate the one
+			// just shown above, so hide it here.
 			if (UI::Element* panelTitle = settingsInterface.FindByName("controls_panel_title"))
-				panelTitle->isVisible = false;
-			if (UI::Element* panelTitle = settingsInterface.FindByName("settings_panel_title"))
 				panelTitle->isVisible = false;
 		}
 
@@ -183,28 +254,14 @@ void SettingsController::ShowPanel(const std::string& panelId)
 			if (UI::Element* button = settingsInterface.FindByName("controls_back_button"))
 				button->offset.y = 36.0f;
 		}
-		else if (panelId == "settings")
-		{
-			// Same reasoning as controls above: settings.json's own heading
-			// is hidden (the frame already shows one), so its five buttons
-			// re-center on the panel instead of sitting low.
-			if (UI::Element* button = settingsInterface.FindByName("settings_graphics_button"))
-				button->offset.y = -72.0f;
-			if (UI::Element* button = settingsInterface.FindByName("settings_audio_button"))
-				button->offset.y = -36.0f;
-			if (UI::Element* button = settingsInterface.FindByName("settings_controls_button"))
-				button->offset.y = 0.0f;
-			if (UI::Element* button = settingsInterface.FindByName("settings_language_button"))
-				button->offset.y = 36.0f;
-			if (UI::Element* button = settingsInterface.FindByName("settings_back_button"))
-				button->offset.y = 72.0f;
-		}
 	}
 
 	if (panelId == "audio")
 		SetupAudioPanel();
 	else if (panelId == "graphics")
 		SetupGraphicsPanel();
+	else if (panelId == "gameplay")
+		SetupGameplayPanel();
 	else if (panelId == "keyboard")
 		SetupKeyboardPanel();
 	else if (panelId == "language")
@@ -226,6 +283,24 @@ void SettingsController::SetVolumeDisplay(const std::string& sliderName, const s
 
 	if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName(labelName)))
 		label->SetText(std::to_string(value));
+}
+
+void SettingsController::SetupGameplayPanel()
+{
+	if (auto* vibration = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("vibration_checkbox")))
+		vibration->SetChecked(context.settings.IsVibrationEnabled());
+
+	if (auto* lightbar = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("lightbar_checkbox")))
+		lightbar->SetChecked(context.settings.IsLightbarEnabled());
+
+	if (auto* vignette = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("low_health_vignette_checkbox")))
+		vignette->SetChecked(context.settings.IsLowHealthVignetteEnabled());
+
+	if (auto* hitStop = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("hit_stop_checkbox")))
+		hitStop->SetChecked(context.settings.IsHitStopEnabled());
+
+	if (auto* cameraShake = dynamic_cast<UI::Checkbox*>(settingsInterface.FindByName("camera_shake_checkbox")))
+		cameraShake->SetChecked(context.settings.IsCameraShakeEnabled());
 }
 
 void SettingsController::SetupKeyboardPanel()
@@ -259,15 +334,20 @@ void SettingsController::BeginKeyCapture(Action action)
 		label->SetText(context.localization.GetText("controls.capturing"));
 }
 
+void SettingsController::CancelKeyCapture()
+{
+	isCapturingKey = false;
+	isWaitingForKeyRelease = true;
+	SetupKeyboardPanel();
+}
+
 void SettingsController::ApplyKeyCapture(sf::Keyboard::Key key)
 {
 	// Escape cancels the capture; it is reserved as the fixed pause/back key
 	// and can never be bound to a game action.
 	if (key == sf::Keyboard::Key::Escape)
 	{
-		isCapturingKey = false;
-		isWaitingForKeyRelease = true;
-		SetupKeyboardPanel();
+		CancelKeyCapture();
 		return;
 	}
 
@@ -440,7 +520,8 @@ void SettingsController::UpdateLanguageLabel()
 
 bool SettingsController::IsSettingsPanel(const std::string& panelId) const
 {
-	return panelId == "audio" || panelId == "graphics" || panelId == "keyboard" || panelId == "language";
+	return panelId == "audio" || panelId == "graphics" || panelId == "gameplay"
+		|| panelId == "keyboard" || panelId == "language";
 }
 
 void SettingsController::ResetCurrentPanelToDefaults()
@@ -462,6 +543,13 @@ void SettingsController::ResetCurrentPanelToDefaults()
 		context.settings.ResetGraphicsToDefaults();
 		context.graphics.ApplyVsync(); // vsync applies live; resolution/mode wait for Save
 		SetupGraphicsPanel();
+	}
+	else if (panel == "gameplay")
+	{
+		context.settings.ResetGameplayToDefaults();
+		context.gamepadHaptics.SetVibrationEnabled(context.settings.IsVibrationEnabled());
+		context.gamepadHaptics.SetLightbarEnabled(context.settings.IsLightbarEnabled());
+		SetupGameplayPanel();
 	}
 	else if (panel == "keyboard")
 	{
@@ -522,7 +610,7 @@ bool SettingsController::PanelIsDirty(const std::string& panel) const
 {
 	if (panel == "keyboard")
 		return context.input.IsDirty();
-	if (panel == "audio" || panel == "graphics" || panel == "language")
+	if (panel == "audio" || panel == "graphics" || panel == "gameplay" || panel == "language")
 		return context.settings.IsDirty();
 	return false;
 }
@@ -537,7 +625,7 @@ void SettingsController::SavePanel(const std::string& panel)
 	{
 		context.input.SaveConfig(InputPath);
 	}
-	else if (panel == "audio" || panel == "graphics" || panel == "language")
+	else if (panel == "audio" || panel == "graphics" || panel == "gameplay" || panel == "language")
 	{
 		context.settings.Save(SettingsPath);
 		context.graphics.ApplyGraphics();
@@ -564,12 +652,14 @@ void SettingsController::RevertPanel(const std::string& panel)
 	{
 		context.input.Revert();
 	}
-	else if (panel == "audio" || panel == "graphics" || panel == "language")
+	else if (panel == "audio" || panel == "graphics" || panel == "gameplay" || panel == "language")
 	{
 		context.settings.Revert();
 		context.audioMixer.SetSoundVolume(context.settings.GetSoundVolume() / 10.0f);
 		context.audioMixer.SetMusicVolume(context.settings.GetMusicVolume() / 10.0f);
 		context.graphics.ApplyVsync();
+		context.gamepadHaptics.SetVibrationEnabled(context.settings.IsVibrationEnabled());
+		context.gamepadHaptics.SetLightbarEnabled(context.settings.IsLightbarEnabled());
 	}
 }
 
@@ -626,6 +716,16 @@ void SettingsController::Update(float deltaTime)
 
 	Input& input = context.input;
 
+	// A gamepad has no keyboard event to swallow in HandleEvent, so give it a
+	// way out of key capture here: its "back" button cancels the rebind, same
+	// as pressing Escape.
+	if (isCapturingKey && input.WasPressed(Action::MenuBack))
+	{
+		CancelKeyCapture();
+		Haptics::PulsePress(context.gamepadHaptics);
+		return;
+	}
+
 	if (isWaitingForKeyRelease && !isCapturingKey)
 	{
 		const bool anyMenuKeyDown = input.IsDown(Action::MenuUp) || input.IsDown(Action::MenuDown)
@@ -643,6 +743,7 @@ void SettingsController::Update(float deltaTime)
 		if (input.WasPressed(Action::MenuBack))
 		{
 			pendingRequest = NavRequest::Back;
+			Haptics::PulsePress(context.gamepadHaptics);
 		}
 		else if (input.WasPressed(Action::MenuDown))
 		{

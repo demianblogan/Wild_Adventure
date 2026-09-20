@@ -12,6 +12,8 @@
 #include "components/physics/Velocity.h"
 #include "components/items/PickupDelay.h"
 #include "graphics/ParticleSystem.h"
+#include "core/GamepadHaptics.h"
+#include "core/HapticCues.h"
 #include "core/Random.h"
 #include "core/SceneLoader.h"
 #include "core/ecs/Registry.h"
@@ -33,11 +35,13 @@ namespace ECS
 		constexpr int DebrisPieceCount = 4;
 	}
 
-	BoxSystem::BoxSystem(Registry& registry, SceneLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer)
+	BoxSystem::BoxSystem(Registry& registry, SceneLoader& loader, ParticleSystem& particles, Audio::Mixer& mixer,
+		Haptics::GamepadHaptics& gamepadHaptics)
 		: registry(registry)
 		, loader(loader)
 		, particles(particles)
 		, mixer(mixer)
+		, gamepadHaptics(gamepadHaptics)
 	{}
 
 	void BoxSystem::EjectFruit(const std::string& fruitName, float x, float y, float ejectSpeedX, float ejectSpeedUp)
@@ -90,6 +94,7 @@ namespace ECS
 
 				if (!box.hitSound.empty())
 					mixer.PlaySound(box.hitSound);
+				Haptics::PulseBoxHit(gamepadHaptics);
 
 				if (box.hitsTaken >= box.hitsToBreak)
 					box.isBreaking = true;
