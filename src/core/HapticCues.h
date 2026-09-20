@@ -324,7 +324,12 @@ namespace Haptics
 			if (timer > 0.f)
 				return;
 
-			haptics.PulseVibration(Motor, Motor * 0.5f, TapDuration);
+			// On the high-frequency motor, not the low one: same reasoning as
+			// PulseFootstep above -- a short ~50ms tap barely gives the heavy
+			// low motor time to spin up and reads as a coarse thunk, while the
+			// lighter high motor is built for exactly this kind of quick, fine
+			// tap.
+			haptics.PulseVibration(0.f, Motor, TapDuration);
 			haptics.PulseLightbar(HealthCriticalFlashColor, TapDuration);
 			timer = isSecondTap ? GapAfterPair : GapBetweenTaps;
 			isSecondTap = !isSecondTap;
@@ -334,7 +339,7 @@ namespace Haptics
 		float timer = 0.f;
 		bool isSecondTap = false;
 
-		static constexpr float Motor = 0.40f;
+		static constexpr float Motor = 0.30f;
 		static constexpr float TapDuration = 0.05f;
 		static constexpr float GapBetweenTaps = 0.12f;
 		static constexpr float GapAfterPair = 0.55f;

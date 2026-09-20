@@ -65,12 +65,15 @@ namespace Haptics
 		// line with DualSense's.
 		constexpr float XboxOverallBoost = 1.8f;
 
-		// Radians/second of the lightbar's throb while a pulse is running.
-		constexpr float LightbarThrobSpeed = 16.f;
-
-		[[nodiscard]] unsigned char Scale(unsigned char channel, float brightness)
+		[[nodiscard]] unsigned char LerpChannel(unsigned char from, unsigned char to, float t)
 		{
-			return static_cast<unsigned char>(std::clamp(static_cast<float>(channel) * brightness, 0.f, 255.f));
+			const float value = static_cast<float>(from) + (static_cast<float>(to) - static_cast<float>(from)) * t;
+			return static_cast<unsigned char>(std::clamp(value, 0.f, 255.f));
+		}
+
+		[[nodiscard]] RGBColor LerpColor(RGBColor from, RGBColor to, float t)
+		{
+			return { LerpChannel(from.r, to.r, t), LerpChannel(from.g, to.g, t), LerpChannel(from.b, to.b, t) };
 		}
 
 		[[nodiscard]] unsigned char ToByte(float normalizedValue)
@@ -139,9 +142,6 @@ namespace Haptics
 		if (durationSeconds <= 0.f)
 			return;
 
-		if (lightbarPulseRemaining <= 0.f)
-			lightbarThrobTime = 0.f;
-
 		lightbarPulseColor = color;
 		lightbarPulseBlinks = std::max(1, blinks);
 		lightbarPulseDuration = std::max(lightbarPulseDuration, durationSeconds);
@@ -175,8 +175,6 @@ namespace Haptics
 
 		// --- Lightbar ---
 
-		lightbarThrobTime += deltaTime;
-
 		if (lightbarPulseRemaining > 0.f)
 			lightbarPulseRemaining = std::max(0.f, lightbarPulseRemaining - deltaTime);
 
@@ -197,28 +195,29 @@ namespace Haptics
 		}
 		else if (lightbarFallOff > 0.f)
 		{
+			// The pulse blends UP from the resting color toward lightbarPulseColor
+			// rather than replacing it outright, and never dips toward black: a
+			// quick, sharp brighten-then-settle-back that reads as "this color,
+			// but brighter for a moment" instead of the lightbar visibly turning
+			// off and back on around every flash.
 			float brightness = 0.f;
 
 			if (lightbarPulseBlinks <= 1)
 			{
-				// A held / single pulse: a faint throb, dimming as it fades.
-				const float throb = 0.6f + 0.4f * (std::sin(lightbarThrobTime * LightbarThrobSpeed) * 0.5f + 0.5f);
-				brightness = lightbarFallOff * throb;
+				// One clean flash: snaps to full brightness the instant it's
+				// triggered, then eases back down to resting over the duration.
+				brightness = lightbarFallOff;
 			}
 			else
 			{
-				// N clean on-off flashes spread across the duration.
+				// N clean on-off flashes spread across the duration -- "off"
+				// here means brightness 0, i.e. resting color, never black.
 				constexpr float Pi = std::numbers::pi_v<float>;
 				const float progress = 1.f - lightbarFallOff;
 				brightness = std::abs(std::sin(progress * Pi * static_cast<float>(lightbarPulseBlinks)));
 			}
 
-			currentLightbar =
-			{
-				Scale(lightbarPulseColor.r, brightness),
-				Scale(lightbarPulseColor.g, brightness),
-				Scale(lightbarPulseColor.b, brightness)
-			};
+			currentLightbar = LerpColor(lightbarColor, lightbarPulseColor, brightness);
 		}
 		else
 		{

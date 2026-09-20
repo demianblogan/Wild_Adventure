@@ -117,7 +117,6 @@ namespace Haptics
 		float lightbarPulseRemaining = 0.f;
 		float lightbarPulseDuration = 0.f;
 		int lightbarPulseBlinks = 1;
-		float lightbarThrobTime = 0.f;
 		RGBColor currentLightbar{};
 	};
 }
