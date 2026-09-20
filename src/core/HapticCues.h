@@ -97,4 +97,159 @@ namespace Haptics
 		else if (direction > 0)
 			haptics.PulseVibration(0.f, motor, SliderDuration);
 	}
+
+	// --- Gameplay --------------------------------------------------------------
+	// The menu cues above are mostly symmetric (no left/right meaning); gameplay
+	// cues instead deliberately pick a low/high motor blend per event: the
+	// low-frequency motor reads as a deep, heavy thud (a solid hit, a body's
+	// weight landing), the high-frequency one as a lighter, brighter buzz (a
+	// spark, a boing, a scrape). Picking a different blend per cue is what
+	// makes them read as distinct sensations rather than "the same rumble,
+	// louder or quieter".
+
+	// Taking damage: a heavy, low-dominant punch.
+	constexpr float DamageLowMotor = 0.90f;
+	constexpr float DamageHighMotor = 0.45f;
+	constexpr float DamageDuration = 0.14f;
+
+	inline void PulseDamage(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(DamageLowMotor, DamageHighMotor, DamageDuration);
+	}
+
+	// Dying/respawning: heavier and longer than a normal damage hit, so losing
+	// the last heart reads as more significant than any single previous hit.
+	constexpr float DeathLowMotor = 0.95f;
+	constexpr float DeathHighMotor = 0.55f;
+	constexpr float DeathDuration = 0.30f;
+
+	inline void PulseDeath(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(DeathLowMotor, DeathHighMotor, DeathDuration);
+	}
+
+	// Landing on the ground: a soft, low-only thump -- much gentler than a hit.
+	constexpr float LandLowMotor = 0.30f;
+	constexpr float LandHighMotor = 0.05f;
+	constexpr float LandDuration = 0.05f;
+
+	inline void PulseLand(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(LandLowMotor, LandHighMotor, LandDuration);
+	}
+
+	// One running footstep: a very light, very short tap, timed to the same
+	// cadence as the run-dust VFX (see PlayerFeedbackController) -- inspired
+	// by Astro's Playroom, where every stride has its own faint kick.
+	constexpr float FootstepMotor = 0.14f;
+	constexpr float FootstepDuration = 0.035f;
+
+	inline void PulseFootstep(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(FootstepMotor, 0.f, FootstepDuration);
+	}
+
+	// Picking up a fruit: light and high-only, a little "sparkle" rather than
+	// a thump.
+	constexpr float CollectLowMotor = 0.04f;
+	constexpr float CollectHighMotor = 0.28f;
+	constexpr float CollectDuration = 0.05f;
+
+	inline void PulseCollect(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(CollectLowMotor, CollectHighMotor, CollectDuration);
+	}
+
+	// Touching a checkpoint: a warm, balanced medium pulse -- a reassuring
+	// confirmation, not an impact.
+	constexpr float CheckpointLowMotor = 0.30f;
+	constexpr float CheckpointHighMotor = 0.25f;
+	constexpr float CheckpointDuration = 0.10f;
+
+	inline void PulseCheckpoint(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(CheckpointLowMotor, CheckpointHighMotor, CheckpointDuration);
+	}
+
+	// A box taking a hit: a sharp, bright crack -- higher and shorter than a
+	// damage hit so wood/metal reads differently from flesh.
+	constexpr float BoxHitLowMotor = 0.55f;
+	constexpr float BoxHitHighMotor = 0.65f;
+	constexpr float BoxHitDuration = 0.10f;
+
+	inline void PulseBoxHit(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(BoxHitLowMotor, BoxHitHighMotor, BoxHitDuration);
+	}
+
+	// Launching off a trampoline or arrow booster: strong but high-leaning, so
+	// it reads as a springy "boing" rather than the low-dominant punch of
+	// taking damage.
+	constexpr float LaunchLowMotor = 0.55f;
+	constexpr float LaunchHighMotor = 0.80f;
+	constexpr float LaunchDuration = 0.14f;
+
+	inline void PulseLaunch(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(LaunchLowMotor, LaunchHighMotor, LaunchDuration);
+	}
+
+	// One beat of the finish-cup fanfare -- call three times, spaced out, from
+	// the moment the player touches it.
+	constexpr float FinishImpactLowMotor = 0.90f;
+	constexpr float FinishImpactHighMotor = 0.55f;
+	constexpr float FinishImpactDuration = 0.12f;
+
+	inline void PulseFinishImpact(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(FinishImpactLowMotor, FinishImpactHighMotor, FinishImpactDuration);
+	}
+
+	// Stuck to a wall and sliding down it: call every frame for as long as it
+	// lasts (PulseVibration's merge rule turns that into one continuous
+	// scrape instead of a stutter) -- brighter/buzzier than it is heavy.
+	constexpr float WallSlideLowMotor = 0.12f;
+	constexpr float WallSlideHighMotor = 0.32f;
+	constexpr float WallSlideDuration = 0.08f; // longer than one frame so re-arming never gaps
+
+	inline void PulseWallSlide(GamepadHaptics& haptics)
+	{
+		haptics.PulseVibration(WallSlideLowMotor, WallSlideHighMotor, WallSlideDuration);
+	}
+
+	// A slow "thump-thump ... thump-thump" heartbeat, meant to run for as long
+	// as `active` stays true (e.g. the player is down to their last heart).
+	// Owned by whoever drives it and ticked every frame; stops and resets the
+	// instant `active` goes false so it never leaves a half-finished beat
+	// hanging or picks back up mid-pattern.
+	class HeartbeatPulser
+	{
+	public:
+		void Update(float deltaTime, bool active, GamepadHaptics& haptics)
+		{
+			if (!active)
+			{
+				timer = 0.f;
+				isSecondTap = false;
+				return;
+			}
+
+			timer -= deltaTime;
+			if (timer > 0.f)
+				return;
+
+			haptics.PulseVibration(Motor, Motor * 0.5f, TapDuration);
+			timer = isSecondTap ? GapAfterPair : GapBetweenTaps;
+			isSecondTap = !isSecondTap;
+		}
+
+	private:
+		float timer = 0.f;
+		bool isSecondTap = false;
+
+		static constexpr float Motor = 0.40f;
+		static constexpr float TapDuration = 0.05f;
+		static constexpr float GapBetweenTaps = 0.12f;
+		static constexpr float GapAfterPair = 0.55f;
+	};
 }

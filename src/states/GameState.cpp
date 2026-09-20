@@ -19,6 +19,7 @@
 #include "components/render/Sprite.h"
 #include "components/items/StartPlatform.h"
 #include "components/items/Finish.h"
+#include "core/HapticCues.h"
 #include "core/Campaign.h"
 #include "core/Random.h"
 #include "core/Resources.h"
@@ -70,9 +71,9 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, enemyDeathSystem(registry)
 	, physicsSystem(registry, tilemap)
 	, rockHeadSystem(registry, tilemap)
-	, boxSystem(registry, sceneLoader, particles, context.audioMixer)
-	, trampolineSystem(registry, context.audioMixer)
-	, arrowSystem(registry, context.audioMixer)
+	, boxSystem(registry, sceneLoader, particles, context.audioMixer, context.gamepadHaptics)
+	, trampolineSystem(registry, context.audioMixer, context.gamepadHaptics)
+	, arrowSystem(registry, context.audioMixer, context.gamepadHaptics)
 	, fireSystem(registry)
 	, movementSystem(registry)
 	, bulletSystem(registry, tilemap, particles)
@@ -81,8 +82,8 @@ GameState::GameState(Context& context, const std::string& levelPath, int levelNu
 	, playerAnimationSystem(registry)
 	, renderSystem(registry, context.resources, context.virtualScreen)
 	, hud(context)
-	, levelSequencer(registry, sceneLoader, camera, confetti, context.audioMixer, transition, hud)
-	, playerFeedback(camera, particles, context.audioMixer)
+	, levelSequencer(registry, sceneLoader, camera, confetti, context.audioMixer, transition, hud, context.gamepadHaptics)
+	, playerFeedback(camera, particles, context.audioMixer, context.gamepadHaptics)
 	, levelPath(levelPath)
 	, levelNumber(levelNumber)
 	, respawnOverride(respawnAt)
@@ -391,7 +392,10 @@ void GameState::Update(float deltaTime)
 	const int scoreBeforePickup = score;
 	pickupSystem.Update(deltaTime);
 	if (score > scoreBeforePickup)
+	{
 		context.audioMixer.PlaySound("fruit_collect");
+		Haptics::PulseCollect(context.gamepadHaptics);
+	}
 
 	playerAnimationSystem.Update();
 	animationSystem.Update(deltaTime);
@@ -454,6 +458,7 @@ void GameState::UpdatePlayer(float deltaTime)
 			if (!isRestarting && (health.current <= 0 || fellIntoPit) && !hasPlayedDeathSound)
 			{
 				context.audioMixer.PlaySound("player_death");
+				Haptics::PulseDeath(context.gamepadHaptics);
 				hasPlayedDeathSound = true;
 				deathFlashTimer = DeathFlashTime;
 				deathCount++;

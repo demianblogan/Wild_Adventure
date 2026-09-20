@@ -12,10 +12,12 @@
 #include <algorithm>
 #include <cmath>
 
-PlayerFeedbackController::PlayerFeedbackController(Camera& camera, ParticleSystem& particles, Audio::Mixer& audioMixer)
+PlayerFeedbackController::PlayerFeedbackController(Camera& camera, ParticleSystem& particles, Audio::Mixer& audioMixer,
+	Haptics::GamepadHaptics& gamepadHaptics)
 	: camera(camera)
 	, particles(particles)
 	, audioMixer(audioMixer)
+	, gamepadHaptics(gamepadHaptics)
 {}
 
 void PlayerFeedbackController::Update(float deltaTime, sf::Vector2f feet, const ECS::Velocity& velocity,
@@ -36,6 +38,7 @@ void PlayerFeedbackController::Update(float deltaTime, sf::Vector2f feet, const 
 		{
 			const int runDirection = (velocity.x > 0.0f) ? 1 : -1;
 			particles.EmitRunDust(feet, runDirection);
+			Haptics::PulseFootstep(gamepadHaptics);
 			runDustTimer = RunDustInterval;
 		}
 	}
@@ -47,9 +50,14 @@ void PlayerFeedbackController::Update(float deltaTime, sf::Vector2f feet, const 
 	// Looping wall-slide sound only while actually sliding down a wall.
 	const bool isWallSliding = collisionState.isOnWall && !onGround && velocity.y > 0.0f;
 	if (isWallSliding)
+	{
 		audioMixer.StartLoop("player_wall_slide");
+		Haptics::PulseWallSlide(gamepadHaptics);
+	}
 	else
+	{
 		audioMixer.StopLoop("player_wall_slide");
+	}
 
 	if (previousLockTimer <= 0.0f && jump.lockTimer > 0.0f)
 	{
@@ -71,6 +79,7 @@ void PlayerFeedbackController::Update(float deltaTime, sf::Vector2f feet, const 
 	if (!wasOnGround && onGround)
 	{
 		particles.Emit("land", feet);
+		Haptics::PulseLand(gamepadHaptics);
 		squashX = SquashLand.x;
 		squashY = SquashLand.y;
 	}
@@ -82,6 +91,7 @@ void PlayerFeedbackController::Update(float deltaTime, sf::Vector2f feet, const 
 	if (health.current < previousPlayerHealth)
 	{
 		camera.Shake(ShakeHit);
+		Haptics::PulseDamage(gamepadHaptics);
 
 		// Compress along the impact axis. The knockback applied by the
 		// damage systems reveals it: side hits launch diagonally
@@ -94,6 +104,10 @@ void PlayerFeedbackController::Update(float deltaTime, sf::Vector2f feet, const 
 			audioMixer.PlaySound("player_hurt");
 	}
 	previousPlayerHealth = health.current;
+
+	// A slow heartbeat while down to the last heart -- stops the instant the
+	// player heals back up or dies (health.current == 0 is not == 1).
+	lowHealthHeartbeat.Update(deltaTime, health.current == 1, gamepadHaptics);
 
 	if (sprite != nullptr)
 	{
