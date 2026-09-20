@@ -39,6 +39,11 @@ namespace UI
 		return content ? content->FindByName(name) : nullptr;
 	}
 
+	void Root::RefreshInteractives()
+	{
+		CollectInteractives();
+	}
+
 	void Root::CollectInteractives()
 	{
 		focusRow = -1;
@@ -58,6 +63,12 @@ namespace UI
 
 	void Root::CollectInteractivesFrom(Element& element, std::vector<InteractiveElement*>* currentRow)
 	{
+		// A hidden element (and anything nested inside it) is never a
+		// navigation stop: a button hidden via isVisible must not still eat
+		// keyboard/gamepad focus (or grab mouse hover, see HandleMouseMove).
+		if (!element.isVisible)
+			return;
+
 		// An interactive element is a navigation leaf: we never descend into it,
 		// so controls built from inner interactives are not collected separately.
 		if (element.IsInteractive())
@@ -363,7 +374,7 @@ namespace UI
 		// The highlighted control blooms: draw it once more into the glow
 		// layer, at the position the pass above just cached.
 		InteractiveElement* focused = CurrentElement();
-		if (focused != nullptr && focused->GetState() == InteractionState::Highlighted)
+		if (focused != nullptr && focused->GetState() == InteractionState::Highlighted && focused->bloomsWhenHighlighted)
 			focused->DrawCached(virtualScreen.GetGlowTarget());
 	}
 

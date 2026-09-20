@@ -5,7 +5,7 @@
 
 // The company logo shown at launch: fades in from black, holds, fades out, then
 // hands over to the regular SplashState. A short jingle plays alongside it, and
-// any key/mouse/gamepad press skips to the fade-out.
+// any key/mouse/gamepad press skips it immediately.
 class CompanySplashState : public State
 {
 public:
@@ -25,6 +25,7 @@ private:
 	};
 
 	void StartFadeOut();
+	void Skip();
 	void Leave();
 
 	Phase phase = Phase::FadeIn;

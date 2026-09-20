@@ -4,6 +4,7 @@
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/System/Angle.hpp>
 #include <SFML/System/String.hpp>
 
 #include <algorithm>
@@ -70,12 +71,34 @@ namespace UI
 		drawableText.setOutlineColor(outlineColor);
 
 		const sf::FloatRect bounds = drawableText.getLocalBounds();
-		sf::Vector2f finalPosition = absolutePosition - bounds.position;
 
-		finalPosition.x = std::floor(finalPosition.x);
-		finalPosition.y = std::floor(finalPosition.y);
+		if (rotationDegrees == 0.0f)
+		{
+			// Fast, pixel-snapped path used by the overwhelming majority of
+			// labels: anchors this element's absolutePosition to the glyph's
+			// own ink top-left, unrotated.
+			sf::Vector2f finalPosition = absolutePosition - bounds.position;
 
-		drawableText.setPosition(finalPosition);
+			finalPosition.x = std::floor(finalPosition.x);
+			finalPosition.y = std::floor(finalPosition.y);
+
+			drawableText.setOrigin({ 0.0f, 0.0f });
+			drawableText.setRotation(sf::degrees(0.0f));
+			drawableText.setPosition(finalPosition);
+		}
+		else
+		{
+			// Rotating pixel-snapped text always looks wrong at some angle no
+			// matter which pixel it's snapped to, so this path skips the
+			// floor() and instead pivots around the glyph's own visual
+			// center, landing that center where absolutePosition's would be
+			// if this were the unrotated, top-left-anchored case above.
+			const sf::Vector2f center = bounds.position + bounds.size / 2.0f;
+
+			drawableText.setOrigin(center);
+			drawableText.setRotation(sf::degrees(rotationDegrees));
+			drawableText.setPosition(absolutePosition + center);
+		}
 
 		target.draw(drawableText);
 	}

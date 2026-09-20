@@ -24,7 +24,7 @@
 					"offset":
 					[
 						0,
-						-70
+						-63
 					],
 					"size":
 					[
@@ -121,7 +121,7 @@
 					"offset":
 					[
 						0,
-						-25
+						-18
 					],
 					"size":
 					[
@@ -280,7 +280,7 @@
 					"offset":
 					[
 						0,
-						13
+						20
 					],
 					"size":
 					[
@@ -472,7 +472,7 @@
 								"offset":
 								[
 									-150,
-									55
+									62
 								],
 								"backgroundTint":
 								[
@@ -517,7 +517,7 @@
 								"offset":
 								[
 									0,
-									55
+									62
 								],
 								"action": "menu_default",
 								"foregrounds":
@@ -555,7 +555,7 @@
 								"offset":
 								[
 									150,
-									55
+									62
 								],
 								"action": "menu_back",
 								"foregrounds":

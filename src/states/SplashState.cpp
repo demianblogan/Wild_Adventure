@@ -5,6 +5,7 @@
 #include "core/Resources.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
+#include "screens/TitleDropAnimation.h"
 #include "states/MenuState.h"
 #include "ui/Animation.h"
 #include "ui/Label.h"
@@ -49,26 +50,21 @@ SplashState::SplashState(Context& context)
 
 void SplashState::BuildInterface()
 {
-	userInterface.SetContent(interfaceLoader.LoadFromFile("data/ui/splash.json"));
+	std::unique_ptr<UI::Element> content = interfaceLoader.LoadFromFile("data/ui/splash.json");
 
-	UI::Element* title = userInterface.FindByName("title");
-	UI::Label* prompt = dynamic_cast<UI::Label*>(userInterface.FindByName("prompt"));
+	UI::Element* title = content->FindByName("title");
+	UI::Label* prompt = dynamic_cast<UI::Label*>(content->FindByName("prompt"));
 
 	if (title == nullptr || prompt == nullptr)
 		throw std::runtime_error("SplashState: splash.json must contain 'title' and 'prompt'");
 
-	const float titleRestY = title->offset.y;
-	const float titleStartY = -title->size.y - 10.0f;
-	title->offset.y = titleStartY;
-
 	prompt->isVisible = false;
 
-	UI::Animation& slide = title->AddAnimation(std::make_unique<UI::Animation>(
-		titleStartY, titleRestY, 1.6f,
-		UI::AnimationCurve::EaseOut, UI::AnimationLoop::Once,
-		[title](float y) { title->offset.y = y; }));
-
-	slide.SetOnFinished([prompt]()
+	// Letters need to exist before SetContent() below: Root only collects
+	// which elements bloom (isGlowing) at that point, so anything added
+	// afterwards would never get the glow pass.
+	BuildTitleDropAnimation(*title, context.resources, shake, "Wild Adventure",
+		[prompt]()
 		{
 			prompt->isVisible = true;
 			prompt->AddAnimation(std::make_unique<UI::Animation>(
@@ -76,6 +72,8 @@ void SplashState::BuildInterface()
 				UI::AnimationCurve::Sine, UI::AnimationLoop::PingPong,
 				[prompt](float alpha) { prompt->SetAlpha(alpha); }));
 		});
+
+	userInterface.SetContent(std::move(content));
 }
 
 void SplashState::HandleEvent(const sf::Event& event)
@@ -98,6 +96,7 @@ void SplashState::Update(float deltaTime)
 
 	backdrop.Update(deltaTime);
 	userInterface.Update(deltaTime);
+	shake.Update(deltaTime);
 
 	if (transition.GetMode() == Transition::Mode::Done && !isLeaving)
 	{
@@ -114,8 +113,13 @@ void SplashState::Render(float interpolationFactor)
 	// Bloom the backdrop's fruits at world strength.
 	context.virtualScreen.CompositeGlow();
 
-	// UI and transition: screen space, on top.
-	context.virtualScreen.SetCameraCenter(VirtualScreen::Width / 2.0f, VirtualScreen::Height / 2.0f);
+	// UI and transition: screen space, on top. The shake offset only nudges
+	// the camera for this pass, so the world backdrop above stays put while
+	// the title/UI layer visibly kicks on each letter's landing.
+	const sf::Vector2f shakeOffset = shake.GetOffset();
+	context.virtualScreen.SetCameraCenter(
+		VirtualScreen::Width / 2.0f + shakeOffset.x,
+		VirtualScreen::Height / 2.0f + shakeOffset.y);
 	userInterface.Draw(context.virtualScreen.GetRenderTarget());
 
 	// Bloom the golden title.

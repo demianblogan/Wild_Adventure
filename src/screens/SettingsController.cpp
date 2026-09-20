@@ -142,14 +142,62 @@ void SettingsController::ShowPanel(const std::string& panelId)
 
 		if (UI::Element* block = settingsInterface.FindByName("frame_title_block"))
 			block->isVisible = !hasOwnTitle;
+
 		if (UI::Element* container = settingsInterface.FindByName("frame_container"))
+		{
 			container->isVisible = !hasOwnTitle;
+
+			// Sized for the 5-button settings hub by default; controls only
+			// has 3 buttons, so it gets a shorter box to match (paired with
+			// re-centering those buttons in the tighter space just below).
+			container->size = (panelId == "controls")
+				? sf::Vector2f(220.0f, 130.0f)
+				: sf::Vector2f(220.0f, 200.0f);
+		}
 
 		if (!hasOwnTitle)
 		{
-			const std::string titleKey = (panelId == "controls") ? "settings.controls" : "pause.options";
+			const std::string titleKey = (panelId == "controls") ? "settings.controls" : "settings.title";
 			if (auto* label = dynamic_cast<UI::Label*>(settingsInterface.FindByName("frame_title_label")))
 				label->SetText(context.localization.GetText(titleKey));
+
+			// controls.json and settings.json also carry their own heading
+			// (needed when reached from the main menu, which has no
+			// frame_title_block of its own) -- in pause context that would
+			// duplicate the one just shown above, so hide it here.
+			if (UI::Element* panelTitle = settingsInterface.FindByName("controls_panel_title"))
+				panelTitle->isVisible = false;
+			if (UI::Element* panelTitle = settingsInterface.FindByName("settings_panel_title"))
+				panelTitle->isVisible = false;
+		}
+
+		if (panelId == "controls")
+		{
+			// Without its own title reserving space above them (hidden just
+			// above), the three buttons re-center on the panel itself instead
+			// of sitting low, leaving a gap where that title would have been.
+			if (UI::Element* button = settingsInterface.FindByName("keyboard_button"))
+				button->offset.y = -36.0f;
+			if (UI::Element* button = settingsInterface.FindByName("joystick_button"))
+				button->offset.y = 0.0f;
+			if (UI::Element* button = settingsInterface.FindByName("controls_back_button"))
+				button->offset.y = 36.0f;
+		}
+		else if (panelId == "settings")
+		{
+			// Same reasoning as controls above: settings.json's own heading
+			// is hidden (the frame already shows one), so its five buttons
+			// re-center on the panel instead of sitting low.
+			if (UI::Element* button = settingsInterface.FindByName("settings_graphics_button"))
+				button->offset.y = -72.0f;
+			if (UI::Element* button = settingsInterface.FindByName("settings_audio_button"))
+				button->offset.y = -36.0f;
+			if (UI::Element* button = settingsInterface.FindByName("settings_controls_button"))
+				button->offset.y = 0.0f;
+			if (UI::Element* button = settingsInterface.FindByName("settings_language_button"))
+				button->offset.y = 36.0f;
+			if (UI::Element* button = settingsInterface.FindByName("settings_back_button"))
+				button->offset.y = 72.0f;
 		}
 	}
 

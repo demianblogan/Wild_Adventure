@@ -11,6 +11,43 @@
 			{
 				"Element":
 				{
+					"anchor": [0.5, 0.5],
+					"pivot": [0.5, 0.5],
+					"offset": [0, -80],
+					"size": [150, 30],
+					"children":
+					[
+						{
+							"Image":
+							{
+								"anchor": [0.5, 0.5],
+								"pivot": [0.5, 0.5],
+								"offset": [0, 0],
+								"size": [150, 30],
+								"textureName": "label_background",
+								"border": [32, 2]
+							}
+						},
+						{
+							"Label":
+							{
+								"anchor": [0.5, 0.5],
+								"pivot": [0.5, 0.5],
+								"offset": [0, 0],
+								"fontName": "main",
+								"characterSize": 16,
+								"color": [244, 199, 110, 255],
+								"outlineColor": [58, 42, 77, 255],
+								"outlineThickness": 1,
+								"textKey": "settings.keyboard"
+							}
+						}
+					]
+				}
+			},
+			{
+				"Element":
+				{
 					"row": true,
 					"anchor":
 					[
@@ -25,7 +62,7 @@
 					"offset":
 					[
 						0,
-						-42
+						-34
 					],
 					"size":
 					[
@@ -152,7 +189,7 @@
 					"offset":
 					[
 						0,
-						-10
+						-2
 					],
 					"size":
 					[
@@ -279,7 +316,7 @@
 					"offset":
 					[
 						0,
-						22
+						30
 					],
 					"size":
 					[
@@ -438,7 +475,7 @@
 								"offset":
 								[
 									-150,
-									70
+									78
 								],
 								"backgroundTint":
 								[
@@ -483,7 +520,7 @@
 								"offset":
 								[
 									0,
-									70
+									78
 								],
 								"action": "menu_default",
 								"foregrounds":
@@ -521,7 +558,7 @@
 								"offset":
 								[
 									150,
-									70
+									78
 								],
 								"action": "menu_back",
 								"foregrounds":

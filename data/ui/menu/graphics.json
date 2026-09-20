@@ -24,7 +24,7 @@
 					"offset":
 					[
 						0,
-						-68
+						-80
 					],
 					"size":
 					[
@@ -121,7 +121,7 @@
 					"offset":
 					[
 						0,
-						-26
+						-38
 					],
 					"size":
 					[
@@ -238,7 +238,7 @@
 					"offset":
 					[
 						0,
-						0
+						-12
 					],
 					"size":
 					[
@@ -354,7 +354,7 @@
 					"offset":
 					[
 						0,
-						26
+						14
 					],
 					"size":
 					[
@@ -471,7 +471,7 @@
 					"offset":
 					[
 						0,
-						52
+						40
 					],
 					"size":
 					[
@@ -621,7 +621,7 @@
 								"offset":
 								[
 									-150,
-									92
+									80
 								],
 								"backgroundTint":
 								[
@@ -666,7 +666,7 @@
 								"offset":
 								[
 									0,
-									92
+									80
 								],
 								"action": "menu_default",
 								"foregrounds":
@@ -704,7 +704,7 @@
 								"offset":
 								[
 									150,
-									92
+									80
 								],
 								"action": "menu_back",
 								"foregrounds":

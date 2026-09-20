@@ -64,6 +64,37 @@
 						45
 					]
 				}
+			},
+			{
+				"Label":
+				{
+					"name": "version",
+					"anchor":
+					[
+						1,
+						1
+					],
+					"pivot":
+					[
+						1,
+						1
+					],
+					"offset":
+					[
+						-4,
+						-4
+					],
+					"fontName": "main",
+					"characterSize": 8,
+					"color":
+					[
+						255,
+						255,
+						255,
+						200
+					],
+					"text": "v1.3"
+				}
 			}
 		]
 	}

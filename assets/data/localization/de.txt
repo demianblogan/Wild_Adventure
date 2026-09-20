@@ -42,11 +42,9 @@ main_menu.exit = Beenden
 
 pause.title = Pause
 pause.restart_level = Level neu starten
-pause.options = Optionen
 pause.quit_to_menu = Zum Hauptmenü
 
 play.single_player = Einzelspieler
-play.delete_saves = Saves löschen
 
 single.new_game = Neues Spiel
 single.select_level = Level wählen

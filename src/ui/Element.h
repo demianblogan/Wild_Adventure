@@ -42,6 +42,11 @@ namespace UI
 
 		Animation& AddAnimation(std::unique_ptr<Animation> animation);
 
+		// Stops and drops every animation currently running on this element
+		// (e.g. a perpetual PingPong hover pulse that must not keep fighting a
+		// one-shot animation just started on the same property).
+		void ClearAnimations();
+
 		virtual void SetColor(sf::Color) {}
 
 		std::string name;
@@ -50,6 +55,12 @@ namespace UI
 		sf::Vector2f pivot = { 0.0f, 0.0f };  // point within this element aligned with the parent's anchor (0..1 of this element's size)
 		sf::Vector2f offset = { 0.0f, 0.0f }; // additional pixel offset applied after positioning
 		sf::Vector2f size = { 0.0f, 0.0f };   // element size in pixels
+
+		// Degrees, clockwise, about this element's own visual center. Zero
+		// (the default, and the overwhelming majority of elements) is a
+		// no-op fast path; only a handful of subclasses (currently Label)
+		// actually honor a nonzero value.
+		float rotationDegrees = 0.0f;
 
 		bool isVisible = true;
 
