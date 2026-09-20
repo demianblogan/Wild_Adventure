@@ -3,6 +3,7 @@
 #include "Context.h"
 #include "audio/Mixer.h"
 #include "core/Campaign.h"
+#include "core/HapticCues.h"
 #include "core/Input.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
@@ -37,6 +38,8 @@ CampaignVictoryState::CampaignVictoryState(Context& context)
 	victoryLoader.SetButtonHaptics(context.gamepadHaptics);
 	victoryLoader.SetLocalization(context.localization);
 	RegisterActions();
+
+	Haptics::SetMenuLightbar(context.gamepadHaptics);
 	victoryInterface.SetContent(victoryLoader.LoadFromFile(VictoryUiPath));
 	victoryInterface.ResetFocus();
 
@@ -103,6 +106,7 @@ void CampaignVictoryState::Update(float deltaTime)
 		if (input.WasPressed(Action::MenuConfirm) || input.WasPressed(Action::MenuBack))
 		{
 			SkipToEnd();
+			Haptics::PulsePress(context.gamepadHaptics);
 			return;
 		}
 
@@ -126,6 +130,7 @@ void CampaignVictoryState::Update(float deltaTime)
 		if (input.WasPressed(Action::MenuConfirm) || input.WasPressed(Action::MenuBack))
 		{
 			SkipToEnd();
+			Haptics::PulsePress(context.gamepadHaptics);
 			return;
 		}
 

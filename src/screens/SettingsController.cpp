@@ -647,6 +647,7 @@ void SettingsController::Update(float deltaTime)
 	if (isCapturingKey && input.WasPressed(Action::MenuBack))
 	{
 		CancelKeyCapture();
+		Haptics::PulsePress(context.gamepadHaptics);
 		return;
 	}
 
@@ -667,6 +668,7 @@ void SettingsController::Update(float deltaTime)
 		if (input.WasPressed(Action::MenuBack))
 		{
 			pendingRequest = NavRequest::Back;
+			Haptics::PulsePress(context.gamepadHaptics);
 		}
 		else if (input.WasPressed(Action::MenuDown))
 		{

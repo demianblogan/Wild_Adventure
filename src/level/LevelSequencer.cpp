@@ -210,6 +210,7 @@ bool LevelSequencer::Update(float deltaTime, int score, int fruitsCollected, int
 
 		camera.Shake(ShakeTouch);
 		Haptics::PulseFinishImpact(gamepadHaptics);
+		Haptics::FlashFinishLightbar(gamepadHaptics);
 		finishImpactsPlayed = 1;
 
 		// The Solid's bounceSpeed already launched the hero upward this frame; he
@@ -257,6 +258,7 @@ void LevelSequencer::UpdateCheckpoints(int score, int fruitsCollected, int enemi
 			confetti.Emit({ transform.x, transform.y - ConfettiRise });
 			camera.Shake(ShakeTouch);
 			Haptics::PulseCheckpoint(gamepadHaptics);
+			Haptics::FlashCheckpointLightbar(gamepadHaptics);
 
 			// Freeze the score and snapshot all alive collectibles and unbroken boxes
 			// so we can restore this exact state if the player dies here.

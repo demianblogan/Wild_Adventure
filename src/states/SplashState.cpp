@@ -44,6 +44,8 @@ SplashState::SplashState(Context& context)
 	interfaceLoader.SetLocalization(context.localization);
 	BuildInterface();
 
+	Haptics::SetMenuLightbar(context.gamepadHaptics);
+
 	context.audioMixer.PlayMusic("menu_theme");
 
 	transition.StartReveal();

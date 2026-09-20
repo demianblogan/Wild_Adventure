@@ -334,6 +334,7 @@ void GameState::Update(float deltaTime)
 			[](ECS::Entity, ECS::Transform& t, ECS::PreviousTransform& pt) { pt.x = t.x; pt.y = t.y; });
 
 		context.stateMachine.Push(std::make_unique<PauseState>(context, levelPath, levelNumber));
+		Haptics::PulsePress(context.gamepadHaptics);
 		return;
 	}
 
@@ -398,6 +399,7 @@ void GameState::Update(float deltaTime)
 	{
 		context.audioMixer.PlaySound("fruit_collect");
 		Haptics::PulseCollect(context.gamepadHaptics);
+		Haptics::FlashCollectLightbar(context.gamepadHaptics);
 	}
 
 	playerAnimationSystem.Update();

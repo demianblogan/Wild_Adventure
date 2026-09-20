@@ -102,6 +102,8 @@ LanguagePickerState::LanguagePickerState(Context& context)
 	RegisterActions();
 	BuildPickerInterface();
 
+	Haptics::SetMenuLightbar(context.gamepadHaptics);
+
 	context.audioMixer.PlayMusic("menu_theme");
 
 	transition.StartReveal();

@@ -2,6 +2,7 @@
 
 #include "Context.h"
 #include "audio/Mixer.h"
+#include "core/HapticCues.h"
 #include "core/Input.h"
 #include "core/StateMachine.h"
 #include "core/VirtualScreen.h"
@@ -26,6 +27,8 @@ ConfirmState::ConfirmState(Context& context, const std::string& title, const std
 	loader.SetButtonSounds(context.audioMixer, "ui_hover", "ui_press");
 	loader.SetButtonHaptics(context.gamepadHaptics);
 	loader.SetLocalization(context.localization);
+
+	Haptics::SetMenuLightbar(context.gamepadHaptics);
 
 	loader.RegisterAction("dialog_yes", [this] { if (this->onYes) this->onYes(); Close(); });
 	loader.RegisterAction("dialog_no", [this] { if (this->onNo) this->onNo(); Close(); });
@@ -64,6 +67,7 @@ void ConfirmState::Update(float deltaTime)
 			onNo();
 
 		Close();
+		Haptics::PulsePress(context.gamepadHaptics);
 
 		return;
 	}

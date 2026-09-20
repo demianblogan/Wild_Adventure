@@ -13,6 +13,27 @@
 // there is no comparable per-player haptics settings surface in this project.
 namespace Haptics
 {
+	// --- DualSense lightbar (menu) ----------------------------------------------
+	// No-ops on Xbox (that hardware has no lightbar); GamepadHaptics already
+	// handles that itself. Every menu screen sets this resting honey color once
+	// when it opens (see e.g. MenuState/PauseState's constructors) and every
+	// menu "click" below -- navigating, pressing, cancelling, doesn't matter
+	// which -- flashes it briefly brighter, the same way a UI sound plays on
+	// all of them alike.
+	constexpr RGBColor MenuRestColor{ 230, 145, 20 };
+	constexpr RGBColor MenuFlashColor{ 255, 210, 120 };
+	constexpr float MenuFlashDuration = 0.15f;
+
+	inline void SetMenuLightbar(GamepadHaptics& haptics)
+	{
+		haptics.SetLightbarColor(MenuRestColor);
+	}
+
+	inline void FlashMenuLightbar(GamepadHaptics& haptics)
+	{
+		haptics.PulseLightbar(MenuFlashColor, MenuFlashDuration);
+	}
+
 	// A light tick for moving focus between menu items (button/stepper hover,
 	// list navigation). Both motors equally: at this strength there's no
 	// perceptible difference between "left"/"right" feel, just a soft pulse.
@@ -22,16 +43,19 @@ namespace Haptics
 	inline void PulseNavigation(GamepadHaptics& haptics)
 	{
 		haptics.PulseVibration(NavigationMotor, NavigationMotor, NavigationDuration);
+		FlashMenuLightbar(haptics);
 	}
 
-	// A firmer thump for confirming something: pressing a button, or picking
-	// an entry from a list (e.g. the language picker).
+	// A firmer thump for confirming something: pressing a button, cancelling
+	// out of a screen, or picking an entry from a list (e.g. the language
+	// picker) -- any of these count as the same "click" for the lightbar.
 	constexpr float PressMotor = 0.35f;
 	constexpr float PressDuration = 0.07f;
 
 	inline void PulsePress(GamepadHaptics& haptics)
 	{
 		haptics.PulseVibration(PressMotor, PressMotor, PressDuration);
+		FlashMenuLightbar(haptics);
 	}
 
 	// Toggling a checkbox: same light strength as menu navigation, just
@@ -61,6 +85,7 @@ namespace Haptics
 	inline void PulsePrompt(GamepadHaptics& haptics)
 	{
 		haptics.PulseVibration(PromptMotor, PromptMotor, PromptDuration);
+		FlashMenuLightbar(haptics);
 	}
 
 	// A carousel arrow (Settings' resolution/screen-mode/language steppers):
@@ -76,6 +101,8 @@ namespace Haptics
 			haptics.PulseVibration(CarouselMotor, 0.f, CarouselDuration);
 		else if (direction > 0)
 			haptics.PulseVibration(0.f, CarouselMotor, CarouselDuration);
+
+		FlashMenuLightbar(haptics);
 	}
 
 	// A volume slider (the only sliders in the game) moving one step left or
@@ -96,6 +123,8 @@ namespace Haptics
 			haptics.PulseVibration(motor, 0.f, SliderDuration);
 		else if (direction > 0)
 			haptics.PulseVibration(0.f, motor, SliderDuration);
+
+		FlashMenuLightbar(haptics);
 	}
 
 	// --- Gameplay --------------------------------------------------------------
@@ -248,11 +277,37 @@ namespace Haptics
 		haptics.PulseVibration(WallSlideLowMotor, WallSlideHighMotor, WallSlideDuration);
 	}
 
+	// --- DualSense lightbar (gameplay) ------------------------------------------
+	// The resting lightbar tracks the player's hearts instead of staying on the
+	// menu's honey: bright green at full health, orange down a heart, a
+	// pulsing red (see HeartbeatPulser below) on the last one, fading to black
+	// as the death animation plays. SetHealthLightbar is meant to be called
+	// every frame from PlayerFeedbackController -- SetLightbarColor is cheap
+	// to call repeatedly with the same value.
+	constexpr RGBColor HealthFullColor{ 40, 220, 60 };
+	constexpr RGBColor HealthMediumColor{ 255, 140, 20 };
+	constexpr RGBColor HealthCriticalColor{ 200, 20, 20 };
+	constexpr RGBColor HealthCriticalFlashColor{ 255, 70, 40 };
+	constexpr RGBColor BlackColor{ 0, 0, 0 };
+
+	[[nodiscard]] inline unsigned char LerpChannel(unsigned char from, unsigned char to, float t)
+	{
+		return static_cast<unsigned char>(static_cast<float>(from) + (static_cast<float>(to) - static_cast<float>(from)) * t);
+	}
+
+	[[nodiscard]] inline RGBColor LerpColor(RGBColor from, RGBColor to, float t)
+	{
+		t = std::clamp(t, 0.f, 1.f);
+		return { LerpChannel(from.r, to.r, t), LerpChannel(from.g, to.g, t), LerpChannel(from.b, to.b, t) };
+	}
+
 	// A slow "thump-thump ... thump-thump" heartbeat, meant to run for as long
 	// as `active` stays true (e.g. the player is down to their last heart).
 	// Owned by whoever drives it and ticked every frame; stops and resets the
 	// instant `active` goes false so it never leaves a half-finished beat
-	// hanging or picks back up mid-pattern.
+	// hanging or picks back up mid-pattern. Also briefly brightens the
+	// lightbar on every beat, in lockstep with the vibration tap, so the
+	// pulsing red reads as the same heartbeat rather than two unrelated cues.
 	class HeartbeatPulser
 	{
 	public:
@@ -270,6 +325,7 @@ namespace Haptics
 				return;
 
 			haptics.PulseVibration(Motor, Motor * 0.5f, TapDuration);
+			haptics.PulseLightbar(HealthCriticalFlashColor, TapDuration);
 			timer = isSecondTap ? GapAfterPair : GapBetweenTaps;
 			isSecondTap = !isSecondTap;
 		}
@@ -283,4 +339,65 @@ namespace Haptics
 		static constexpr float GapBetweenTaps = 0.12f;
 		static constexpr float GapAfterPair = 0.55f;
 	};
+
+	// currentHealth <= 0 is handled by DeathLightbarFader below instead, not
+	// here -- there is no "0 hearts" resting color, only the fade to black.
+	inline void SetHealthLightbar(GamepadHaptics& haptics, int currentHealth)
+	{
+		if (currentHealth >= 3)
+			haptics.SetLightbarColor(HealthFullColor);
+		else if (currentHealth == 2)
+			haptics.SetLightbarColor(HealthMediumColor);
+		else
+			haptics.SetLightbarColor(HealthCriticalColor);
+	}
+
+	// Ticks the lightbar from the last-heart red down to black across
+	// DeathFadeDuration once the player dies, so the death animation reads as
+	// the heartbeat finally giving out. Reset() re-arms it for the next life
+	// (a checkpoint respawn or level restart), so the same fade always plays
+	// from full red again rather than continuing a partial one.
+	class DeathLightbarFader
+	{
+	public:
+		void Reset()
+		{
+			elapsed = 0.f;
+		}
+
+		void Update(float deltaTime, GamepadHaptics& haptics)
+		{
+			elapsed += deltaTime;
+			const float t = std::clamp(elapsed / DeathFadeDuration, 0.f, 1.f);
+			haptics.SetLightbarColor(LerpColor(HealthCriticalColor, BlackColor, t));
+		}
+
+	private:
+		float elapsed = 0.f;
+
+		static constexpr float DeathFadeDuration = 0.6f;
+	};
+
+	// --- DualSense lightbar (gameplay one-shots) --------------------------------
+	constexpr RGBColor CollectFlashColor{ 40, 220, 220 };   // cyan, picking up a fruit
+	constexpr RGBColor GoldFlashColor{ 255, 200, 60 };      // checkpoint / finish cup
+	constexpr float CollectFlashDuration = 0.18f;
+	constexpr float CheckpointFlashDuration = 0.25f;
+	constexpr float FinishFlashDuration = 0.6f; // spread across all 3 blinks below
+	constexpr int FinishFlashBlinks = 3;
+
+	inline void FlashCollectLightbar(GamepadHaptics& haptics)
+	{
+		haptics.PulseLightbar(CollectFlashColor, CollectFlashDuration);
+	}
+
+	inline void FlashCheckpointLightbar(GamepadHaptics& haptics)
+	{
+		haptics.PulseLightbar(GoldFlashColor, CheckpointFlashDuration);
+	}
+
+	inline void FlashFinishLightbar(GamepadHaptics& haptics)
+	{
+		haptics.PulseLightbar(GoldFlashColor, FinishFlashDuration, FinishFlashBlinks);
+	}
 }

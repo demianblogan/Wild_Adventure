@@ -268,6 +268,7 @@ void SelectLevelController::Update(float)
 	if (input.WasPressed(Action::MenuBack))
 	{
 		wasCloseRequested = true;
+		Haptics::PulsePress(context.gamepadHaptics);
 		return;
 	}
 

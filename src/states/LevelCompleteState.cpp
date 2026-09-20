@@ -2,6 +2,7 @@
 
 #include "Context.h"
 #include "core/Campaign.h"
+#include "core/HapticCues.h"
 #include "core/Input.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
@@ -85,6 +86,8 @@ LevelCompleteState::LevelCompleteState(Context& context, std::string levelPath, 
 	completeLoader.SetButtonHaptics(context.gamepadHaptics);
 	completeLoader.SetLocalization(context.localization);
 	RegisterActions();
+
+	Haptics::SetMenuLightbar(context.gamepadHaptics);
 	completeInterface.SetContent(completeLoader.LoadFromFile(LevelCompleteUiPath));
 	completeInterface.ResetFocus();
 
@@ -120,6 +123,7 @@ void LevelCompleteState::Update(float deltaTime)
 		(input.WasPressed(Action::MenuConfirm) || input.WasPressed(Action::MenuBack)))
 	{
 		SkipToEnd();
+		Haptics::PulsePress(context.gamepadHaptics);
 		return;
 	}
 

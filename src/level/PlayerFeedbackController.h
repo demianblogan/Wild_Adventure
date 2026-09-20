@@ -53,6 +53,7 @@ private:
 	float previousLockTimer = 0.0f;
 	int previousPlayerHealth = -1;
 	Haptics::HeartbeatPulser lowHealthHeartbeat;
+	Haptics::DeathLightbarFader deathLightbarFader;
 
 	// Squash & stretch: the player's sprite briefly deforms on jump, land and
 	// hit, then springs back to normal. X/Y pairs roughly preserve volume.

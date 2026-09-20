@@ -109,6 +109,19 @@ void PlayerFeedbackController::Update(float deltaTime, sf::Vector2f feet, const 
 	// player heals back up or dies (health.current == 0 is not == 1).
 	lowHealthHeartbeat.Update(deltaTime, health.current == 1, gamepadHaptics);
 
+	// DualSense lightbar: green/orange/red by heart count, fading to black as
+	// the death animation plays; re-arms for the next life the moment the
+	// player is alive again (a checkpoint respawn or level restart).
+	if (health.current > 0)
+	{
+		deathLightbarFader.Reset();
+		Haptics::SetHealthLightbar(gamepadHaptics, health.current);
+	}
+	else
+	{
+		deathLightbarFader.Update(deltaTime, gamepadHaptics);
+	}
+
 	if (sprite != nullptr)
 	{
 		sprite->scaleX = squashX;
