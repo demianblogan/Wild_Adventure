@@ -34,6 +34,13 @@ namespace Haptics
 		haptics.PulseVibration(PressMotor, PressMotor, PressDuration);
 	}
 
+	// Toggling a checkbox: same light strength as menu navigation, just
+	// under its own name so call sites read as what they mean.
+	inline void PulseCheckboxToggled(GamepadHaptics& haptics)
+	{
+		PulseNavigation(haptics);
+	}
+
 	// One title letter landing in the "Wild Adventure" drop-in animation.
 	// letterFraction is 0 for the first letter and 1 for the last, so the
 	// pulse grows steadily stronger as the word finishes assembling itself.

@@ -85,7 +85,7 @@
 						-4
 					],
 					"fontName": "main",
-					"characterSize": 8,
+					"characterSize": 16,
 					"color":
 					[
 						255,
@@ -93,7 +93,7 @@
 						255,
 						200
 					],
-					"text": "v1.3"
+					"text": "v1.4"
 				}
 			}
 		]

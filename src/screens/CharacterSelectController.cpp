@@ -4,6 +4,7 @@
 #include "audio/Mixer.h"
 #include "core/Campaign.h"
 #include "core/Input.h"
+#include "core/HapticCues.h"
 #include "core/Resources.h"
 #include "core/Skins.h"
 #include "core/StateMachine.h"
@@ -147,6 +148,7 @@ void CharacterSelectController::MoveSkin(int delta)
 	const int count = static_cast<int>(AllSkins().size());
 	selectedSkin = (selectedSkin + delta + count) % count;
 	context.audioMixer.PlaySound("ui_hover");
+	Haptics::PulseNavigation(context.gamepadHaptics);
 }
 
 void CharacterSelectController::SetFocus(Focus newFocus)
@@ -156,6 +158,7 @@ void CharacterSelectController::SetFocus(Focus newFocus)
 
 	focus = newFocus;
 	context.audioMixer.PlaySound("ui_hover");
+	Haptics::PulseNavigation(context.gamepadHaptics);
 }
 
 void CharacterSelectController::Activate()
@@ -170,6 +173,7 @@ void CharacterSelectController::Activate()
 
 	case Focus::BackButton:
 		context.audioMixer.PlaySound("ui_press");
+		Haptics::PulsePress(context.gamepadHaptics);
 		wasCloseRequested = true;
 		break;
 	}
@@ -179,6 +183,7 @@ void CharacterSelectController::Launch()
 {
 	context.campaign.SetSelectedSkin(AllSkins()[selectedSkin].id);
 	context.audioMixer.PlaySound("ui_press");
+	Haptics::PulsePress(context.gamepadHaptics);
 	wasCloseRequested = true;
 
 	context.stateMachine.Push(std::make_unique<GameState>(

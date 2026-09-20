@@ -2,6 +2,7 @@
 
 #include "Context.h"
 #include "audio/Mixer.h"
+#include "core/HapticCues.h"
 #include "core/Input.h"
 #include "core/Resources.h"
 #include "core/StateMachine.h"
@@ -147,6 +148,7 @@ void SelectLevelController::MoveSelection(int deltaColumn, int deltaRow)
 			{
 				selected = index;
 				context.audioMixer.PlaySound("ui_hover");
+				Haptics::PulseNavigation(context.gamepadHaptics);
 			}
 			return;
 		}
@@ -160,6 +162,7 @@ void SelectLevelController::SetFocus(Focus newFocus)
 
 	focus = newFocus;
 	context.audioMixer.PlaySound("ui_hover");
+	Haptics::PulseNavigation(context.gamepadHaptics);
 }
 
 void SelectLevelController::LaunchSelected()
@@ -170,6 +173,7 @@ void SelectLevelController::LaunchSelected()
 	const int number = selected + 1;
 
 	context.audioMixer.PlaySound("ui_press");
+	Haptics::PulsePress(context.gamepadHaptics);
 	wasCloseRequested = true;
 
 	if (launchHandler)
@@ -228,6 +232,7 @@ void SelectLevelController::HandleEvent(const sf::Event& event)
 			{
 				selected = index;
 				context.audioMixer.PlaySound("ui_hover");
+				Haptics::PulseNavigation(context.gamepadHaptics);
 			}
 		}
 	}
@@ -240,6 +245,7 @@ void SelectLevelController::HandleEvent(const sf::Event& event)
 			if (BackRect().contains(mouse))
 			{
 				context.audioMixer.PlaySound("ui_press");
+				Haptics::PulsePress(context.gamepadHaptics);
 				wasCloseRequested = true;
 				return;
 			}
@@ -294,6 +300,7 @@ void SelectLevelController::Update(float)
 		if (input.WasPressed(Action::MenuConfirm))
 		{
 			context.audioMixer.PlaySound("ui_press");
+			Haptics::PulsePress(context.gamepadHaptics);
 			wasCloseRequested = true;
 		}
 	}

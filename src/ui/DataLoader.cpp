@@ -414,8 +414,20 @@ namespace UI
 				{
 					const std::string actionName = data["action"];
 					auto action = loader.FindBoolAction(actionName);
-					if (action)
+
+					if (action && loader.buttonHaptics != nullptr)
+					{
+						Haptics::GamepadHaptics* haptics = loader.buttonHaptics;
+						checkbox->SetOnCheckedChanged([haptics, action](bool checked)
+							{
+								Haptics::PulseCheckboxToggled(*haptics);
+								action(checked);
+							});
+					}
+					else if (action)
+					{
 						checkbox->SetOnCheckedChanged(std::move(action));
+					}
 				}
 
 				return checkbox;
